@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import pl.dev.bkwiatkowski.orienteeringapp.ui.theme.OrienteeringAppTheme
+import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
