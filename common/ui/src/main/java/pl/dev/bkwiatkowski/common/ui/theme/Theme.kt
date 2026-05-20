@@ -1,19 +1,15 @@
 package pl.dev.bkwiatkowski.common.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-  primary = AppColors.sageGreen20,
+  primary = AppColors.warmthBeige30,
   onPrimary = AppColors.creamyWhite,
-  primaryContainer = AppColors.sageGreen30,
+  primaryContainer = AppColors.warmthBeige80,
   onPrimaryContainer = AppColors.sageGreen90,
   secondary = AppColors.forestGreen40,
   onSecondary = AppColors.creamyWhite,
@@ -23,9 +19,9 @@ private val DarkColorScheme = darkColorScheme(
   onTertiary = AppColors.neutralBlack,
   tertiaryContainer = AppColors.vibrantOrange30,
   onTertiaryContainer = AppColors.vibrantOrange90,
-  background = AppColors.forestGreen10,
+  background = AppColors.forestGreen20,
   onBackground = AppColors.creamyWhite,
-  surface = AppColors.forestGreen20,
+  surface = AppColors.forestGreen10,
   onSurface = AppColors.creamyWhite,
   surfaceVariant = AppColors.forestGreen30,
   onSurfaceVariant = AppColors.creamyWhite,

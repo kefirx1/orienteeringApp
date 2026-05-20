@@ -3,6 +3,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.kotlin.compose)
+  alias(libs.plugins.dagger)
+  alias(libs.plugins.kotlin.ksp)
+  alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -49,6 +52,12 @@ dependencies {
   implementation(libs.androidx.compose.ui.graphics)
   implementation(libs.androidx.compose.ui.tooling.preview)
   implementation(libs.androidx.compose.material3)
+  implementation(libs.androidx.appcompat)
+  implementation(libs.dagger.hilt)
+  ksp(libs.dagger.hilt.compiler)
+  implementation(libs.androidx.navigation.compose)
+  implementation(libs.androidx.hilt.navigation.compose)
+
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)
@@ -62,5 +71,11 @@ dependencies {
   implementation(project(":technical:auth"))
   implementation(project(":technical:backend"))
 
+  implementation(project(":common:core"))
   implementation(project(":common:ui"))
+  implementation(project(":common:loader"))
+  implementation(project(":common:activityconnector"))
+  implementation(project(":common:storage"))
+  implementation(project(":common:network"))
+  implementation(project(":common:security"))
 }
