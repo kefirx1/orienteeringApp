@@ -134,11 +134,11 @@ fun CustomTopAppBar(
       }
     },
     colors = TopAppBarDefaults.topAppBarColors(
-      containerColor = MaterialTheme.colorScheme.surface,
-      titleContentColor = MaterialTheme.colorScheme.onSurface,
-      actionIconContentColor = MaterialTheme.colorScheme.onSurface,
-      navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-      scrolledContainerColor = MaterialTheme.colorScheme.surface,
+      containerColor = MaterialTheme.colorScheme.background,
+      titleContentColor = MaterialTheme.colorScheme.onBackground,
+      actionIconContentColor = MaterialTheme.colorScheme.onBackground,
+      navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+      scrolledContainerColor = MaterialTheme.colorScheme.background,
     ),
   )
 }

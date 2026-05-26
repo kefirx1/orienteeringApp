@@ -2,10 +2,12 @@ package pl.dev.bkwiatkowski.common.ui.component.input
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextField
@@ -27,6 +29,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import pl.dev.bkwiatkowski.common.core.validators.ValidationResult
 import pl.dev.bkwiatkowski.common.ui.component.button.SmallButton
 import pl.dev.bkwiatkowski.common.ui.component.button.SmallButtonData
 import pl.dev.bkwiatkowski.common.ui.component.card.BaseCard
@@ -46,6 +49,11 @@ sealed interface ValidationState {
       UnVerified -> true
       Valid -> true
       is Invalid -> false
+    }
+
+    fun ValidationResult.getState() = when (this) {
+      is ValidationResult.Invalid -> Invalid(message = message)
+      ValidationResult.Valid -> Valid
     }
   }
 }
@@ -80,25 +88,29 @@ fun TextField(
   BaseCard {
     Column(
       modifier = modifier.padding(
-        vertical = 10.dp,
+        vertical = 8.dp,
       )
     ) {
       Column(
-        modifier = Modifier.padding(
-          horizontal = 10.dp,
-        )
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(
+            horizontal = 8.dp,
+          )
       ) {
         textFieldData.label?.let { label ->
           CustomText(
-            modifier = Modifier.padding(start = 5.dp),
+            modifier = Modifier.padding(start = 4.dp),
             text = label,
             style = MaterialTheme.typography.labelMedium,
           )
-          Spacer(modifier = Modifier.height(5.dp))
+          Spacer(modifier = Modifier.height(4.dp))
         }
 
         TextField(
+          shape = RoundedCornerShape(8.dp),
           modifier = Modifier
+            .fillMaxWidth()
             .bringIntoViewRequester(viewRequester)
             .onFocusEvent { focusState ->
               if (focusState.isFocused) {
@@ -155,10 +167,10 @@ fun TextField(
           ValidationState.UnVerified -> {}
           ValidationState.Valid -> {}
           is ValidationState.Invalid -> {
-            Spacer(modifier = Modifier.height(5.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             CustomText(
-              modifier = Modifier.padding(start = 5.dp),
+              modifier = Modifier.padding(start = 4.dp),
               text = textFieldData.validationState.message,
               style = MaterialTheme.typography.labelSmall,
               color = MaterialTheme.colorScheme.error,
@@ -168,7 +180,7 @@ fun TextField(
       }
 
       textFieldData.linkTextButton?.let { button ->
-        Spacer(modifier = Modifier.height(5.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         SmallButton(buttonData = button)
       }

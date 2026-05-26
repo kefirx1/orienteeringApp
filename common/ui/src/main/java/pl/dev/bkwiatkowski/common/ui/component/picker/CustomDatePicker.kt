@@ -29,27 +29,60 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 
+sealed interface DateValidationMode {
+  data object NoValidation : DateValidationMode
+  data class PastDatesOnly(val excludeToday: Boolean = false) : DateValidationMode
+  data class FutureDatesOnly(val excludeToday: Boolean = false) : DateValidationMode
+  data class DateRange(val from: LocalDateTime, val to: LocalDateTime) : DateValidationMode
+}
+
 data class CustomDatePickerData(
   val pickerTitle: String,
   val pickedDate: LocalDateTime,
   val onNewDatePicked: (LocalDateTime) -> Unit,
   val onDismiss: () -> Unit,
+  val validationMode: DateValidationMode = DateValidationMode.NoValidation,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomDatePicker(data: CustomDatePickerData) {
+  val selectableDates = object : SelectableDates {
+    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+      val instant = Instant.ofEpochMilli(utcTimeMillis)
+      val selectedLocalDate = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+      val now = LocalDateTime.now(ZoneId.systemDefault())
+
+      return when (data.validationMode) {
+        is DateValidationMode.NoValidation -> true
+        is DateValidationMode.PastDatesOnly -> {
+          val mode = data.validationMode
+          if (mode.excludeToday) {
+            selectedLocalDate.isBefore(now)
+          } else {
+            selectedLocalDate <= now
+          }
+        }
+        is DateValidationMode.FutureDatesOnly -> {
+          val mode = data.validationMode
+          if (mode.excludeToday) {
+            selectedLocalDate.isAfter(now)
+          } else {
+            selectedLocalDate >= now
+          }
+        }
+        is DateValidationMode.DateRange -> {
+          val mode = data.validationMode
+          selectedLocalDate >= mode.from && selectedLocalDate <= mode.to
+        }
+      }
+    }
+  }
+
   val state = rememberDatePickerState(
     initialSelectedDateMillis = data.pickedDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
     initialDisplayMode = DisplayMode.Picker,
-    selectableDates = object : SelectableDates {
-      override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-        val instant = Instant.ofEpochMilli(utcTimeMillis)
-        val selectedLocalDate = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
-
-        return selectedLocalDate.isAfter(LocalDateTime.now(ZoneId.systemDefault()))
-      }
-    }
+    selectableDates = selectableDates
   )
   val dateFormatter = remember { DatePickerDefaults.dateFormatter() }
   val datePickerColors = DatePickerDefaults.colors(
@@ -60,19 +93,19 @@ fun CustomDatePicker(data: CustomDatePickerData) {
     subheadContentColor = MaterialTheme.colorScheme.onPrimary,
     navigationContentColor = MaterialTheme.colorScheme.onPrimary,
     yearContentColor = MaterialTheme.colorScheme.onPrimary,
-    disabledYearContentColor = MaterialTheme.colorScheme.onPrimary,
+    disabledYearContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
     currentYearContentColor = MaterialTheme.colorScheme.onPrimary,
     selectedYearContentColor = MaterialTheme.colorScheme.onPrimary,
-    disabledSelectedYearContentColor = MaterialTheme.colorScheme.primary,
+    disabledSelectedYearContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
     dayContentColor = MaterialTheme.colorScheme.onPrimary,
-    disabledDayContentColor = MaterialTheme.colorScheme.onPrimary,
+    disabledDayContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
     selectedDayContentColor = MaterialTheme.colorScheme.onPrimary,
-    disabledSelectedDayContentColor = MaterialTheme.colorScheme.onPrimary,
+    disabledSelectedDayContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
     todayContentColor = MaterialTheme.colorScheme.onPrimary,
     selectedYearContainerColor = MaterialTheme.colorScheme.primary,
-    disabledSelectedYearContainerColor = MaterialTheme.colorScheme.primary,
+    disabledSelectedYearContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
     selectedDayContainerColor = MaterialTheme.colorScheme.primary,
-    disabledSelectedDayContainerColor = MaterialTheme.colorScheme.primary,
+    disabledSelectedDayContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
     todayDateBorderColor = MaterialTheme.colorScheme.primary,
     dayInSelectionRangeContentColor = MaterialTheme.colorScheme.onPrimary,
     dayInSelectionRangeContainerColor = MaterialTheme.colorScheme.primary,
@@ -144,6 +177,7 @@ private class CustomDatePickerProvider : PreviewParameterProvider<CustomDatePick
       pickerTitle = "Wybierz date wylotu",
       onNewDatePicked = {},
       onDismiss = {},
+      validationMode = DateValidationMode.PastDatesOnly(excludeToday = false),
     )
   )
 }

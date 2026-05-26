@@ -2,6 +2,7 @@ package pl.dev.bkwiatkowski.common.ui.component.card
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -21,14 +22,19 @@ fun BaseCard(
 ) {
   Column(
     modifier = Modifier
-      .shadow(elevation = 4.dp)
+      .fillMaxWidth()
+      .shadow(
+        elevation = 4.dp,
+        shape = RoundedCornerShape(16.dp),
+      )
       .background(
         color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(5.dp),
+        shape = RoundedCornerShape(16.dp),
       )
+
       .padding(
-        horizontal = 10.dp,
-        vertical = 5.dp,
+        horizontal = 8.dp,
+        vertical = 4.dp,
       )
   ) {
     content()

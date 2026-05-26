@@ -7,6 +7,9 @@ import pl.dev.bkwiatkowski.common.core.navigation.createDestination
 import pl.dev.bkwiatkowski.feature.login.presentation.login.LoginScreen
 import pl.dev.bkwiatkowski.feature.login.presentation.login.LoginVM
 import pl.dev.bkwiatkowski.feature.login.presentation.login.LoginVMImpl
+import pl.dev.bkwiatkowski.feature.login.presentation.onboarding.OnboardingScreen
+import pl.dev.bkwiatkowski.feature.login.presentation.onboarding.OnboardingVM
+import pl.dev.bkwiatkowski.feature.login.presentation.onboarding.OnboardingVMImpl
 
 fun NavGraphBuilder.loginNavGraph(
   navController: AppNavController,
@@ -26,8 +29,24 @@ fun NavGraphBuilder.loginNavGraph(
       navActionHandler = { action, contractViewModel ->
         when (action) {
           is LoginVM.Action.Navigation.ToDashboard -> onResult(LoginResult.LoginSuccess)
-          is LoginVM.Action.Navigation.ToOnboarding -> {} //TODO
+          is LoginVM.Action.Navigation.ToOnboarding -> navController.navigate(destination = LoginDestinations.Onboarding)
           is LoginVM.Action.Navigation.Back -> onResult(LoginResult.ExitApp)
+        }
+      },
+    )
+
+    createDestination<Nothing, LoginContractVM, OnboardingVMImpl, OnboardingVM.Action.Navigation>(
+      destination = LoginDestinations.Onboarding,
+      navController = navController,
+      content = { viewModel ->
+        OnboardingScreen(viewModel = viewModel)
+      },
+      navActionHandler = { action, contractViewModel ->
+        when (action) {
+          is OnboardingVM.Action.Navigation.Back -> navController.popBackStack()
+          is OnboardingVM.Action.Navigation.ContinueOnboarding -> {
+            // TODO: Handle continue onboarding navigation
+          }
         }
       },
     )

@@ -10,6 +10,9 @@ sealed interface LoginDestinations : Destination {
 
   @Serializable
   data object Login : LoginDestinations
+
+  @Serializable
+  data object Onboarding : LoginDestinations
 }
 
 sealed interface LoginResult {

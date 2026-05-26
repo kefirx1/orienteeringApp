@@ -46,7 +46,7 @@ fun BaseScaffold(
         Row(
           modifier = Modifier
             .fillMaxWidth()
-            .background(color = MaterialTheme.colorScheme.surface),
+            .background(color = MaterialTheme.colorScheme.background),
         ) {
           CustomTopAppBar(topAppBarData = topBarData)
         }
@@ -97,7 +97,7 @@ fun BaseScaffoldPreview() {
       bottomBar = {
         Column(
           modifier = Modifier.padding(
-            horizontal = 40.dp,
+            horizontal = 20.dp,
             vertical = 10.dp,
           ),
           horizontalAlignment = Alignment.CenterHorizontally,

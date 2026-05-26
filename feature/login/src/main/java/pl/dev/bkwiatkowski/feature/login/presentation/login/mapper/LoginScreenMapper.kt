@@ -14,7 +14,10 @@ interface LoginScreenMapper : Mapper<Params, LoginVM.ScreenData> {
     val state: LoginVM.State,
     val onBiometricOpenClick: () -> Unit,
     val onLoginClick: () -> Unit,
-    val onStartClick: () -> Unit,
+    val onGoToLoginClick: () -> Unit,
+    val onGoToOtherClick: () -> Unit,
+    val onGoToRegistrationClick: () -> Unit,
+    val onPlayAsGuestClick: () -> Unit,
     val onPasswordValueChanged: (String) -> Unit,
     val onBackClick: () -> Unit,
     val onToPasswordLoginClick: () -> Unit,
@@ -22,7 +25,7 @@ interface LoginScreenMapper : Mapper<Params, LoginVM.ScreenData> {
   )
 }
 
-class LoginScreenMapperImpl @Inject constructor() : LoginScreenMapper {
+class LoginScreenMapperImpl : LoginScreenMapper {
   override fun invoke(params: Params): LoginVM.ScreenData =
     when (params.state) {
       LoginVM.State.Initial -> LoginVM.ScreenData.Initial(
@@ -48,10 +51,16 @@ class LoginScreenMapperImpl @Inject constructor() : LoginScreenMapper {
           onValueChanged = params.onPasswordValueChanged,
           textFieldType = TextFieldType.Password,
         ),
-        buttonData = LargeButtonData.Primary(
+        loginButton = LargeButtonData.Primary(
           text = "Zaloguj",
           onClick = {
             params.onLoginClick()
+          },
+        ),
+        otherOptionsButton = LargeButtonData.Secondary(
+          text = "Inne opcje",
+          onClick = {
+            params.onGoToOtherClick()
           },
         ),
         onBackClick = params.onBackClick,
@@ -62,10 +71,23 @@ class LoginScreenMapperImpl @Inject constructor() : LoginScreenMapper {
       )
       is LoginVM.State.Registration -> LoginVM.ScreenData.RegistrationScreen(
         appName = "OrienteeringApp",
-        buttonData = LargeButtonData.Primary(
-          text = "Zaczynajmy",
+        description = "Odkryj na nowo klasyczne gry na orientację i zamień swój telefon w cyfrowy kompas. Ta aplikacja to Twój przewodnik po świecie biegów i marszów na orientację, dzięki któremu łatwo odnajdziesz ukryte w lesie zielone punkty kontrolne.",
+        loginButton = LargeButtonData.Primary(
+          text = "Posiadam konto",
           onClick = {
-            params.onStartClick()
+            params.onGoToLoginClick()
+          },
+        ),
+        registerButton = LargeButtonData.Secondary(
+          text = "Utwórz konto",
+          onClick = {
+            params.onGoToRegistrationClick()
+          },
+        ),
+        guestButton = LargeButtonData.Tertiary(
+          text = "Graj jako gość",
+          onClick = {
+            params.onPlayAsGuestClick()
           },
         ),
         onBackClick = params.onBackClick,

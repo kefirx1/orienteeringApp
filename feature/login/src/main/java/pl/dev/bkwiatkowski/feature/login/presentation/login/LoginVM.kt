@@ -2,7 +2,6 @@ package pl.dev.bkwiatkowski.feature.login.presentation.login
 
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
@@ -11,6 +10,7 @@ import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.button.SmallButtonData
 import pl.dev.bkwiatkowski.common.ui.component.input.TextFieldData
 import pl.dev.bkwiatkowski.common.ui.component.input.ValidationState
+import pl.dev.bkwiatkowski.feature.login.domain.interactor.LoginUserInteractor
 import pl.dev.bkwiatkowski.feature.login.presentation.login.LoginVM.Action
 import pl.dev.bkwiatkowski.feature.login.presentation.login.LoginVM.ScreenData
 import pl.dev.bkwiatkowski.feature.login.presentation.login.LoginVM.State
@@ -40,12 +40,14 @@ interface LoginVM {
     }
 
     data object ToBiometricLoginScreen : Action
+    data object ToOtherScreen : Action
     data object ToPasswordLoginScreen : Action
     data object ShowBiometricPrompt : Action
     data object SuccessLogin : Action
     data object Back : Action
     data object CheckPassword : Action
     data object ToOnboarding : Action
+    data object ToLoginScreen : Action
     data class UpdatePassword(val password: String) : Action
   }
 
@@ -55,7 +57,8 @@ interface LoginVM {
     data class LoginScreen(
       val appName: String,
       val welcomeLabel: String,
-      val buttonData: LargeButtonData,
+      val loginButton: LargeButtonData,
+      val otherOptionsButton: LargeButtonData,
       val textFieldData: TextFieldData,
       val biometricLoginButtonData: SmallButtonData.Tertiary?,
       override val onBackClick: () -> Unit,
@@ -72,7 +75,10 @@ interface LoginVM {
 
     data class RegistrationScreen(
       val appName: String,
-      val buttonData: LargeButtonData,
+      val description: String,
+      val loginButton: LargeButtonData,
+      val registerButton: LargeButtonData,
+      val guestButton: LargeButtonData,
       override val onBackClick: () -> Unit,
     ) : ScreenData
 
@@ -89,6 +95,7 @@ interface LoginVM {
 class LoginVMImpl @Inject constructor(
   private val loginScreenMapper: LoginScreenMapper,
   private val runWithLoaderUC: RunWithLoaderUC,
+  private val loginUserInteractor: LoginUserInteractor,
 ) : CustomViewModel<State, ScreenData, Action.Navigation>(
   initialStateValue = State.Initial,
 ), LoginVM {
@@ -121,6 +128,9 @@ class LoginVMImpl @Inject constructor(
         }
         is State.Login -> {
           when (action) {
+            is Action.ToOtherScreen -> {
+              State.Registration.override()
+            }
             is Action.ToBiometricLoginScreen -> {
               State.Biometric(
                 userName = currentState.userName,
@@ -148,6 +158,11 @@ class LoginVMImpl @Inject constructor(
           is Action.ToOnboarding -> {
             Action.Navigation.ToOnboarding.emit()
           }
+          is Action.ToLoginScreen -> {
+            State.Login(
+              userName = "",
+            ).override()
+          }
           else -> {}
         }
       }
@@ -156,10 +171,23 @@ class LoginVMImpl @Inject constructor(
 
   override suspend fun onStateEnter(newState: State) {
     when (newState) {
-      State.Initial -> {
-        State.Login(
-          userName = "John Doe",  //TODO
-        ).override()
+      State.Initial -> runWithLoaderUC {
+        loginUserInteractor.getSavedUserName().fold(
+          onRight = { name ->
+            //todo check refreshToken
+
+            if (false) {
+              //todo refresh token exist, try to login and if success then to dashboard, if not then to login screen with password
+            } else {
+              State.Login(
+                userName = name,
+              ).override()
+            }
+          },
+          onLeft = {
+            State.Registration.override()
+          }
+        )
       }
       is State.Biometric -> {
         dispatchAction(Action.ShowBiometricPrompt)
@@ -175,8 +203,14 @@ class LoginVMImpl @Inject constructor(
       onLoginClick = {
         dispatchAction(Action.CheckPassword)
       },
-      onStartClick = {
+      onGoToRegistrationClick = {
         dispatchAction(Action.ToOnboarding)
+      },
+      onGoToLoginClick = {
+        dispatchAction(Action.ToLoginScreen)
+      },
+      onPlayAsGuestClick = {
+
       },
       onPasswordValueChanged = { password ->
         dispatchAction(Action.UpdatePassword(password = password))
@@ -192,6 +226,9 @@ class LoginVMImpl @Inject constructor(
       },
       onToBiometricLoginClick = {
         dispatchAction(Action.ToBiometricLoginScreen)
+      },
+      onGoToOtherClick = {
+        dispatchAction(Action.ToOtherScreen)
       }
     ),
   )

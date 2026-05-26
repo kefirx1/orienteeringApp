@@ -26,29 +26,36 @@ import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 sealed class LargeButtonData(
   open val text: String,
   open val onClick: () -> Unit,
+  open val isEnabled: Boolean = true,
 ) {
   data class Primary(
     override val text: String,
     override val onClick: () -> Unit,
+    override val isEnabled: Boolean = true,
   ) : LargeButtonData(
     text = text,
     onClick = onClick,
+    isEnabled = isEnabled,
   )
 
   data class Secondary(
     override val text: String,
     override val onClick: () -> Unit,
+    override val isEnabled: Boolean = true,
   ) : LargeButtonData(
     text = text,
     onClick = onClick,
+    isEnabled = isEnabled,
   )
 
   data class Tertiary(
     override val text: String,
     override val onClick: () -> Unit,
+    override val isEnabled: Boolean = true,
   ) : LargeButtonData(
     text = text,
     onClick = onClick,
+    isEnabled = isEnabled,
   )
 }
 
@@ -65,6 +72,7 @@ fun LargeButton(
 
   Button(
     modifier = modifier.fillMaxWidth(),
+    enabled = buttonData.isEnabled,
     onClick = {
       val currentTime = System.currentTimeMillis()
       if (currentTime - lastClick > DEBOUNCE_DELAY) {
@@ -104,7 +112,7 @@ fun LargeButton(
         color = when (buttonData) {
           is LargeButtonData.Primary -> MaterialTheme.colorScheme.onPrimary
           is LargeButtonData.Secondary -> MaterialTheme.colorScheme.onSecondary
-          is LargeButtonData.Tertiary -> MaterialTheme.colorScheme.onTertiary
+          is LargeButtonData.Tertiary -> MaterialTheme.colorScheme.onSecondary
         }
       )
     }

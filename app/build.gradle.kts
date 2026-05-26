@@ -70,6 +70,7 @@ dependencies {
 
   implementation(project(":technical:auth"))
   implementation(project(":technical:backend"))
+  implementation(project(":technical:user"))
 
   implementation(project(":common:core"))
   implementation(project(":common:ui"))
@@ -78,4 +79,5 @@ dependencies {
   implementation(project(":common:storage"))
   implementation(project(":common:network"))
   implementation(project(":common:security"))
+  implementation(project(":common:validators"))
 }

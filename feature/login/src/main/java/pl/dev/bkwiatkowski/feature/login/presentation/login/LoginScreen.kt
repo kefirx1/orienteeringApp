@@ -4,10 +4,13 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -107,10 +110,10 @@ fun LoginScreenContent(
     content = {
       Column(
         modifier = Modifier
-          .fillMaxWidth(),
+          .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {
-        Spacer(modifier = Modifier.height(70.dp))
+        Spacer(modifier = Modifier.height(64.dp))
 
         Row(
           verticalAlignment = Alignment.CenterVertically,
@@ -149,12 +152,15 @@ fun LoginScreenContent(
     bottomBar = {
       Column(
         modifier = Modifier.padding(
-          horizontal = 40.dp,
+          horizontal = 20.dp,
           vertical = 10.dp
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {
-        LargeButton(buttonData = data.buttonData)
+        LargeButton(buttonData = data.loginButton)
+        Spacer(modifier = Modifier.height(12.dp))
+
+        LargeButton(buttonData = data.otherOptionsButton)
       }
     }
   )
@@ -168,32 +174,40 @@ fun RegistrationScreenContent(
     content = {
       Column(
         modifier = Modifier
-          .fillMaxWidth(),
+          .fillMaxSize()
+          .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {
-        Spacer(modifier = Modifier.height(70.dp))
+        Spacer(modifier = Modifier.height(64.dp))
 
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          CustomText(
-            text = data.appName,
-            style = MaterialTheme.typography.headlineLarge,
-            customSize = 40.sp,
-          )
-        }
+        CustomText(
+          text = data.appName,
+          style = MaterialTheme.typography.headlineLarge,
+          customSize = 40.sp,
+        )
         Spacer(modifier = Modifier.height(80.dp))
+
+        CustomText(
+          text = data.description,
+          style = MaterialTheme.typography.bodyLarge,
+        )
       }
     },
     bottomBar = {
       Column(
         modifier = Modifier.padding(
-          horizontal = 40.dp,
+          horizontal = 20.dp,
           vertical = 10.dp
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {
-        LargeButton(buttonData = data.buttonData)
+        LargeButton(buttonData = data.loginButton)
+        Spacer(modifier = Modifier.height(12.dp))
+
+        LargeButton(buttonData = data.registerButton)
+        Spacer(modifier = Modifier.height(12.dp))
+
+        LargeButton(buttonData = data.guestButton)
       }
     }
   )

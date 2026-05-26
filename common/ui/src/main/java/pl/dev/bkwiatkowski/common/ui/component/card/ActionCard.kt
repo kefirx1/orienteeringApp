@@ -38,8 +38,8 @@ fun ActionCard(data: ActionCardData) {
           onClick = data.onClick,
         )
         .padding(
-          vertical = 10.dp,
-          horizontal = 5.dp,
+          vertical = 8.dp,
+          horizontal = 4.dp,
         ),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically,
