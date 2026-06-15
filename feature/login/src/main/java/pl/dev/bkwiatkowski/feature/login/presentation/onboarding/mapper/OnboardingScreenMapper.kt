@@ -56,12 +56,12 @@ class OnboardingScreenMapperImpl : OnboardingScreenMapper {
             textFieldType = TextFieldType.Default,
             validationState = state.content.phoneValidation,
           ),
-           birthDateFieldData = DatePickerInputData(
-             label = "Data urodzenia",
-             pickedDate = params.state.content.birthdate,
-             onClick = params.onBirthDateInputClick,
-             validationState = state.content.birthDateValidation,
-           ),
+          birthDateFieldData = DatePickerInputData(
+            label = "Data urodzenia",
+            pickedDate = params.state.content.birthdate,
+            onClick = params.onBirthDateInputClick,
+            validationState = state.content.birthDateValidation,
+          ),
           continueButton = LargeButtonData.Primary(
             text = "Dalej",
             onClick = params.onContinueClick,

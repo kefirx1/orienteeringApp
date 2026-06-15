@@ -5,10 +5,15 @@ import android.util.Log
 typealias Log = StaticLogger
 
 object StaticLogger {
-  fun e(tag: String, message: String) {
-    Log.e(tag, message)
+  fun e(tag: Tag<*>, message: String) {
+    Log.e(tag.javaClass.name, message)
   }
-  fun i(tag: String, message: String) {
-    Log.i(tag, message)
+  fun i(tag: Tag<*>, message: String) {
+    Log.i(tag.javaClass.name, message)
   }
+}
+
+data class Tag<T>(val obj: T) {
+  val name: String
+    get() = obj?.javaClass?.name ?: "TAG"
 }

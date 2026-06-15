@@ -22,6 +22,7 @@ import pl.dev.bkwiatkowski.feature.login.presentation.onboarding.OnboardingVM.Ac
 import pl.dev.bkwiatkowski.feature.login.presentation.onboarding.OnboardingVM.ScreenData
 import pl.dev.bkwiatkowski.feature.login.presentation.onboarding.OnboardingVM.State
 import pl.dev.bkwiatkowski.feature.login.presentation.onboarding.mapper.OnboardingScreenMapper
+import pl.dev.bkwiatkowski.feature.login.presentation.setpassword.SetPasswordVM
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -52,7 +53,9 @@ interface OnboardingVM {
   sealed interface Action {
     sealed interface Navigation : Action {
       data object Back : Navigation
-      data object ContinueOnboarding : Navigation
+      data class ContinueOnboarding(
+        val setupData: SetPasswordVM.SetupData,
+      ) : Navigation
     }
 
     data object OpenBirthDatePicker : Action
@@ -149,9 +152,14 @@ class OnboardingVMImpl @Inject constructor(
               if (listOf(newUserNameState, newEmailState, newPhoneState, newBirthdateState).all { state ->
                   state.isValid()
                 }) {
-                //todo send be
-
-                Action.Navigation.ContinueOnboarding.emit()
+                Action.Navigation.ContinueOnboarding(
+                  setupData = SetPasswordVM.SetupData(
+                    userName = currentState.content.userName,
+                    email = currentState.content.email,
+                    phone = currentState.content.phone.takeIf { it.isNotBlank() },
+                    dateOfBirth = currentState.content.birthdate,
+                  )
+                ).emit()
               }
 
               currentState.copy(

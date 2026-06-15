@@ -10,6 +10,9 @@ import pl.dev.bkwiatkowski.feature.login.presentation.login.LoginVMImpl
 import pl.dev.bkwiatkowski.feature.login.presentation.onboarding.OnboardingScreen
 import pl.dev.bkwiatkowski.feature.login.presentation.onboarding.OnboardingVM
 import pl.dev.bkwiatkowski.feature.login.presentation.onboarding.OnboardingVMImpl
+import pl.dev.bkwiatkowski.feature.login.presentation.setpassword.SetPasswordScreen
+import pl.dev.bkwiatkowski.feature.login.presentation.setpassword.SetPasswordVM
+import pl.dev.bkwiatkowski.feature.login.presentation.setpassword.SetPasswordVMImpl
 
 fun NavGraphBuilder.loginNavGraph(
   navController: AppNavController,
@@ -45,7 +48,27 @@ fun NavGraphBuilder.loginNavGraph(
         when (action) {
           is OnboardingVM.Action.Navigation.Back -> navController.popBackStack()
           is OnboardingVM.Action.Navigation.ContinueOnboarding -> {
-            // TODO: Handle continue onboarding navigation
+            contractViewModel.setContractData(
+              destination = LoginDestinations.SetPassword,
+              data = action.setupData,
+            )
+            navController.navigate(destination = LoginDestinations.SetPassword)
+          }
+        }
+      },
+    )
+
+    createDestination<SetPasswordVM.SetupData, LoginContractVM, SetPasswordVMImpl, SetPasswordVM.Action.Navigation>(
+      destination = LoginDestinations.SetPassword,
+      navController = navController,
+      content = { viewModel ->
+        SetPasswordScreen(viewModel = viewModel)
+      },
+      navActionHandler = { action, contractViewModel ->
+        when (action) {
+          is SetPasswordVM.Action.Navigation.Back -> navController.popBackStack()
+          is SetPasswordVM.Action.Navigation.RegistrationSuccess -> {
+            // TODO: navigate after successful registration
           }
         }
       },

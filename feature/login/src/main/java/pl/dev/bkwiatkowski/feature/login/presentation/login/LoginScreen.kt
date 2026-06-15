@@ -17,6 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -29,6 +31,8 @@ import pl.dev.bkwiatkowski.common.ui.component.icon.CustomImage
 import pl.dev.bkwiatkowski.common.ui.component.icon.ImageSize
 import pl.dev.bkwiatkowski.common.ui.component.input.TextField
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
+import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
+import pl.dev.bkwiatkowski.feature.login.presentation.login.provider.LoginPreviewProvider
 
 @Composable
 fun LoginScreen(viewModel: LoginVM) {
@@ -211,5 +215,15 @@ fun RegistrationScreenContent(
       }
     }
   )
+}
+
+@Preview()
+@Composable
+private fun LoginScreenPreview(
+  @PreviewParameter(provider = LoginPreviewProvider::class) viewModel: LoginVM,
+) {
+  OrienteeringAppTheme {
+    LoginScreen(viewModel = viewModel)
+  }
 }
 

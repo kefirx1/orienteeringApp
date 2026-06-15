@@ -2,16 +2,17 @@ package pl.dev.bkwiatkowski.common.core.navigation
 
 import androidx.navigation.NavHostController
 import pl.dev.bkwiatkowski.common.core.logger.Log
+import pl.dev.bkwiatkowski.common.core.logger.Tag
 
 data class AppNavController(
   val navController: NavHostController,
 ) {
 
   fun navigate(destination: Destination) {
-    Log.i(tag = "AppNavController", message = "before navigate: $destination")
+    Log.i(tag = Tag(this), message = "before navigate: $destination")
 
     navController.currentBackStack.value.forEachIndexed { index, entry ->
-      Log.i(tag = "AppNavController", message = "- $index: ${entry.destination.route}")
+      Log.i(tag = Tag(this), message = "- $index: ${entry.destination.route}")
     }
 
     navController.navigate(destination.route) {
@@ -21,24 +22,24 @@ data class AppNavController(
       launchSingleTop = true
       restoreState = true
     }
-    Log.i(tag = "AppNavController", message = "after navigate: $destination")
+    Log.i(tag = Tag(this), message = "after navigate: $destination")
 
     navController.currentBackStack.value.forEachIndexed { index, entry ->
-      Log.i(tag = "AppNavController", message = "- $index: ${entry.destination.route}")
+      Log.i(tag = Tag(this), message = "- $index: ${entry.destination.route}")
     }
   }
 
   fun popBackStack() {
-    Log.i(tag = "AppNavController", message = "before popBackStack")
+    Log.i(tag = Tag(this), message = "before popBackStack")
 
     navController.currentBackStack.value.forEachIndexed { index, entry ->
-      Log.i(tag = "AppNavController", message = "- $index: ${entry.destination.route}")
+      Log.i(tag = Tag(this), message = "- $index: ${entry.destination.route}")
     }
     navController.popBackStack()
-    Log.i(tag = "AppNavController", message = "after popBackStack")
+    Log.i(tag = Tag(this), message = "after popBackStack")
 
     navController.currentBackStack.value.forEachIndexed { index, entry ->
-      Log.i(tag = "AppNavController", message = "- $index: ${entry.destination.route}")
+      Log.i(tag = Tag(this), message = "- $index: ${entry.destination.route}")
     }
   }
 

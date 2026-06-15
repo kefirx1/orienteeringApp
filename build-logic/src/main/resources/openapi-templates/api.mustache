@@ -1,0 +1,22 @@
+package {{package}}
+
+import io.ktor.resources.Resource
+import kotlinx.serialization.Serializable
+{{#imports}}
+import {{import}}
+{{/imports}}
+
+{{#operations}}
+{{#operation}}
+/**
+ * {{summary}}
+ * {{httpMethod}} {{{path}}}{{#hasBodyParam}}
+ * @param body {{#bodyParams}}[{{dataType}}]{{/bodyParams}}{{/hasBodyParam}}{{#returnType}}
+ * @return [{{returnType}}]{{/returnType}}
+ */
+@Serializable
+@Resource("{{{path}}}")
+object {{operationIdCamelCase}}
+
+{{/operation}}
+{{/operations}}

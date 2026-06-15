@@ -13,6 +13,9 @@ sealed interface LoginDestinations : Destination {
 
   @Serializable
   data object Onboarding : LoginDestinations
+
+  @Serializable
+  data object SetPassword : LoginDestinations
 }
 
 sealed interface LoginResult {

@@ -5,8 +5,14 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import pl.dev.bkwiatkowski.common.core.config.EnvironmentConfig
 import pl.dev.bkwiatkowski.common.activityconnector.ActivityConnector
+import pl.dev.bkwiatkowski.orienteeringapp.config.EnvironmentConfigImpl
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
+import pl.dev.bkwiatkowski.common.network.HttpClientFactory
+import pl.dev.bkwiatkowski.common.network.HttpClientFactoryImpl
+import pl.dev.bkwiatkowski.common.network.CallMediator
+import pl.dev.bkwiatkowski.common.network.CallMediatorImpl
 import pl.dev.bkwiatkowski.common.core.security.CryptoManager
 import pl.dev.bkwiatkowski.common.core.security.provider.MasterKeyProvider
 import pl.dev.bkwiatkowski.common.core.security.provider.SecretKeyProvider
@@ -41,6 +47,10 @@ object CommonModule {
 
   @Provides
   @Singleton
+  fun provideEnvironmentConfig(): EnvironmentConfig = EnvironmentConfigImpl()
+
+  @Provides
+  @Singleton
   fun provideLoaderManager(): LoaderManager = LoaderManagerImpl()
 
   @Provides
@@ -53,6 +63,14 @@ object CommonModule {
   @Provides
   @Singleton
   fun provideActivityConnector(): ActivityConnector = ActivityConnectorImpl()
+
+  @Provides
+  @Singleton
+  fun provideHttpClientFactory(
+    environmentConfig: EnvironmentConfig,
+  ): HttpClientFactory = HttpClientFactoryImpl(
+    environmentConfig = environmentConfig,
+  )
 
   @Provides
   @Singleton
@@ -117,5 +135,13 @@ object CommonModule {
     masterKeyDataStore: MasterKeyDataStore,
   ): MasterKeyProvider = MasterKeyProviderImpl(
     masterKeyDataStore = masterKeyDataStore,
+  )
+
+  @Provides
+  @Singleton
+  fun provideCallMediator(
+    jsonSerializer: JsonSerializer,
+  ): CallMediator = CallMediatorImpl(
+    jsonSerializer = jsonSerializer,
   )
 }
