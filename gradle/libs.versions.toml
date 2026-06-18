@@ -26,6 +26,7 @@ kotlinxSerialization = "1.11.0"
 sqlcipher = "4.5.4"
 ktor = "3.5.0"
 openapi-generator = "7.22.0"
+material = "1.10.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -69,6 +70,7 @@ ktor-resources = { module = "io.ktor:ktor-client-resources", version.ref = "ktor
 openapi-generator-plugin = { module = "org.openapitools:openapi-generator-gradle-plugin", version.ref = "openapi-generator" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-serialization-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -18,8 +18,7 @@ import pl.dev.bkwiatkowski.common.ui.component.input.ValidationState
 import pl.dev.bkwiatkowski.common.ui.component.input.ValidationState.Companion.getState
 import pl.dev.bkwiatkowski.common.ui.component.input.ValidationState.Companion.isValid
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
-import pl.dev.bkwiatkowski.feature.login.domain.interactor.LoginBackendInteractor
-import pl.dev.bkwiatkowski.feature.login.domain.usecase.CreateNewUserUC
+import pl.dev.bkwiatkowski.feature.login.domain.interactor.LoginUserInteractor
 import pl.dev.bkwiatkowski.feature.login.domain.usecase.ValidateConfirmPasswordUC
 import pl.dev.bkwiatkowski.feature.login.domain.usecase.ValidatePasswordUC
 import pl.dev.bkwiatkowski.feature.login.presentation.setpassword.SetPasswordVM.Action
@@ -86,8 +85,8 @@ class SetPasswordVMImpl @AssistedInject constructor(
   private val setPasswordScreenMapper: SetPasswordScreenMapper,
   private val validatePasswordUC: ValidatePasswordUC,
   private val validateConfirmPasswordUC: ValidateConfirmPasswordUC,
-  private val createNewUserUC: CreateNewUserUC,
   private val runWithLoaderUC: RunWithLoaderUC,
+  private val loginUserInteractor: LoginUserInteractor,
 ) : CustomViewModel<State, ScreenData, Action.Navigation>(
   initialStateValue = State.SetPassword(
     content = SetPasswordVM.StateContent(),
@@ -137,14 +136,12 @@ class SetPasswordVMImpl @AssistedInject constructor(
               ).getState()
 
               if (listOf(newPasswordState, newConfirmPasswordState).all { it.isValid() }) {
-                createNewUserUC(
-                  params = CreateNewUserUC.Params(
-                    username = setupData.userName,
-                    email = setupData.email,
-                    password = currentState.content.password,
-                    phoneNumber = setupData.phone,
-                    dateOfBirth = setupData.dateOfBirth,
-                  )
+                loginUserInteractor.createNewUser(
+                  username = setupData.userName,
+                  email = setupData.email,
+                  password = currentState.content.password,
+                  phoneNumber = setupData.phone,
+                  dateOfBirth = setupData.dateOfBirth,
                 ).onRight {
                   Action.Navigation.RegistrationSuccess.emit()
                 }.onLeft { error ->

@@ -81,6 +81,7 @@ dependencies {
   debugImplementation(libs.androidx.compose.ui.test.manifest)
 
   implementation(project(":feature:login"))
+  implementation(project(":feature:dashboard"))
 
   implementation(project(":technical:auth"))
   implementation(project(":technical:backend"))

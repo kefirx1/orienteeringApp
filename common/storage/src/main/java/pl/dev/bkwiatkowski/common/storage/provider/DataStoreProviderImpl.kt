@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.security.CryptoManager
 import pl.dev.bkwiatkowski.common.core.security.Cryptography
+import pl.dev.bkwiatkowski.common.core.security.provider.AppSecretKeyProvider
 import pl.dev.bkwiatkowski.common.core.storage.Base64Coder
 import pl.dev.bkwiatkowski.common.core.storage.JsonSerializer
 import pl.dev.bkwiatkowski.common.core.storage.provider.DataStoreProvider
@@ -24,6 +25,7 @@ class DataStoreProviderImpl(
   private val context: Context,
   private val jsonSerializer: JsonSerializer,
   private val base64Coder: Base64Coder,
+  private val appSecretKeyProvider: AppSecretKeyProvider,
 ): DataStoreProvider {
 
   companion object {
@@ -42,6 +44,7 @@ class DataStoreProviderImpl(
       val decryptedData = cryptoManager.decryptData(
         data = decodedData,
         cryptography = Cryptography.AES_CBC_PKCS7,
+        key = appSecretKeyProvider.getKeyStoreSecretKey(cryptography = Cryptography.AES_CBC_PKCS7).getRight(),
       )?.decodeToString()
 
       jsonSerializer.deserialize<T>(serializedData = decryptedData, type = type).getRight()
@@ -62,6 +65,7 @@ class DataStoreProviderImpl(
       val decryptedData = cryptoManager.decryptData(
         data = decodedData,
         cryptography = Cryptography.AES_CBC_PKCS7,
+        key = appSecretKeyProvider.getKeyStoreSecretKey(cryptography = Cryptography.AES_CBC_PKCS7).getRight(),
       )?.decodeToString()
 
       jsonSerializer.deserialize<T>(serializedData = decryptedData, type = type).getRight()
@@ -75,6 +79,7 @@ class DataStoreProviderImpl(
     val encryptedData = cryptoManager.encryptData(
       data = jsonSerializer.serialize(data = data).getRight().toByteArray(),
       cryptography = Cryptography.AES_CBC_PKCS7,
+      key = appSecretKeyProvider.getKeyStoreSecretKey(cryptography = Cryptography.AES_CBC_PKCS7).getRight(),
     )
 
     getDataStore().edit { prefs ->

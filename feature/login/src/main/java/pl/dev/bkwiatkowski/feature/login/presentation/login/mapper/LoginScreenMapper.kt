@@ -50,6 +50,7 @@ class LoginScreenMapperImpl : LoginScreenMapper {
           validationState = params.state.passwordState,
           onValueChanged = params.onPasswordValueChanged,
           textFieldType = TextFieldType.Password,
+          initialText = params.state.typedPassword,
         ),
         loginButton = LargeButtonData.Primary(
           text = "Zaloguj",

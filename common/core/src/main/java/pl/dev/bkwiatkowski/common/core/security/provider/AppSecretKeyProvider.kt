@@ -1,13 +1,14 @@
 package pl.dev.bkwiatkowski.common.core.security.provider
 
+import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.security.Cryptography
+import pl.dev.bkwiatkowski.common.core.usecase.Either
 import javax.crypto.SecretKey
 
-interface SecretKeyProvider {
+interface AppSecretKeyProvider {
   fun getKeyStoreSecretKey(
     cryptography: Cryptography,
     authenticationRequired: Boolean = false,
     keyAlias: String? = null,
-  ): SecretKey
-  fun getSecretKeyFromBase(cryptography: Cryptography, base: CharArray, salt: ByteArray): SecretKey
+  ): Either<DomainError, SecretKey>
 }

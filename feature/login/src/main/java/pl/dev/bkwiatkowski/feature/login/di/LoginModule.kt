@@ -82,11 +82,4 @@ object LoginModule {
 
   @Provides
   fun provideSetPasswordScreenMapper(): SetPasswordScreenMapper = SetPasswordScreenMapperImpl()
-
-  @Provides
-  fun provideCreateNewUserUC(
-    loginBackendInteractor: LoginBackendInteractor,
-  ): CreateNewUserUC = CreateNewUserUCImpl(
-    loginBackendInteractor = loginBackendInteractor,
-  )
 }

@@ -13,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
@@ -21,6 +23,8 @@ import pl.dev.bkwiatkowski.common.ui.component.input.TextField
 import pl.dev.bkwiatkowski.common.ui.component.picker.CustomDatePicker
 import pl.dev.bkwiatkowski.common.ui.component.picker.DatePickerInput
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
+import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
+import pl.dev.bkwiatkowski.feature.login.presentation.onboarding.provider.OnboardingPreviewProvider
 
 @Composable
 fun OnboardingScreen(viewModel: OnboardingVM) {
@@ -88,4 +92,14 @@ fun OnboardingScreenContent(
       }
     }
   )
+}
+
+@Preview
+@Composable
+private fun OnboardingScreenPreview(
+  @PreviewParameter(provider = OnboardingPreviewProvider ::class) viewModel: OnboardingVM,
+) {
+  OrienteeringAppTheme {
+    OnboardingScreen(viewModel = viewModel)
+  }
 }

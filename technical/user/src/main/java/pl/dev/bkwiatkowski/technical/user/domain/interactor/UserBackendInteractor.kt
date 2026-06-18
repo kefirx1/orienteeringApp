@@ -1,10 +1,10 @@
-package pl.dev.bkwiatkowski.feature.login.domain.interactor
+package pl.dev.bkwiatkowski.technical.user.domain.interactor
 
 import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import java.time.LocalDateTime
 
-interface LoginBackendInteractor {
+interface UserBackendInteractor {
   suspend fun registerUser(
     username: String,
     email: String,

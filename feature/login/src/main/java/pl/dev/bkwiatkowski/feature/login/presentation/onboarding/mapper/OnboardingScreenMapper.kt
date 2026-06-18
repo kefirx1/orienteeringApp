@@ -41,6 +41,7 @@ class OnboardingScreenMapperImpl : OnboardingScreenMapper {
             onValueChanged = params.onUserNameValueChanged,
             textFieldType = TextFieldType.Default,
             validationState = state.content.userNameValidation,
+            initialText = state.content.userName,
           ),
           emailFieldData = TextFieldData(
             label = "Email",
@@ -48,6 +49,7 @@ class OnboardingScreenMapperImpl : OnboardingScreenMapper {
             onValueChanged = params.onEmailValueChanged,
             textFieldType = TextFieldType.Default,
             validationState = state.content.emailValidation,
+            initialText = state.content.email,
           ),
           phoneFieldData = TextFieldData(
             label = "Telefon (Opcjonalne)",
@@ -55,6 +57,7 @@ class OnboardingScreenMapperImpl : OnboardingScreenMapper {
             onValueChanged = params.onPhoneValueChanged,
             textFieldType = TextFieldType.Default,
             validationState = state.content.phoneValidation,
+            initialText = state.content.phone,
           ),
           birthDateFieldData = DatePickerInputData(
             label = "Data urodzenia",

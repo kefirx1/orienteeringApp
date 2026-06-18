@@ -5,6 +5,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import pl.dev.bkwiatkowski.common.core.navigation.AppNavController
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.DashboardDestination
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.DashboardResult
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.dashboardNavGraph
 import pl.dev.bkwiatkowski.feature.login.presentation.LoginDestinations
 import pl.dev.bkwiatkowski.feature.login.presentation.LoginResult
 import pl.dev.bkwiatkowski.feature.login.presentation.loginNavGraph
@@ -27,11 +30,19 @@ fun MainAppNavGraph(
       navController = appNavController,
       onResult = { result ->
         when (result) {
-          LoginResult.LoginSuccess -> {}
+          LoginResult.LoginSuccess ->
+            appNavController.navigate(destination = DashboardDestination.DashboardGraph)
           LoginResult.ExitApp -> onAppExit()
         }
       },
     )
-
+    dashboardNavGraph(
+      navController = appNavController,
+      onResult = { result ->
+        when (result) {
+          DashboardResult.ExitApp -> onAppExit()
+        }
+      },
+    )
   }
 }

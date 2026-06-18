@@ -13,12 +13,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButton
 import pl.dev.bkwiatkowski.common.ui.component.input.TextField
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
+import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
+import pl.dev.bkwiatkowski.feature.login.presentation.setpassword.provider.SetPasswordPreviewProvider
 
 @Composable
 fun SetPasswordScreen(viewModel: SetPasswordVM) {
@@ -76,4 +80,14 @@ fun SetPasswordScreenContent(
       }
     }
   )
+}
+
+@Preview
+@Composable
+private fun SetPasswordScreenPreview(
+  @PreviewParameter(provider = SetPasswordPreviewProvider ::class) viewModel: SetPasswordVM,
+) {
+  OrienteeringAppTheme {
+    SetPasswordScreen(viewModel = viewModel)
+  }
 }

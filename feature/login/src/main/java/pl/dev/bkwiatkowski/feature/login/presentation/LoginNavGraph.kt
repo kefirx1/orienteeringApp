@@ -18,7 +18,6 @@ fun NavGraphBuilder.loginNavGraph(
   navController: AppNavController,
   onResult: (LoginResult) -> Unit,
 ) {
-
   navigation(
     route = LoginDestinations.LoginGraph.route,
     startDestination = LoginDestinations.Login.route,
@@ -67,9 +66,7 @@ fun NavGraphBuilder.loginNavGraph(
       navActionHandler = { action, contractViewModel ->
         when (action) {
           is SetPasswordVM.Action.Navigation.Back -> navController.popBackStack()
-          is SetPasswordVM.Action.Navigation.RegistrationSuccess -> {
-            // TODO: navigate after successful registration
-          }
+          is SetPasswordVM.Action.Navigation.RegistrationSuccess -> onResult(LoginResult.LoginSuccess)
         }
       },
     )

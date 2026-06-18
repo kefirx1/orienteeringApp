@@ -33,6 +33,7 @@ class SetPasswordScreenMapperImpl : SetPasswordScreenMapper {
         onValueChanged = params.onPasswordValueChanged,
         textFieldType = TextFieldType.Password,
         validationState = state.content.passwordValidation,
+        initialText = state.content.password,
       ),
       confirmPasswordFieldData = TextFieldData(
         label = "Potwierdź hasło",
@@ -40,6 +41,7 @@ class SetPasswordScreenMapperImpl : SetPasswordScreenMapper {
         onValueChanged = params.onConfirmPasswordValueChanged,
         textFieldType = TextFieldType.Password,
         validationState = state.content.confirmPasswordValidation,
+        initialText = state.content.confirmPassword,
       ),
       continueButton = LargeButtonData.Primary(
         text = "Zarejestruj się",

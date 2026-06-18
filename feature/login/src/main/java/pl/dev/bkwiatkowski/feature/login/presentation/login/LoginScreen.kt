@@ -217,7 +217,7 @@ fun RegistrationScreenContent(
   )
 }
 
-@Preview()
+@Preview
 @Composable
 private fun LoginScreenPreview(
   @PreviewParameter(provider = LoginPreviewProvider::class) viewModel: LoginVM,
