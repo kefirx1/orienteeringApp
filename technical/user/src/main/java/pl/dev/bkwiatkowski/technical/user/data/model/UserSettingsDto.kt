@@ -10,5 +10,4 @@ data class UserSettingsDto(
   @SerialName(value = "userName") val userName: String,
   @SerialName(value = "salt") val salt: String,
   @SerialName(value = "ivDek") val ivDek: String,
-  @SerialName(value = "ivDekBiometric") val ivDekBiometric: String?,
 )

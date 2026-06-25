@@ -71,6 +71,9 @@ dependencies {
   ksp(libs.dagger.hilt.compiler)
   implementation(libs.androidx.navigation.compose)
   implementation(libs.androidx.hilt.navigation.compose)
+  implementation(libs.ktor.core)
+  implementation(libs.ktor.auth)
+  implementation(libs.ktor.resources)
 
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)

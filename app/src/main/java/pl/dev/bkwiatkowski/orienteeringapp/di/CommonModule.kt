@@ -8,11 +8,12 @@ import dagger.hilt.components.SingletonComponent
 import pl.dev.bkwiatkowski.common.activityconnector.ActivityConnector
 import pl.dev.bkwiatkowski.common.core.config.EnvironmentConfig
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
+import pl.dev.bkwiatkowski.common.core.network.SessionManager
 import pl.dev.bkwiatkowski.common.core.security.CryptoManager
 import pl.dev.bkwiatkowski.common.core.security.generator.AesKeyGenerator
+import pl.dev.bkwiatkowski.common.core.security.generator.SecureRandomGenerator
 import pl.dev.bkwiatkowski.common.core.security.provider.AppSecretKeyProvider
 import pl.dev.bkwiatkowski.common.core.security.provider.MasterKeyProvider
-import pl.dev.bkwiatkowski.common.core.security.generator.SecureRandomGenerator
 import pl.dev.bkwiatkowski.common.core.storage.Base64Coder
 import pl.dev.bkwiatkowski.common.core.storage.JsonSerializer
 import pl.dev.bkwiatkowski.common.core.storage.provider.DataStoreProvider
@@ -26,6 +27,7 @@ import pl.dev.bkwiatkowski.common.network.CallMediator
 import pl.dev.bkwiatkowski.common.network.CallMediatorImpl
 import pl.dev.bkwiatkowski.common.network.HttpClientFactory
 import pl.dev.bkwiatkowski.common.network.HttpClientFactoryImpl
+import pl.dev.bkwiatkowski.common.network.RefreshTokenHandler
 import pl.dev.bkwiatkowski.common.security.CryptoManagerImpl
 import pl.dev.bkwiatkowski.common.security.MasterKeyDataStore
 import pl.dev.bkwiatkowski.common.security.generator.AesKeyGeneratorImpl
@@ -40,7 +42,10 @@ import pl.dev.bkwiatkowski.common.validators.DateValidatorImpl
 import pl.dev.bkwiatkowski.common.validators.TextValidatorImpl
 import pl.dev.bkwiatkowski.orienteeringapp.config.EnvironmentConfigImpl
 import pl.dev.bkwiatkowski.orienteeringapp.core.lifecycle.ActivityConnectorImpl
+import pl.dev.bkwiatkowski.orienteeringapp.core.network.RefreshTokenHandlerImpl
+import pl.dev.bkwiatkowski.orienteeringapp.core.network.SessionManagerImpl
 import pl.dev.bkwiatkowski.technical.user.data.datastore.MasterKeyCacheDataStore
+import pl.dev.bkwiatkowski.technical.user.domain.repository.SessionRepository
 import javax.inject.Singleton
 
 @Module
@@ -70,9 +75,25 @@ object CommonModule {
   @Singleton
   fun provideHttpClientFactory(
     environmentConfig: EnvironmentConfig,
+    sessionManager: SessionManager,
+    refreshTokenHandler: RefreshTokenHandler,
   ): HttpClientFactory = HttpClientFactoryImpl(
     environmentConfig = environmentConfig,
+    sessionManager = sessionManager,
+    refreshTokenHandler = refreshTokenHandler,
   )
+
+  @Provides
+  @Singleton
+  fun provideRefreshTokenHandler(
+    sessionRepository: SessionRepository,
+  ): RefreshTokenHandler = RefreshTokenHandlerImpl(
+    sessionRepository = sessionRepository,
+  )
+
+  @Provides
+  @Singleton
+  fun provideSessionManager(): SessionManager = SessionManagerImpl()
 
   @Provides
   @Singleton
@@ -122,12 +143,14 @@ object CommonModule {
     jsonSerializer: JsonSerializer,
     base64Coder: Base64Coder,
     appSecretKeyProvider: AppSecretKeyProvider,
+    masterKeyProvider: MasterKeyProvider,
   ): DataStoreProvider = DataStoreProviderImpl(
     cryptoManager = cryptoManager,
     context = context,
     jsonSerializer = jsonSerializer,
     base64Coder = base64Coder,
     appSecretKeyProvider = appSecretKeyProvider,
+    masterKeyProvider = masterKeyProvider,
   )
 
   @Provides

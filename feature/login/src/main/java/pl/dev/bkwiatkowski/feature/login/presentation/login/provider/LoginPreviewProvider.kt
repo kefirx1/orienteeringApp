@@ -12,19 +12,13 @@ class LoginPreviewProvider : ViewModelPreviewProvider<LoginVM, LoginVM.ScreenDat
   override val values: Sequence<LoginVM> = sequenceOf(
     object : LoginVM {
       override val screenData = MutableStateFlow(
-        value = mapper(params = getMapperParams(state = LoginVM.State.Login(userName = "Jan Kowalski"))),
-      )
-    },
-
-    object : LoginVM {
-      override val screenData = MutableStateFlow(
-        value = mapper(params = getMapperParams(state = LoginVM.State.Biometric(userName = "Jan Kowalski")))
-      )
-    },
-
-    object : LoginVM {
-      override val screenData = MutableStateFlow(
         value = mapper(params = getMapperParams(state = LoginVM.State.Registration))
+      )
+    },
+
+    object : LoginVM {
+      override val screenData = MutableStateFlow(
+        value = mapper(params = getMapperParams(state = LoginVM.State.NewLogin()))
       )
     }
   )
@@ -33,7 +27,6 @@ class LoginPreviewProvider : ViewModelPreviewProvider<LoginVM, LoginVM.ScreenDat
   private fun getMapperParams(state: LoginVM.State): LoginScreenMapper.Params =
     LoginScreenMapper.Params(
       state = state,
-      onBiometricOpenClick = {},
       onLoginClick = {},
       onGoToLoginClick = {},
       onGoToOtherClick = {},
@@ -41,7 +34,6 @@ class LoginPreviewProvider : ViewModelPreviewProvider<LoginVM, LoginVM.ScreenDat
       onPlayAsGuestClick = {},
       onPasswordValueChanged = {},
       onBackClick = {},
-      onToPasswordLoginClick = {},
-      onToBiometricLoginClick = {}
+      onUserNameValueChanged = {},
     )
 }

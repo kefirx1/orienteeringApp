@@ -8,8 +8,12 @@ import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.feature.login.domain.interactor.LoginUserInteractor
+import pl.dev.bkwiatkowski.technical.user.domain.usecase.CreateNewLocalUserUC
 import pl.dev.bkwiatkowski.technical.user.domain.usecase.CreateNewUserUC
-import pl.dev.bkwiatkowski.technical.user.domain.usecase.GetUserNameUC
+import pl.dev.bkwiatkowski.technical.user.domain.usecase.HasValidRefreshTokenUC
+import pl.dev.bkwiatkowski.technical.user.domain.usecase.LoginUserLocalUC
+import pl.dev.bkwiatkowski.technical.user.domain.usecase.LoginUserRemoteUC
+import pl.dev.bkwiatkowski.technical.user.domain.usecase.LoginUserToAppUC
 import java.time.LocalDateTime
 
 @Module
@@ -18,10 +22,14 @@ object LoginSetupModule {
 
   @Provides
   fun provideLoginUserInteractor(
-    getUserNameUC: GetUserNameUC,
+    createNewLocalUserUC: CreateNewLocalUserUC,
     createNewUserUC: CreateNewUserUC,
+    loginUserRemoteUC: LoginUserRemoteUC,
+    loginUserLocalUC: LoginUserLocalUC,
+    hasValidRefreshTokenUC: HasValidRefreshTokenUC,
   ): LoginUserInteractor = object : LoginUserInteractor {
-    override suspend fun getSavedUserName() = getUserNameUC(params = UseCase.Params.Empty)
+    override suspend fun initMasterKey(): Either<DomainError, Unit> =
+      loginUserLocalUC(params = UseCase.Params.Empty)
 
     override suspend fun createNewUser(
       username: String,
@@ -39,5 +47,28 @@ object LoginSetupModule {
           dateOfBirth = dateOfBirth,
         )
       )
+
+    override suspend fun createNewLocalUser(
+      username: String,
+    ): Either<DomainError, Unit> =
+      createNewLocalUserUC(
+        params = CreateNewLocalUserUC.Params(
+          username = username,
+        )
+      )
+
+    override suspend fun loginUserRemote(
+      username: String,
+      password: String
+    ): Either<DomainError, Unit> =
+      loginUserRemoteUC(
+        params = LoginUserRemoteUC.Params(
+          userName = username,
+          password = password,
+        )
+      )
+
+    override suspend fun hasValidRefreshToken(): Either<DomainError, Boolean> =
+      hasValidRefreshTokenUC(params = UseCase.Params.Empty)
   }
 }

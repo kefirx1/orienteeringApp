@@ -4,20 +4,20 @@ import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.core.usecase.EitherUseCase
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
+import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInRequest
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInResponse
-import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignUpRequest
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendRepository
 
-interface RegisterUserUC : EitherUseCase<RegisterUserUC.RegisterUserParams, MobileSignInResponse> {
-  data class RegisterUserParams(
-    val request: MobileSignUpRequest,
+interface RemoteLoginUserUC : EitherUseCase<RemoteLoginUserUC.Params, MobileSignInResponse> {
+  data class Params(
+    val request: MobileSignInRequest,
   ) : UseCase.Params
 }
 
-class RegisterUserUCImpl(
+class RemoteLoginUserUCImpl(
   private val backendRepository: BackendRepository,
-) : RegisterUserUC {
-  override suspend fun invoke(params: RegisterUserUC.RegisterUserParams): Either<DomainError, MobileSignInResponse> =
-    backendRepository.registerUser(params.request)
+) : RemoteLoginUserUC {
+  override suspend fun invoke(params: RemoteLoginUserUC.Params): Either<DomainError, MobileSignInResponse> =
+    backendRepository.loginUser(params.request)
 }
 

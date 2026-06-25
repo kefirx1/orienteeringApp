@@ -41,6 +41,7 @@ dependencies {
   implementation(libs.ktor.serialization)
   implementation(libs.ktor.negotiation)
   implementation(libs.ktor.resources)
+  implementation(libs.ktor.auth)
 
   implementation(project(":common:core"))
 }

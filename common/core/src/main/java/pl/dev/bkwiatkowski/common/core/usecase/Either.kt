@@ -2,6 +2,8 @@ package pl.dev.bkwiatkowski.common.core.usecase
 
 import kotlinx.coroutines.CancellationException
 import pl.dev.bkwiatkowski.common.core.error.DomainError
+import pl.dev.bkwiatkowski.common.core.logger.Log
+import pl.dev.bkwiatkowski.common.core.logger.Tag
 
 sealed class Either<out L, out R> {
   data class Left<out L>(val value: L) : Either<L, Nothing>()
@@ -75,13 +77,17 @@ interface EitherScope {
 @PublishedApi
 internal class EitherScopeImpl : EitherScope {
   override fun raise(error: DomainError): Nothing {
+    Log.e(
+      tag = Tag("Either-raise"),
+      message = "Error: ${(error as? DomainError.Custom)?.e}.",
+    )
     throw DefaultEitherException(error = error)
   }
 
   override fun <R> Either<DomainError, R>.getRight(): R {
     return when (this) {
       is Either.Right -> value
-      is Either.Left -> raise(error = value)
+      is Either.Left -> throw DefaultEitherException(error = value)
     }
   }
 }
@@ -95,6 +101,10 @@ inline fun <R> either(block: EitherScope.() -> R): Either<DomainError, R> {
   } catch (e: CancellationException) {
     throw e
   } catch (e: Exception) {
+    Log.e(
+      tag = Tag("Either-exception"),
+      message = "Error: $e",
+    )
     Either.Left(value = DomainError.Custom(e = e))
   }
 }

@@ -6,9 +6,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import pl.dev.bkwiatkowski.common.core.validators.TextValidator
 import pl.dev.bkwiatkowski.common.core.validators.DateValidator
-import pl.dev.bkwiatkowski.feature.login.domain.interactor.LoginBackendInteractor
-import pl.dev.bkwiatkowski.feature.login.domain.usecase.CreateNewUserUC
-import pl.dev.bkwiatkowski.feature.login.domain.usecase.CreateNewUserUCImpl
 import pl.dev.bkwiatkowski.feature.login.domain.usecase.ValidateEmailUC
 import pl.dev.bkwiatkowski.feature.login.domain.usecase.ValidateEmailUCImpl
 import pl.dev.bkwiatkowski.feature.login.domain.usecase.ValidateUserNameUC

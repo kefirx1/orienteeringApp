@@ -13,12 +13,14 @@ import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.security.CryptoManager
 import pl.dev.bkwiatkowski.common.core.security.Cryptography
 import pl.dev.bkwiatkowski.common.core.security.provider.AppSecretKeyProvider
+import pl.dev.bkwiatkowski.common.core.security.provider.MasterKeyProvider
 import pl.dev.bkwiatkowski.common.core.storage.Base64Coder
 import pl.dev.bkwiatkowski.common.core.storage.JsonSerializer
 import pl.dev.bkwiatkowski.common.core.storage.provider.DataStoreProvider
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import java.lang.reflect.Type
+import javax.crypto.SecretKey
 
 class DataStoreProviderImpl(
   private val cryptoManager: CryptoManager,
@@ -26,6 +28,7 @@ class DataStoreProviderImpl(
   private val jsonSerializer: JsonSerializer,
   private val base64Coder: Base64Coder,
   private val appSecretKeyProvider: AppSecretKeyProvider,
+  private val masterKeyProvider: MasterKeyProvider,
 ): DataStoreProvider {
 
   companion object {
@@ -34,7 +37,23 @@ class DataStoreProviderImpl(
 
   val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = APP_DATA_STORE_PREFS_NAME)
 
-  override suspend fun <T> getDataStoreData(dataStoreKey: String, type: Type): Either<DomainError, T> = either {
+  private fun getKeyForDataStore(dataStoreKeyProvider: DataStoreProvider.DataStoreKeyProvider): Either<DomainError, SecretKey> =
+    either {
+      when (dataStoreKeyProvider) {
+        is DataStoreProvider.DataStoreKeyProvider.AppSecretKey ->
+          appSecretKeyProvider.getKeyStoreSecretKey(cryptography = Cryptography.AES_GCM_NoPadding)
+            .getRight()
+
+        is DataStoreProvider.DataStoreKeyProvider.MasterKey ->
+          masterKeyProvider.getMasterKey().getRight()
+      }
+    }
+
+  override suspend fun <T> getDataStoreData(
+    dataStoreKey: String,
+    type: Type,
+    dataStoreKeyProvider: DataStoreProvider.DataStoreKeyProvider,
+  ): Either<DomainError, T> = either {
     getDataStore().data.firstOrNull()?.let { prefs ->
       val data = (prefs.get(key = stringPreferencesKey(dataStoreKey)) ?: raise(
         error = DomainError.Custom(NullPointerException("Data for key $dataStoreKey not found in DataStore"))
@@ -43,9 +62,9 @@ class DataStoreProviderImpl(
       val decodedData = base64Coder.decode(data = data).getRight()
       val decryptedData = cryptoManager.decryptData(
         data = decodedData,
-        cryptography = Cryptography.AES_CBC_PKCS7,
-        key = appSecretKeyProvider.getKeyStoreSecretKey(cryptography = Cryptography.AES_CBC_PKCS7).getRight(),
-      )?.decodeToString()
+        cryptography = Cryptography.AES_GCM_NoPadding,
+        key = getKeyForDataStore(dataStoreKeyProvider = dataStoreKeyProvider).getRight()
+      ).getRight().decodeToString()
 
       jsonSerializer.deserialize<T>(serializedData = decryptedData, type = type).getRight()
 
@@ -57,6 +76,7 @@ class DataStoreProviderImpl(
   override suspend fun <T> getDataStoreDataFlow(
     dataStoreKey: String,
     type: Type,
+    dataStoreKeyProvider: DataStoreProvider.DataStoreKeyProvider,
   ): Either<DomainError, Flow<T>> = either {
     getDataStore().data.mapNotNull { prefs ->
       val data = (prefs.get(key = stringPreferencesKey(dataStoreKey)) ?: return@mapNotNull null)
@@ -64,9 +84,9 @@ class DataStoreProviderImpl(
       val decodedData = base64Coder.decode(data = data).getRight()
       val decryptedData = cryptoManager.decryptData(
         data = decodedData,
-        cryptography = Cryptography.AES_CBC_PKCS7,
-        key = appSecretKeyProvider.getKeyStoreSecretKey(cryptography = Cryptography.AES_CBC_PKCS7).getRight(),
-      )?.decodeToString()
+        cryptography = Cryptography.AES_GCM_NoPadding,
+        key = getKeyForDataStore(dataStoreKeyProvider = dataStoreKeyProvider).getRight(),
+      ).getRight().decodeToString()
 
       jsonSerializer.deserialize<T>(serializedData = decryptedData, type = type).getRight()
     }
@@ -74,13 +94,14 @@ class DataStoreProviderImpl(
 
   override suspend fun <T> updateDataStoreData(
     dataStoreKey: String,
-    data: T
+    data: T,
+    dataStoreKeyProvider: DataStoreProvider.DataStoreKeyProvider,
   ) = either {
     val encryptedData = cryptoManager.encryptData(
       data = jsonSerializer.serialize(data = data).getRight().toByteArray(),
-      cryptography = Cryptography.AES_CBC_PKCS7,
-      key = appSecretKeyProvider.getKeyStoreSecretKey(cryptography = Cryptography.AES_CBC_PKCS7).getRight(),
-    )
+      cryptography = Cryptography.AES_GCM_NoPadding,
+      key = getKeyForDataStore(dataStoreKeyProvider = dataStoreKeyProvider).getRight(),
+    ).getRight()
 
     getDataStore().edit { prefs ->
       prefs[stringPreferencesKey(name = dataStoreKey)] =
@@ -88,6 +109,12 @@ class DataStoreProviderImpl(
     }
 
     Unit
+  }
+
+  override suspend fun clearDataStoreData(dataStoreKey: String): Either<DomainError, Unit> = either {
+    getDataStore().edit { prefs ->
+      prefs.remove(key = stringPreferencesKey(name = dataStoreKey))
+    }
   }
 
   private fun getDataStore(): DataStore<Preferences> = context.dataStore

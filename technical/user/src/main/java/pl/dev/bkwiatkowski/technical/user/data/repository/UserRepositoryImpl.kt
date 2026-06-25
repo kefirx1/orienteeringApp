@@ -7,11 +7,7 @@ import pl.dev.bkwiatkowski.technical.user.data.mapper.UserMapper.toDomain
 import pl.dev.bkwiatkowski.technical.user.data.mapper.UserMapper.toDto
 import pl.dev.bkwiatkowski.technical.user.data.model.UserSettingsDto
 import pl.dev.bkwiatkowski.technical.user.domain.model.UserSettings
-
-interface UserRepository {
-  suspend fun saveNewUserSettings(userSettings: UserSettings) : Either<DomainError, Unit>
-  suspend fun getUserSettings(): Either<DomainError, UserSettings>
-}
+import pl.dev.bkwiatkowski.technical.user.domain.repository.UserRepository
 
 class UserRepositoryImpl(
   private val dataStoreProvider: DataStoreProvider,
@@ -24,11 +20,13 @@ class UserRepositoryImpl(
     dataStoreProvider.updateDataStoreData(
       dataStoreKey = USER_SETTINGS_STORE_NAME,
       data = userSettings.toDto(),
+      dataStoreKeyProvider = DataStoreProvider.DataStoreKeyProvider.AppSecretKey,
     )
 
   override suspend fun getUserSettings(): Either<DomainError, UserSettings> =
     dataStoreProvider.getDataStoreData<UserSettingsDto>(
       dataStoreKey = USER_SETTINGS_STORE_NAME,
       type = UserSettingsDto::class.java,
+      dataStoreKeyProvider = DataStoreProvider.DataStoreKeyProvider.AppSecretKey,
     ).mapRight { it.toDomain() }
 }

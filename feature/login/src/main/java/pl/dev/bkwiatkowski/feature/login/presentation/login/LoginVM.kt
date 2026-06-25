@@ -7,7 +7,6 @@ import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
-import pl.dev.bkwiatkowski.common.ui.component.button.SmallButtonData
 import pl.dev.bkwiatkowski.common.ui.component.input.TextFieldData
 import pl.dev.bkwiatkowski.common.ui.component.input.ValidationState
 import pl.dev.bkwiatkowski.feature.login.domain.interactor.LoginUserInteractor
@@ -20,14 +19,11 @@ import javax.inject.Inject
 interface LoginVM {
   sealed interface State {
     data object Initial : State
-    data class Login(
-      val fromBiometric: Boolean = false,
-      val userName: String,
+    data class NewLogin(
+      val typedUserName: String = "",
+      val userNameState: ValidationState = ValidationState.UnVerified,
       val typedPassword: String = "",
       val passwordState: ValidationState = ValidationState.UnVerified,
-    ) : State
-    data class Biometric(
-      val userName: String,
     ) : State
     data object Registration : State
   }
@@ -39,37 +35,27 @@ interface LoginVM {
       data object Back : Navigation
     }
 
-    data object ToBiometricLoginScreen : Action
     data object ToOtherScreen : Action
-    data object ToPasswordLoginScreen : Action
-    data object ShowBiometricPrompt : Action
     data object SuccessLogin : Action
     data object Back : Action
     data object CheckPassword : Action
     data object ToOnboarding : Action
     data object ToLoginScreen : Action
+    data object PlayAsAGuest : Action
     data class UpdatePassword(val password: String) : Action
+    data class UpdateUserName(val userName: String) : Action
   }
 
   sealed interface ScreenData {
     val onBackClick: () -> Unit
 
-    data class LoginScreen(
+    data class NewLoginScreen(
       val appName: String,
-      val welcomeLabel: String,
+      val infoLabel: String,
       val loginButton: LargeButtonData,
       val otherOptionsButton: LargeButtonData,
-      val textFieldData: TextFieldData,
-      val biometricLoginButtonData: SmallButtonData.Tertiary?,
-      override val onBackClick: () -> Unit,
-    ) : ScreenData
-
-    data class BiometricScreen(
-      val appName: String,
-      val welcomeLabel: String,
-      val loginBiometricLabel: String,
-      val passwordLoginButtonData: SmallButtonData.Tertiary,
-      val onBiometricOpenClick: () -> Unit,
+      val usernameInput: TextFieldData,
+      val passwordInput: TextFieldData,
       override val onBackClick: () -> Unit,
     ) : ScreenData
 
@@ -109,59 +95,70 @@ class LoginVMImpl @Inject constructor(
     viewModelScope.launch {
       when (val currentState = state.value) {
         State.Initial -> when (action) {
-          is Action.Back -> Action.Navigation.Back.emit()
-          else ->  {}
-        }
-        is State.Biometric -> when (action) {
-          is Action.ToPasswordLoginScreen -> {
-            State.Login(
-              fromBiometric = true,
-              userName = currentState.userName,
-            ).override()
-          }
           is Action.SuccessLogin -> {
             Action.Navigation.ToDashboard.emit()
           }
-          is Action.ShowBiometricPrompt -> {}
           is Action.Back -> Action.Navigation.Back.emit()
-          else -> {}
+          else ->  {}
         }
-        is State.Login -> {
-          when (action) {
-            is Action.ToOtherScreen -> {
-              State.Registration.override()
-            }
-            is Action.ToBiometricLoginScreen -> {
-              State.Biometric(
-                userName = currentState.userName,
-              ).override()
-            }
-            is Action.SuccessLogin -> {
-              dispatchAction(Action.UpdatePassword(password = ""))
-              Action.Navigation.ToDashboard.emit()
-            }
-            is Action.CheckPassword -> {
-              runWithLoaderUC {}
-            }
-            is Action.UpdatePassword -> {
-              currentState.copy(
-                typedPassword = action.password,
-                passwordState = ValidationState.UnVerified,
-              ).mutate()
-            }
-            is Action.Back -> Action.Navigation.Back.emit()
-            else -> {}
+        is State.NewLogin -> when (action) {
+          is Action.Back -> Action.Navigation.Back.emit()
+          is Action.ToOtherScreen -> {
+            State.Registration.override()
           }
+          is Action.SuccessLogin -> {
+            dispatchAction(Action.UpdateUserName(userName = ""))
+            dispatchAction(Action.UpdatePassword(password = ""))
+            Action.Navigation.ToDashboard.emit()
+          }
+          is Action.CheckPassword -> {
+            runWithLoaderUC {
+              loginUserInteractor.createNewLocalUser(
+                username = currentState.typedUserName,
+              ).fold(
+                onRight = {
+                  loginUserInteractor.loginUserRemote(
+                    username = currentState.typedUserName,
+                    password = currentState.typedPassword,
+                  ).fold(
+                    onRight = {
+                      dispatchAction(Action.SuccessLogin)
+                    },
+                    onLeft = {
+                      //todo error handling
+                    }
+                  )
+                },
+                onLeft = {
+                  //todo error handling
+                }
+              )
+            }
+          }
+          is Action.UpdatePassword -> {
+            currentState.copy(
+              typedPassword = action.password,
+              passwordState = ValidationState.UnVerified,
+            ).mutate()
+          }
+          is Action.UpdateUserName -> {
+            currentState.copy(
+              typedUserName = action.userName,
+              userNameState = ValidationState.UnVerified,
+            ).mutate()
+          }
+          else -> {}
         }
         State.Registration -> when (action) {
           is Action.Back -> Action.Navigation.Back.emit()
+          is Action.PlayAsAGuest -> {
+            //TODO play as a guest logic
+          }
           is Action.ToOnboarding -> {
             Action.Navigation.ToOnboarding.emit()
           }
           is Action.ToLoginScreen -> {
-            State.Login(
-              userName = "",
-            ).override()
+            State.NewLogin().override()
           }
           else -> {}
         }
@@ -172,27 +169,27 @@ class LoginVMImpl @Inject constructor(
   override suspend fun onStateEnter(newState: State) {
     when (newState) {
       State.Initial -> runWithLoaderUC {
-        loginUserInteractor.getSavedUserName().fold(
-          onRight = { name ->
-            //todo check refreshToken
-
-            if (false) {
-              //todo refresh token exist, try to login and if success then to dashboard, if not then to login screen with password
-            } else {
-              State.Login(
-                userName = name,
-              ).override()
-            }
+        loginUserInteractor.initMasterKey().fold(
+          onRight = {
+            loginUserInteractor.hasValidRefreshToken().fold(
+              onRight = { hasValid ->
+                if (hasValid) {
+                  dispatchAction(Action.SuccessLogin)
+                } else {
+                  State.NewLogin().override()
+                }
+              },
+              onLeft = {
+                State.NewLogin().override()
+              }
+            )
           },
           onLeft = {
             State.Registration.override()
           }
         )
       }
-      is State.Biometric -> {
-        dispatchAction(Action.ShowBiometricPrompt)
-      }
-      is State.Login -> {}
+      is State.NewLogin -> {}
       State.Registration -> {}
     }
   }
@@ -210,7 +207,7 @@ class LoginVMImpl @Inject constructor(
         dispatchAction(Action.ToLoginScreen)
       },
       onPlayAsGuestClick = {
-
+        dispatchAction(Action.PlayAsAGuest)
       },
       onPasswordValueChanged = { password ->
         dispatchAction(Action.UpdatePassword(password = password))
@@ -218,17 +215,11 @@ class LoginVMImpl @Inject constructor(
       onBackClick = {
         dispatchAction(Action.Back)
       },
-      onBiometricOpenClick = {
-        dispatchAction(Action.ShowBiometricPrompt)
-      },
-      onToPasswordLoginClick = {
-        dispatchAction(Action.ToPasswordLoginScreen)
-      },
-      onToBiometricLoginClick = {
-        dispatchAction(Action.ToBiometricLoginScreen)
-      },
       onGoToOtherClick = {
         dispatchAction(Action.ToOtherScreen)
+      },
+      onUserNameValueChanged = { userName ->
+        dispatchAction(Action.UpdateUserName(userName = userName))
       }
     ),
   )

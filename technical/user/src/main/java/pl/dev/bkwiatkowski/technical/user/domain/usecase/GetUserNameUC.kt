@@ -5,7 +5,7 @@ import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.core.usecase.EitherUseCase
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
-import pl.dev.bkwiatkowski.technical.user.data.repository.UserRepository
+import pl.dev.bkwiatkowski.technical.user.domain.repository.UserRepository
 
 interface GetUserNameUC : EitherUseCase<UseCase.Params.Empty, String>
 

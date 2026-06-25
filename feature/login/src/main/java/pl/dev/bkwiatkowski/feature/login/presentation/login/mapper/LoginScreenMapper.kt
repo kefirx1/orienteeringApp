@@ -2,26 +2,22 @@ package pl.dev.bkwiatkowski.feature.login.presentation.login.mapper
 
 import pl.dev.bkwiatkowski.common.core.usecase.Mapper
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
-import pl.dev.bkwiatkowski.common.ui.component.button.SmallButtonData
 import pl.dev.bkwiatkowski.common.ui.component.input.TextFieldData
 import pl.dev.bkwiatkowski.common.ui.component.input.TextFieldType
 import pl.dev.bkwiatkowski.feature.login.presentation.login.LoginVM
 import pl.dev.bkwiatkowski.feature.login.presentation.login.mapper.LoginScreenMapper.Params
-import javax.inject.Inject
 
 interface LoginScreenMapper : Mapper<Params, LoginVM.ScreenData> {
   data class Params(
     val state: LoginVM.State,
-    val onBiometricOpenClick: () -> Unit,
     val onLoginClick: () -> Unit,
     val onGoToLoginClick: () -> Unit,
     val onGoToOtherClick: () -> Unit,
     val onGoToRegistrationClick: () -> Unit,
     val onPlayAsGuestClick: () -> Unit,
+    val onUserNameValueChanged: (String) -> Unit,
     val onPasswordValueChanged: (String) -> Unit,
     val onBackClick: () -> Unit,
-    val onToPasswordLoginClick: () -> Unit,
-    val onToBiometricLoginClick: () -> Unit,
   )
 }
 
@@ -31,21 +27,17 @@ class LoginScreenMapperImpl : LoginScreenMapper {
       LoginVM.State.Initial -> LoginVM.ScreenData.Initial(
         onBackClick = params.onBackClick,
       )
-      is LoginVM.State.Biometric -> LoginVM.ScreenData.BiometricScreen(
+      is LoginVM.State.NewLogin -> LoginVM.ScreenData.NewLoginScreen(
         appName = "OrienteeringApp",
-        welcomeLabel = "Witaj ${params.state.userName}!",
-        onBackClick = params.onBackClick,
-        loginBiometricLabel = "Zaloguj się biometrycznie",
-        passwordLoginButtonData = SmallButtonData.Tertiary(
-          text = "Zaloguj się przez hasło",
-          onClick = params.onToPasswordLoginClick,
+        infoLabel = "Zaloguj się do swojego konta!",
+        usernameInput = TextFieldData(
+          hint = "Wpisz nazwę użytkownika",
+          validationState = params.state.userNameState,
+          onValueChanged = params.onUserNameValueChanged,
+          textFieldType = TextFieldType.Default,
+          initialText = params.state.typedUserName,
         ),
-        onBiometricOpenClick = params.onBiometricOpenClick,
-      )
-      is LoginVM.State.Login -> LoginVM.ScreenData.LoginScreen(
-        appName = "OrienteeringApp",
-        welcomeLabel = "Witaj ${params.state.userName}!",
-        textFieldData = TextFieldData(
+        passwordInput = TextFieldData(
           hint = "Wpisz hasło",
           validationState = params.state.passwordState,
           onValueChanged = params.onPasswordValueChanged,
@@ -65,10 +57,6 @@ class LoginScreenMapperImpl : LoginScreenMapper {
           },
         ),
         onBackClick = params.onBackClick,
-        biometricLoginButtonData = SmallButtonData.Tertiary(
-          text = "Zaloguj się biometrycznie",
-          onClick = params.onToBiometricLoginClick,
-        ).takeIf { params.state.fromBiometric }
       )
       is LoginVM.State.Registration -> LoginVM.ScreenData.RegistrationScreen(
         appName = "OrienteeringApp",

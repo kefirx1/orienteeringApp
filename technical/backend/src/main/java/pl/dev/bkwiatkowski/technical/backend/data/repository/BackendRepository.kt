@@ -2,23 +2,20 @@ package pl.dev.bkwiatkowski.technical.backend.data.repository
 
 import io.ktor.client.call.body
 import io.ktor.client.plugins.resources.post
-import io.ktor.client.request.header
 import io.ktor.client.request.setBody
-import io.ktor.http.HttpHeaders
 import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.network.CallMediator
 import pl.dev.bkwiatkowski.common.network.HttpClientFactory
+import pl.dev.bkwiatkowski.technical.backend.api.LoginMobileUser
 import pl.dev.bkwiatkowski.technical.backend.api.RegisterMobileUser
+import pl.dev.bkwiatkowski.technical.backend.data.MobileSignInResponseDto
+import pl.dev.bkwiatkowski.technical.backend.data.mapper.BackendMapper.toDomain
 import pl.dev.bkwiatkowski.technical.backend.data.mapper.BackendMapper.toDto
+import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInRequest
+import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignUpRequest
-import kotlin.getValue
-
-interface BackendRepository {
-  suspend fun registerUser(
-    request: MobileSignUpRequest,
-  ): Either<DomainError, Unit>
-}
+import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendRepository
 
 class BackendRepositoryImpl(
   private val callMediator: CallMediator,
@@ -31,11 +28,17 @@ class BackendRepositoryImpl(
 
   override suspend fun registerUser(
     request: MobileSignUpRequest,
-  ): Either<DomainError, Unit> = callMediator<RegisterMobileUser> {
+  ): Either<DomainError, MobileSignInResponse> = callMediator<RegisterMobileUser> {
     client.post(resource = RegisterMobileUser) {
-      header(HttpHeaders.ContentType, "application/json")
       setBody(request.toDto())
     }.body()
-  }.mapRight { }
+  }.mapRight { response -> response.body<MobileSignInResponseDto>().toDomain() }
+
+  override suspend fun loginUser(request: MobileSignInRequest): Either<DomainError, MobileSignInResponse> =
+    callMediator<LoginMobileUser> {
+      client.post(resource = LoginMobileUser) {
+        setBody(request.toDto())
+      }.body()
+    }.mapRight { response -> response.body<MobileSignInResponseDto>().toDomain() }
 }
 

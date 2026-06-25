@@ -22,7 +22,11 @@ paths:
               $ref: "#/components/schemas/MobileSignUpRequestDto"
       responses:
         "201":
-          description: "User registered successfully"
+          description: "User registered successfully and returns authentication tokens"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileSignInResponseDto"
         "400":
           description: "Bad Request - Invalid or missing request body"
           content:
@@ -215,7 +219,8 @@ components:
       required:
         - accessToken
         - refreshToken
-        - expiresInSec
+        - accessTokenExpiresTimestamp
+        - refreshTokenExpiresTimestamp
       properties:
         accessToken:
           type: string
@@ -225,8 +230,13 @@ components:
           type: string
           description: "JWT refresh token for obtaining new access tokens. Store securely in mobile device."
           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-        expiresInSec:
+        accessTokenExpiresTimestamp:
           type: integer
           format: int64
-          description: "Time in seconds until access token expires"
-          example: 360
+          description: "Expiration timestamp (epoch seconds) for access token"
+          example: 1710000000
+        refreshTokenExpiresTimestamp:
+          type: integer
+          format: int64
+          description: "Expiration timestamp (epoch seconds) for refresh token"
+          example: 1710086400

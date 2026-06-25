@@ -39,4 +39,5 @@ dependencies {
   androidTestImplementation(libs.androidx.junit)
 
   implementation(project(":common:core"))
+  implementation(project(":common:security"))
 }
