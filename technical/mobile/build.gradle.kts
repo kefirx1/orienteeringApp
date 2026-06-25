@@ -1,9 +1,12 @@
 plugins {
   alias(libs.plugins.android.library)
+  alias(libs.plugins.dagger)
+  alias(libs.plugins.kotlin.ksp)
+  alias(libs.plugins.kotlin.serialization)
 }
 
 android {
-  namespace = "pl.dev.bkwiatkowski.technical.auth"
+  namespace = "pl.dev.bkwiatkowski.technical.mobile"
   compileSdk {
     version = release(37)
   }
@@ -22,8 +25,13 @@ android {
 }
 
 dependencies {
-  implementation(libs.androidx.core.ktx)
+  implementation(libs.dagger.hilt)
+  ksp(libs.dagger.hilt.compiler)
+  implementation(libs.kotlinx.serialization)
+
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.espresso.core)
   androidTestImplementation(libs.androidx.junit)
+
+  implementation(project(":common:core"))
 }

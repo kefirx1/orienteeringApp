@@ -15,12 +15,12 @@ import pl.dev.bkwiatkowski.technical.backend.data.mapper.BackendMapper.toDto
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInRequest
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignUpRequest
-import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendRepository
+import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendAuthenticationRepository
 
-class BackendRepositoryImpl(
+class BackendAuthenticationRepositoryImpl(
   private val callMediator: CallMediator,
   private val clientFactory: HttpClientFactory,
-) : BackendRepository {
+) : BackendAuthenticationRepository {
 
   private val client by lazy {
     clientFactory.create()

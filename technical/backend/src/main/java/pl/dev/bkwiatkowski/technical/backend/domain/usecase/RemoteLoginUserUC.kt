@@ -6,7 +6,7 @@ import pl.dev.bkwiatkowski.common.core.usecase.EitherUseCase
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInRequest
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInResponse
-import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendRepository
+import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendAuthenticationRepository
 
 interface RemoteLoginUserUC : EitherUseCase<RemoteLoginUserUC.Params, MobileSignInResponse> {
   data class Params(
@@ -15,9 +15,9 @@ interface RemoteLoginUserUC : EitherUseCase<RemoteLoginUserUC.Params, MobileSign
 }
 
 class RemoteLoginUserUCImpl(
-  private val backendRepository: BackendRepository,
+  private val backendAuthenticationRepository: BackendAuthenticationRepository,
 ) : RemoteLoginUserUC {
   override suspend fun invoke(params: RemoteLoginUserUC.Params): Either<DomainError, MobileSignInResponse> =
-    backendRepository.loginUser(params.request)
+    backendAuthenticationRepository.loginUser(params.request)
 }
 

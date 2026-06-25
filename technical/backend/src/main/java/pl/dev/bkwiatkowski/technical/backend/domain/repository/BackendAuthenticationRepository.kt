@@ -6,7 +6,7 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInRequest
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignUpRequest
 
-interface BackendRepository {
+interface BackendAuthenticationRepository {
   suspend fun registerUser(
     request: MobileSignUpRequest,
   ): Either<DomainError, MobileSignInResponse>

@@ -6,14 +6,14 @@ typealias Log = StaticLogger
 
 object StaticLogger {
   fun e(tag: Tag<*>, message: String) {
-    Log.e(tag.javaClass.name, message)
+    Log.e(tag.name, message)
   }
   fun i(tag: Tag<*>, message: String) {
-    Log.i(tag.javaClass.name, message)
+    Log.i(tag.name, message)
   }
 }
 
 data class Tag<T>(val obj: T) {
   val name: String
-    get() = obj?.javaClass?.name ?: "TAG"
+    get() = obj?.javaClass?.name?.split('.')?.last() ?: "TAG"
 }

@@ -6,8 +6,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import pl.dev.bkwiatkowski.common.network.CallMediator
 import pl.dev.bkwiatkowski.common.network.HttpClientFactory
-import pl.dev.bkwiatkowski.technical.backend.data.repository.BackendRepositoryImpl
-import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendRepository
+import pl.dev.bkwiatkowski.technical.backend.data.repository.BackendAuthenticationRepositoryImpl
+import pl.dev.bkwiatkowski.technical.backend.data.repository.BackendSettingsRepositoryImpl
+import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendAuthenticationRepository
+import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendSettingsRepository
+import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetMobileSettingsUC
+import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetMobileSettingsUCImpl
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.RegisterUserUC
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.RegisterUserUCImpl
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.RemoteLoginUserUC
@@ -23,22 +27,39 @@ object BackendModule {
   fun provideBackendRepository(
     callMediator: CallMediator,
     httpClientFactory: HttpClientFactory,
-  ): BackendRepository = BackendRepositoryImpl(
+  ): BackendAuthenticationRepository = BackendAuthenticationRepositoryImpl(
+    callMediator = callMediator,
+    clientFactory = httpClientFactory,
+  )
+
+  @Provides
+  @Singleton
+  fun provideBackendSettingsRepository(
+    callMediator: CallMediator,
+    httpClientFactory: HttpClientFactory,
+  ): BackendSettingsRepository = BackendSettingsRepositoryImpl(
     callMediator = callMediator,
     clientFactory = httpClientFactory,
   )
 
   @Provides
   fun provideRegisterUserUC(
-    backendRepository: BackendRepository,
+    backendAuthenticationRepository: BackendAuthenticationRepository,
   ): RegisterUserUC = RegisterUserUCImpl(
-    backendRepository = backendRepository,
+    backendAuthenticationRepository = backendAuthenticationRepository,
   )
 
   @Provides
   fun provideLoginUserUC(
-    backendRepository: BackendRepository,
+    backendAuthenticationRepository: BackendAuthenticationRepository,
   ): RemoteLoginUserUC = RemoteLoginUserUCImpl(
-    backendRepository = backendRepository,
+    backendAuthenticationRepository = backendAuthenticationRepository,
+  )
+
+  @Provides
+  fun provideGetMobileSettingsUC(
+    backendSettingsRepository: BackendSettingsRepository,
+  ): GetMobileSettingsUC = GetMobileSettingsUCImpl(
+    backendSettingsRepository = backendSettingsRepository,
   )
 }

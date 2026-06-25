@@ -129,7 +129,26 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-
+  /api/mobile/settings:
+    get:
+      operationId: "getMobileSettings"
+      summary: "Get Mobile Settings"
+      description: "Returns mobile client settings including current server time. Used for synchronizing client clock and retrieving configuration."
+      tags:
+        - "Mobile Settings"
+      responses:
+        "200":
+          description: "Mobile settings retrieved successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MobileSettingsResponseDto"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     ErrorResponse:
@@ -147,7 +166,6 @@ components:
           type: string
           description: "Human-readable error message"
           example: "User with this email already exists"
-
     MobileSignUpRequestDto:
       type: object
       description: "Mobile user registration request"
@@ -184,7 +202,6 @@ components:
           nullable: true
           description: "Optional date of birth in ISO 8601 format (mobile-specific)"
           example: "1990-05-15T10:30:00"
-
     MobileSignInRequestDto:
       type: object
       description: "Mobile user login request"
@@ -201,7 +218,6 @@ components:
           format: password
           description: "User password"
           example: "SecurePassword123!"
-
     MobileRefreshTokenRequestDto:
       type: object
       description: "Token refresh request"
@@ -212,7 +228,6 @@ components:
           type: string
           description: "Valid refresh token obtained from login or previous refresh"
           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-
     MobileSignInResponseDto:
       type: object
       description: "Mobile user authentication response with tokens"
@@ -240,3 +255,14 @@ components:
           format: int64
           description: "Expiration timestamp (epoch seconds) for refresh token"
           example: 1710086400
+    MobileSettingsResponseDto:
+      type: object
+      description: "Mobile client settings response"
+      required:
+        - serverLocalDateTime
+      properties:
+        serverLocalDateTime:
+          type: string
+          format: date-time
+          description: "Server local time as LocalDateTime in ISO-8601 (no offset). Serialized as java.time.LocalDateTime."
+          example: "2026-06-25T12:34:56"

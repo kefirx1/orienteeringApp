@@ -24,7 +24,7 @@ dependencyResolutionManagement {
 rootProject.name = "OrienteeringApp"
 include(":app")
 include(":feature:login")
-include(":technical:auth")
+include(":technical:mobile")
 include(":common:ui")
 include(":technical:backend")
 include(":common:core")

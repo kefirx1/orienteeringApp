@@ -36,8 +36,8 @@
             <option value="$PROJECT_DIR$/feature/dashboard" />
             <option value="$PROJECT_DIR$/feature/login" />
             <option value="$PROJECT_DIR$/technical" />
-            <option value="$PROJECT_DIR$/technical/auth" />
             <option value="$PROJECT_DIR$/technical/backend" />
+            <option value="$PROJECT_DIR$/technical/mobile" />
             <option value="$PROJECT_DIR$/technical/user" />
           </set>
         </option>

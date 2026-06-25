@@ -1,8 +1,10 @@
 package pl.dev.bkwiatkowski.technical.backend.data.mapper
 
+import pl.dev.bkwiatkowski.technical.backend.data.MobileSettingsResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileSignInRequestDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileSignInResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileSignUpRequestDto
+import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSettingsResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInRequest
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignUpRequest
@@ -30,5 +32,10 @@ object BackendMapper {
       refreshToken = refreshToken,
       accessTokenExpiresTimestamp = accessTokenExpiresTimestamp,
       refreshTokenExpiresTimestamp = refreshTokenExpiresTimestamp,
+    )
+
+  fun MobileSettingsResponseDto.toDomain(): MobileSettingsResponse =
+    MobileSettingsResponse(
+      serverLocalDateTime = serverLocalDateTime,
     )
 }

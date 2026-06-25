@@ -4,7 +4,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
+import pl.dev.bkwiatkowski.feature.dashboard.domain.interactor.DashboardMobileInteractor
 import javax.inject.Inject
 
 interface MainDashboardVM {
@@ -18,6 +20,7 @@ interface MainDashboardVM {
       data object ExitApp : Navigation
     }
 
+    data object DataLoaded : Action
     data object Back : Action
   }
 
@@ -39,6 +42,8 @@ interface MainDashboardVM {
 @HiltViewModel
 class MainDashboardVMImpl @Inject constructor(
   private val mapper: MainDashboardMapper,
+  private val runWithLoaderUC: RunWithLoaderUC,
+  private val dashboardMobileInteractor: DashboardMobileInteractor,
 ) : CustomViewModel<MainDashboardVM.State, MainDashboardVM.ScreenData, MainDashboardVM.Action.Navigation>(
   initialStateValue = MainDashboardVM.State.Initial,
 ), MainDashboardVM {
@@ -57,6 +62,9 @@ class MainDashboardVMImpl @Inject constructor(
             is MainDashboardVM.Action.Back -> {
               MainDashboardVM.Action.Navigation.ExitApp.emit()
             }
+            is MainDashboardVM.Action.DataLoaded -> {
+              MainDashboardVM.State.Active.override()
+            }
             else -> {}
           }
         }
@@ -74,7 +82,22 @@ class MainDashboardVMImpl @Inject constructor(
   }
 
   override suspend fun onStateEnter(newState: MainDashboardVM.State) {
-    // no-op for now
+    when (newState) {
+      is MainDashboardVM.State.Initial -> {
+        runWithLoaderUC {
+          dashboardMobileInteractor.fetchMobileSettings().fold(
+            onRight = {
+              dispatchAction(MainDashboardVM.Action.DataLoaded)
+            },
+            onLeft = {
+              //todo check offline mode
+            }
+          )
+        }
+      }
+
+      is MainDashboardVM.State.Active -> {}
+    }
   }
 
   override fun mapScreenData(): MainDashboardVM.ScreenData = mapper(
