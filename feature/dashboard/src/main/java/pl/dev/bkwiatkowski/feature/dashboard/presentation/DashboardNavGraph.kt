@@ -25,6 +25,10 @@ fun NavGraphBuilder.dashboardNavGraph(
       navActionHandler = { action, contractViewModel ->
         when (action) {
           is MainDashboardVM.Action.Navigation.ExitApp -> onResult(DashboardResult.ExitApp)
+          is MainDashboardVM.Action.Navigation.GoToSettings -> onResult(DashboardResult.GoToSettings)
+          is MainDashboardVM.Action.Navigation.GoToNewRuns -> {}
+          is MainDashboardVM.Action.Navigation.GoToMyProfile -> {}
+          is MainDashboardVM.Action.Navigation.GoToMap -> {}
         }
       }
     )

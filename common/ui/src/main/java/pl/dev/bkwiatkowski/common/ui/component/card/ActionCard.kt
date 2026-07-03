@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
 import pl.dev.bkwiatkowski.common.ui.R
 import pl.dev.bkwiatkowski.common.ui.component.icon.CustomImage
@@ -23,12 +24,14 @@ import pl.dev.bkwiatkowski.common.ui.component.icon.ImageSize
 import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 
 data class ActionCardData(
-  val content: @Composable () -> Unit,
   val onClick: () -> Unit,
+  val text: String,
 )
 
 @Composable
-fun ActionCard(data: ActionCardData) {
+fun ActionCard(
+  data: ActionCardData,
+) {
   BaseCard {
     Row(
       modifier = Modifier.fillMaxWidth()
@@ -38,14 +41,20 @@ fun ActionCard(data: ActionCardData) {
           onClick = data.onClick,
         )
         .padding(
-          vertical = 8.dp,
-          horizontal = 4.dp,
+          top = 8.dp,
+          bottom = 8.dp,
+          start = 16.dp,
+          end = 4.dp,
         ),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically,
     ) {
       Column {
-        data.content()
+        CustomText(
+          text = data.text,
+          style = MaterialTheme.typography.bodyLarge,
+          customSize = 20.sp,
+        )
       }
 
       CustomImage(
@@ -61,10 +70,8 @@ fun ActionCard(data: ActionCardData) {
 private class ActionCardProvider : PreviewParameterProvider<ActionCardData> {
   override val values: Sequence<ActionCardData> = sequenceOf(
     ActionCardData(
-      content = {
-        CustomText(text = "Przykładowy tekst")
-      },
       onClick = {},
+      text = "Przykładowy tekst"
     ),
   )
 }

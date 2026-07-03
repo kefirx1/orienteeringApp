@@ -1,6 +1,7 @@
 package pl.dev.bkwiatkowski.common.ui.component.tab
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,6 +21,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import pl.dev.bkwiatkowski.common.ui.R
+import pl.dev.bkwiatkowski.common.ui.component.icon.CustomImage
+import pl.dev.bkwiatkowski.common.ui.component.icon.ImageSize
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
 import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 
@@ -27,7 +30,7 @@ sealed class TopAppBarData(
   open val title: String?,
   val navigationIconId: Int? = null,
   open val onNavigationIconClick: () -> Unit = {},
-  val actionIconId: Int? = null,
+  open val actionIconId: Int? = null,
   open val onActionIconClick: () -> Unit = {},
 ) {
   data class BackAndTitle(
@@ -75,6 +78,15 @@ sealed class TopAppBarData(
   ): TopAppBarData(
     title = title,
   )
+
+  data class Action(
+    override val onActionIconClick: () -> Unit,
+    override val actionIconId: Int?,
+  ): TopAppBarData(
+    title = null,
+    onActionIconClick = onActionIconClick,
+    actionIconId = actionIconId,
+  )
 }
 
 private const val DEBOUNCE_DELAY = 500L
@@ -98,9 +110,10 @@ fun CustomTopAppBar(
             }
           },
         ) {
-          Icon(
-            painter = painterResource(topAppBarData.navigationIconId),
+          CustomImage(
+            iconRes = topAppBarData.navigationIconId,
             contentDescription = "TAB navigation icon",
+            color = MaterialTheme.colorScheme.onBackground,
           )
         }
       }
@@ -126,9 +139,10 @@ fun CustomTopAppBar(
             }
           },
         ) {
-          Icon(
-            painter = painterResource(topAppBarData.actionIconId),
+          CustomImage(
+            iconRes = topAppBarData.actionIconId!!,
             contentDescription = "TAB action icon",
+            color = MaterialTheme.colorScheme.onBackground,
           )
         }
       }
@@ -151,6 +165,14 @@ private class CustomTopAppBarProvider : PreviewParameterProvider<TopAppBarData> 
     ),
     TopAppBarData.Back(
       onNavigationIconClick = {},
+    ),
+    TopAppBarData.Action(
+      onActionIconClick = {},
+      actionIconId = R.drawable.baseline_circle_notifications_24,
+    ),
+    TopAppBarData.BackAndAction(
+      onNavigationIconClick = {},
+      onActionIconClick = {},
     ),
   )
 }

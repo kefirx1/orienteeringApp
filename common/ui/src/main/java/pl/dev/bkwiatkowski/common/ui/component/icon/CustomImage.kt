@@ -14,6 +14,7 @@ enum class ImageSize(val size: Dp) {
   SMALL(size = 12.dp),
   SMALL_X(size = 24.dp),
   MEDIUM(size = 32.dp),
+  MEDIUM_X(size = 48.dp),
   LARGE(size = 64.dp),
   EXTRA_LARGE(size = 150.dp),
 }

@@ -31,7 +31,6 @@ fun BaseCard(
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(16.dp),
       )
-
       .padding(
         horizontal = 8.dp,
         vertical = 4.dp,

@@ -41,6 +41,9 @@ fun MainAppNavGraph(
       onResult = { result ->
         when (result) {
           DashboardResult.ExitApp -> onAppExit()
+          DashboardResult.GoToSettings -> {
+            // Handle navigation to settings screen TODO
+          }
         }
       },
     )
