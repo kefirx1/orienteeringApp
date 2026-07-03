@@ -77,6 +77,7 @@ fun MainDashboardScreenContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         ActionCard(data = data.settingsCard)
+        Spacer(modifier = Modifier.height(32.dp))
       }
     },
     fabData = data.newRunFab,
