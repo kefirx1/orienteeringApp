@@ -20,4 +20,5 @@ sealed interface DashboardDestination : Destination {
 
 sealed interface DashboardResult {
   data object ExitApp : DashboardResult
+  data object ToMaps : DashboardResult
 }

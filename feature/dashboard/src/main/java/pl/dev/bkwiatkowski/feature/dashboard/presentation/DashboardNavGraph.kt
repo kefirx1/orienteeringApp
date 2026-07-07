@@ -34,7 +34,7 @@ fun NavGraphBuilder.dashboardNavGraph(
           is MainDashboardVM.Action.Navigation.GoToSettings -> navController.navigate(destination = DashboardDestination.Settings)
           is MainDashboardVM.Action.Navigation.GoToNewRuns -> {}
           is MainDashboardVM.Action.Navigation.GoToMyProfile -> navController.navigate(destination = DashboardDestination.UserProfile)
-          is MainDashboardVM.Action.Navigation.GoToMap -> {}
+          is MainDashboardVM.Action.Navigation.GoToMap -> onResult(DashboardResult.ToMaps)
         }
       }
     )

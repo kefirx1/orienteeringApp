@@ -11,6 +11,9 @@ import pl.dev.bkwiatkowski.feature.dashboard.presentation.dashboardNavGraph
 import pl.dev.bkwiatkowski.feature.login.presentation.LoginDestinations
 import pl.dev.bkwiatkowski.feature.login.presentation.LoginResult
 import pl.dev.bkwiatkowski.feature.login.presentation.loginNavGraph
+import pl.dev.bkwiatkowski.feature.maps.presentation.MapsDestination
+import pl.dev.bkwiatkowski.feature.maps.presentation.MapsResult
+import pl.dev.bkwiatkowski.feature.maps.presentation.mapsNavGraph
 
 @Composable
 fun MainAppNavGraph(
@@ -41,6 +44,15 @@ fun MainAppNavGraph(
       onResult = { result ->
         when (result) {
           DashboardResult.ExitApp -> onAppExit()
+          DashboardResult.ToMaps -> appNavController.navigate(destination = MapsDestination.MapsGraph)
+        }
+      },
+    )
+    mapsNavGraph(
+      navController = appNavController,
+      onResult = { result ->
+        when (result) {
+          MapsResult.Back -> appNavController.popBackStack()
         }
       },
     )

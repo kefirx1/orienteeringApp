@@ -85,6 +85,7 @@ dependencies {
 
   implementation(project(":feature:login"))
   implementation(project(":feature:dashboard"))
+  implementation(project(":feature:maps"))
 
   implementation(project(":technical:mobile"))
   implementation(project(":technical:backend"))
