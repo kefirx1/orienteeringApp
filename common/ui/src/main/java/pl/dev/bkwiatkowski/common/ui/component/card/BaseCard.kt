@@ -18,10 +18,11 @@ import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 
 @Composable
 fun BaseCard(
+  modifier: Modifier = Modifier,
   content: @Composable () -> Unit,
 ) {
   Column(
-    modifier = Modifier
+    modifier = modifier
       .fillMaxWidth()
       .shadow(
         elevation = 4.dp,

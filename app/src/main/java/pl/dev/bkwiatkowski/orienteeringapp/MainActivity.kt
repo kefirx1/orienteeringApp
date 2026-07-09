@@ -5,10 +5,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -36,7 +32,9 @@ class MainActivity : AppCompatActivity() {
       activityConnector.connect(this@MainActivity)
 
     }
-    enableEdgeToEdge()
+    enableEdgeToEdge(
+
+    )
 
     setContent {
       OrienteeringAppTheme {
@@ -49,21 +47,5 @@ class MainActivity : AppCompatActivity() {
         }
       }
     }
-  }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-  Text(
-    text = "Hello $name!",
-    modifier = modifier
-  )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-  OrienteeringAppTheme {
-    Greeting("Android")
   }
 }

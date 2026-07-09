@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import pl.dev.bkwiatkowski.common.ui.component.addDefaultPadding
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
 import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.userprofile.provider.UserProfileDashboardPreviewProvider
@@ -38,6 +39,7 @@ fun UserProfileDashboardScreenContent(
       Column(
         modifier = Modifier
           .fillMaxSize()
+          .addDefaultPadding()
           .verticalScroll(rememberScrollState()),
       ) {
 

@@ -6,6 +6,8 @@ plugins {
   alias(libs.plugins.dagger)
   alias(libs.plugins.kotlin.ksp)
   alias(libs.plugins.kotlin.serialization)
+  alias(libs.plugins.google.services)
+  alias(libs.plugins.secrets.gradle.plugin)
 }
 
 android {
@@ -74,6 +76,7 @@ dependencies {
   implementation(libs.ktor.core)
   implementation(libs.ktor.auth)
   implementation(libs.ktor.resources)
+  implementation(platform(libs.firebase.bom))
 
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)

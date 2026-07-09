@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import pl.dev.bkwiatkowski.common.ui.component.addDefaultPadding
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
 import pl.dev.bkwiatkowski.common.ui.component.button.SmallButton
 import pl.dev.bkwiatkowski.common.ui.component.button.SmallButtonData
@@ -53,6 +54,7 @@ fun MainDashboardScreenContent(
       Column(
         modifier = Modifier
           .fillMaxSize()
+          .addDefaultPadding()
           .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {

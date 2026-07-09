@@ -5,6 +5,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
+import pl.dev.bkwiatkowski.common.ui.component.map.MapComponentData
 import javax.inject.Inject
 
 interface EventsMapVM {
@@ -25,6 +26,7 @@ interface EventsMapVM {
 
     data class Main(
       override val onBackClick: () -> Unit,
+      val mapComponentData: MapComponentData,
     ) : ScreenData
   }
 

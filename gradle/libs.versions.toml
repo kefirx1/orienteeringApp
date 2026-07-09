@@ -1,5 +1,6 @@
 [versions]
 agp = "9.2.1"
+firebaseBom = "34.15.0"
 kotlin = "2.3.21"
 coreKtx = "1.18.0"
 junit = "4.13.2"
@@ -23,13 +24,18 @@ datastore = "1.2.1"
 room = "2.8.4"
 appcompatVersion = "1.7.1"
 kotlinxSerialization = "1.11.0"
+secretsGradlePlugin = "2.0.1"
 sqlcipher = "4.5.4"
 ktor = "3.5.0"
 openapi-generator = "7.22.0"
 material = "1.10.0"
+googleServices = "4.5.0"
+mapsCompose = "8.3.0"
+playServices = "20.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -72,6 +78,9 @@ openapi-generator-plugin = { module = "org.openapitools:openapi-generator-gradle
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-serialization-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
+play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServices" }
+secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -82,4 +91,6 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 dagger = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 openapi-generator = { id = "org.openapi.generator", version.ref = "openapi-generator" }
+secrets-gradle-plugin = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin" }

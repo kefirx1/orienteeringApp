@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import pl.dev.bkwiatkowski.common.ui.component.addDefaultPadding
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButton
 import pl.dev.bkwiatkowski.common.ui.component.input.TextField
@@ -47,6 +48,7 @@ fun SetPasswordScreenContent(
       Column(
         modifier = Modifier
           .fillMaxSize()
+          .addDefaultPadding()
           .verticalScroll(rememberScrollState()),
       ) {
         CustomText(

@@ -32,6 +32,8 @@ dependencies {
   implementation(libs.androidx.compose.ui.tooling.preview)
   implementation(libs.androidx.compose.material3)
   implementation(libs.coil)
+  implementation(libs.maps.compose)
+  implementation(libs.play.services.maps)
 
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)

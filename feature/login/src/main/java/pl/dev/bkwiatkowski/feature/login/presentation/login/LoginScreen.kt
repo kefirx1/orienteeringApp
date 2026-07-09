@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import pl.dev.bkwiatkowski.common.ui.component.addDefaultPadding
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButton
 import pl.dev.bkwiatkowski.common.ui.component.emptyscreen.EmptyScreen
@@ -55,8 +56,9 @@ fun NewUserLoginScreenContent(
     content = {
       Column(
         modifier = Modifier
-          .verticalScroll(rememberScrollState())
-          .fillMaxSize(),
+          .fillMaxSize()
+          .addDefaultPadding()
+          .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {
         Spacer(modifier = Modifier.height(64.dp))
@@ -122,6 +124,7 @@ fun RegistrationScreenContent(
       Column(
         modifier = Modifier
           .fillMaxSize()
+          .addDefaultPadding()
           .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {

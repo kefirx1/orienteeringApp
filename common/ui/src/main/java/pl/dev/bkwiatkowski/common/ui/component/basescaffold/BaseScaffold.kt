@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.IconButton
@@ -48,7 +49,7 @@ fun BaseScaffold(
 ) {
   Scaffold(
     modifier = modifier.imePadding(),
-    contentWindowInsets = WindowInsets.safeDrawing,
+    contentWindowInsets = WindowInsets.navigationBars,
     topBar = {
       topBarData?.let {
         Row(
@@ -66,10 +67,6 @@ fun BaseScaffold(
           .fillMaxSize()
           .background(color = MaterialTheme.colorScheme.background)
           .padding(paddingValues = padding)
-          .padding(
-            horizontal = 20.dp,
-            vertical = 5.dp,
-          )
       ) {
         content()
       }
