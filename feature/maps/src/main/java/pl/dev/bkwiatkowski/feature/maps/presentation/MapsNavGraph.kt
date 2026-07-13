@@ -25,6 +25,7 @@ fun NavGraphBuilder.mapsNavGraph(
       navActionHandler = { action, contractViewModel ->
         when (action) {
           is EventsMapVM.Action.Navigation.Back -> onResult(MapsResult.Back)
+          is EventsMapVM.Action.Navigation.ToEventDetails -> {}
         }
       }
     )

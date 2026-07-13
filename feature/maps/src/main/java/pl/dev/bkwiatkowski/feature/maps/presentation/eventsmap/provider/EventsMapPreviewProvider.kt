@@ -12,7 +12,7 @@ class EventsMapPreviewProvider : ViewModelPreviewProvider<EventsMapVM, EventsMap
   override val values: Sequence<EventsMapVM> = sequenceOf(
     object : EventsMapVM {
       override val screenData = MutableStateFlow(
-        value = mapper(params = getMapperParams(state = EventsMapVM.State.Initialized)),
+        value = mapper(params = getMapperParams(state = EventsMapVM.State.Initialized(events = null))),
       )
     }
   )
@@ -21,5 +21,6 @@ class EventsMapPreviewProvider : ViewModelPreviewProvider<EventsMapVM, EventsMap
     EventsMapMapper.Params(
       state = state,
       onBackClick = {},
+      onEventDetailsClick = {},
     )
 }

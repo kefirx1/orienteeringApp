@@ -16,7 +16,12 @@ import {{import}}
  */
 @Serializable
 @Resource("{{{path}}}")
+{{#pathParams}}
+data class {{operationIdCamelCase}}({{#pathParams}}val {{paramName}}: {{dataType}}{{#-last}}{{/-last}}{{^-last}}, {{/-last}}{{/pathParams}})
+{{/pathParams}}
+{{^pathParams}}
 object {{operationIdCamelCase}}
+{{/pathParams}}
 
 {{/operation}}
 {{/operations}}

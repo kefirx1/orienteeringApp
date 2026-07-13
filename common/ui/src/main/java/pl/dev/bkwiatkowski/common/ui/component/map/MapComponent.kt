@@ -78,7 +78,7 @@ fun MapComponent(
       uiSettings = mapSetting,
       onMapClick = {
         isInfoCardVisible = false
-      }
+      },
     ) {
       markersState.forEachIndexed { index, markerState ->
         Marker(

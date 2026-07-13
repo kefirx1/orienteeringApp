@@ -7,6 +7,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
+import pl.dev.bkwiatkowski.common.ui.component.emptyscreen.EmptyScreen
 import pl.dev.bkwiatkowski.common.ui.component.map.MapComponent
 import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 import pl.dev.bkwiatkowski.feature.maps.presentation.eventsmap.provider.EventsMapPreviewProvider
@@ -16,6 +17,7 @@ fun EventsMapScreen(viewModel: EventsMapVM) {
   val state by viewModel.screenData.collectAsStateWithLifecycle()
 
   when (val screenData = state) {
+    is EventsMapVM.ScreenData.Loading -> EmptyScreen()
     is EventsMapVM.ScreenData.Main -> EventsMapsScreenContent(data = screenData)
   }
 
