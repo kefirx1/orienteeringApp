@@ -20,6 +20,7 @@ import pl.dev.bkwiatkowski.common.core.storage.provider.DataStoreProvider
 import pl.dev.bkwiatkowski.common.core.storage.provider.DatabaseProvider
 import pl.dev.bkwiatkowski.common.core.validators.DateValidator
 import pl.dev.bkwiatkowski.common.core.validators.TextValidator
+import pl.dev.bkwiatkowski.common.core.time.DateFormatter
 import pl.dev.bkwiatkowski.common.loader.LoaderManager
 import pl.dev.bkwiatkowski.common.loader.LoaderManagerImpl
 import pl.dev.bkwiatkowski.common.loader.domain.RunWithLoaderUCImpl
@@ -40,12 +41,15 @@ import pl.dev.bkwiatkowski.common.storage.provider.DatabaseProviderImpl
 import pl.dev.bkwiatkowski.common.storage.serializer.JsonSerializerImpl
 import pl.dev.bkwiatkowski.common.validators.DateValidatorImpl
 import pl.dev.bkwiatkowski.common.validators.TextValidatorImpl
+import pl.dev.bkwiatkowski.common.time.DateFormatterImpl
 import pl.dev.bkwiatkowski.orienteeringapp.config.EnvironmentConfigImpl
 import pl.dev.bkwiatkowski.orienteeringapp.core.lifecycle.ActivityConnectorImpl
 import pl.dev.bkwiatkowski.orienteeringapp.core.network.RefreshTokenHandlerImpl
 import pl.dev.bkwiatkowski.orienteeringapp.core.network.SessionManagerImpl
 import pl.dev.bkwiatkowski.technical.user.data.datastore.MasterKeyCacheDataStore
 import pl.dev.bkwiatkowski.technical.user.domain.repository.SessionRepository
+import pl.dev.bkwiatkowski.common.ui.image.BitmapReader
+import pl.dev.bkwiatkowski.common.ui.image.BitmapReaderImpl
 import javax.inject.Singleton
 
 @Module
@@ -105,11 +109,19 @@ object CommonModule {
 
   @Provides
   @Singleton
+  fun provideBitmapReader(): BitmapReader = BitmapReaderImpl()
+
+  @Provides
+  @Singleton
   fun provideTextValidator(): TextValidator = TextValidatorImpl()
 
   @Provides
   @Singleton
   fun provideDateValidator(): DateValidator = DateValidatorImpl()
+
+  @Provides
+  @Singleton
+  fun provideDateFormatter(): DateFormatter = DateFormatterImpl()
 
   @Provides
   @Singleton

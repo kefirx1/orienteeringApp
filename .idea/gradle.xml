@@ -30,6 +30,7 @@
             <option value="$PROJECT_DIR$/common/network" />
             <option value="$PROJECT_DIR$/common/security" />
             <option value="$PROJECT_DIR$/common/storage" />
+            <option value="$PROJECT_DIR$/common/time" />
             <option value="$PROJECT_DIR$/common/ui" />
             <option value="$PROJECT_DIR$/common/validators" />
             <option value="$PROJECT_DIR$/feature" />

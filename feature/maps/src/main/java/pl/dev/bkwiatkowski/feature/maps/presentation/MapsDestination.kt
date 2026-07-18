@@ -10,6 +10,9 @@ sealed interface MapsDestination : Destination {
 
   @Serializable
   data object EventsMap : MapsDestination
+
+  @Serializable
+  data object EventDetails : MapsDestination
 }
 
 sealed interface MapsResult {

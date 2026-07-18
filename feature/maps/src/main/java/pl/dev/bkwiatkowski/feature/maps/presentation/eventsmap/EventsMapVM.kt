@@ -23,13 +23,13 @@ interface EventsMapVM {
     sealed interface Navigation : Action {
       data object Back : Navigation
       data class ToEventDetails(
-        val eventId: String,
+        val eventId: Int,
       ) : Navigation
     }
 
     data object Back : Action
     data class ToEventDetails(
-      val eventId: String,
+      val eventId: Int,
     ) : Action
   }
 

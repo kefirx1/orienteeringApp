@@ -5,17 +5,16 @@ import pl.dev.bkwiatkowski.common.core.usecase.Mapper
 import pl.dev.bkwiatkowski.common.ui.component.map.MapComponentData
 import pl.dev.bkwiatkowski.common.ui.component.map.MarkerData
 import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileEventListDetails
-import javax.inject.Inject
 
 interface EventsMapMapper : Mapper<EventsMapMapper.Params, EventsMapVM.ScreenData> {
   data class Params(
     val state: EventsMapVM.State,
     val onBackClick: () -> Unit,
-    val onEventDetailsClick: (String) -> Unit
+    val onEventDetailsClick: (Int) -> Unit
   )
 }
 
-class EventsMapMapperImpl @Inject constructor() : EventsMapMapper {
+class EventsMapMapperImpl : EventsMapMapper {
   override fun invoke(params: EventsMapMapper.Params): EventsMapVM.ScreenData =
     when (params.state) {
       is EventsMapVM.State.Loading ->
@@ -27,14 +26,14 @@ class EventsMapMapperImpl @Inject constructor() : EventsMapMapper {
           onBackClick = params.onBackClick,
           mapComponentData = MapComponentData(
             markers = params.state.events?.events?.map { event ->
-              event.getMarkerData()
+              event.getMarkerData(onEventClick = params.onEventDetailsClick)
             } ?: emptyList(),
           )
         )
       }
     }
 
-  private fun MobileEventListDetails.getMarkerData() = MarkerData(
+  private fun MobileEventListDetails.getMarkerData(onEventClick: (Int) -> Unit) = MarkerData(
     position = Position(
       latitude = this.startLocationY.toDouble(),
       longitude = this.startLocationX.toDouble(),
@@ -42,5 +41,6 @@ class EventsMapMapperImpl @Inject constructor() : EventsMapMapper {
     infoCardTitle = this.name,
     infoCardBody = this.description,
     buttonLabel = "Sprawdź",
+    onButtonClick = { onEventClick(this.id) },
   )
 }

@@ -7,6 +7,9 @@ import pl.dev.bkwiatkowski.common.core.navigation.createDestination
 import pl.dev.bkwiatkowski.feature.maps.presentation.eventsmap.EventsMapScreen
 import pl.dev.bkwiatkowski.feature.maps.presentation.eventsmap.EventsMapVM
 import pl.dev.bkwiatkowski.feature.maps.presentation.eventsmap.EventsMapVMImpl
+import pl.dev.bkwiatkowski.feature.maps.presentation.eventdetails.EventDetailsScreen
+import pl.dev.bkwiatkowski.feature.maps.presentation.eventdetails.EventDetailsVM
+import pl.dev.bkwiatkowski.feature.maps.presentation.eventdetails.EventDetailsVMImpl
 
 fun NavGraphBuilder.mapsNavGraph(
   navController: AppNavController,
@@ -25,7 +28,26 @@ fun NavGraphBuilder.mapsNavGraph(
       navActionHandler = { action, contractViewModel ->
         when (action) {
           is EventsMapVM.Action.Navigation.Back -> onResult(MapsResult.Back)
-          is EventsMapVM.Action.Navigation.ToEventDetails -> {}
+          is EventsMapVM.Action.Navigation.ToEventDetails -> {
+            contractViewModel.setContractData(
+              destination = MapsDestination.EventDetails,
+              data = EventDetailsVM.SetupData(eventId = action.eventId),
+            )
+            navController.navigate(destination = MapsDestination.EventDetails)
+          }
+        }
+      }
+    )
+
+    createDestination<EventDetailsVM.SetupData, MapsContractVM, EventDetailsVMImpl, EventDetailsVM.Action.Navigation>(
+      destination = MapsDestination.EventDetails,
+      navController = navController,
+      content = { viewModel ->
+        EventDetailsScreen(viewModel = viewModel)
+      },
+      navActionHandler = { action, contractViewModel ->
+        when (action) {
+          is EventDetailsVM.Action.Navigation.Back -> navController.popBackStack()
         }
       }
     )

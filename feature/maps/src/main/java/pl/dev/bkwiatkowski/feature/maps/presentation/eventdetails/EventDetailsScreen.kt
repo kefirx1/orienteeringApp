@@ -1,0 +1,113 @@
+package pl.dev.bkwiatkowski.feature.maps.presentation.eventdetails
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import pl.dev.bkwiatkowski.common.ui.component.addDefaultPadding
+import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
+import pl.dev.bkwiatkowski.common.ui.component.button.LargeButton
+import pl.dev.bkwiatkowski.common.ui.component.emptyscreen.EmptyScreen
+import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
+import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
+import pl.dev.bkwiatkowski.feature.maps.presentation.eventdetails.provider.EventDetailsPreviewProvider
+
+@Composable
+fun EventDetailsScreen(viewModel: EventDetailsVM) {
+  val state by viewModel.screenData.collectAsStateWithLifecycle()
+
+  when (val screenData = state) {
+    is EventDetailsVM.ScreenData.Loading -> EmptyScreen()
+    is EventDetailsVM.ScreenData.Main -> EventDetailsScreenContent(data = screenData)
+  }
+
+  BackHandler {
+    state.onBackClick()
+  }
+}
+
+@Composable
+fun EventDetailsScreenContent(
+  data: EventDetailsVM.ScreenData.Main,
+) {
+  BaseScaffold(
+    topBarData = data.topAppBarData,
+    content = {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .addDefaultPadding()
+          .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.Start,
+      ) {
+        data.map?.let { bmp ->
+          Image(
+            bitmap = bmp.asImageBitmap(),
+            contentDescription = data.event.map.name,
+            modifier = Modifier
+              .fillMaxWidth()
+              .fillMaxHeight(0.3f)
+          )
+          Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        CustomText(
+          text = data.event.name,
+          style =MaterialTheme.typography.titleLarge,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        CustomText(
+          text = data.event.description,
+          style = MaterialTheme.typography.bodyMedium,
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        CustomText(
+          text = data.startDateTime,
+          style = MaterialTheme.typography.bodySmall,
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+      }
+    },
+    bottomBar = {
+      Column(
+        modifier = Modifier.padding(
+          horizontal = 20.dp,
+          vertical = 10.dp,
+        ),
+      ) {
+        data.playButtonData?.let { button ->
+          LargeButton(buttonData = button)
+        }
+      }
+    }
+  )
+}
+
+@Preview
+@Composable
+private fun EventDetailsScreenPreview(
+  @PreviewParameter(provider = EventDetailsPreviewProvider::class) viewModel: EventDetailsVM
+) {
+  OrienteeringAppTheme {
+    EventDetailsScreen(viewModel = viewModel)
+  }
+}
