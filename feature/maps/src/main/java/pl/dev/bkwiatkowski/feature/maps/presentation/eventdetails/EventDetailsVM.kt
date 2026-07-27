@@ -9,40 +9,67 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
+import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
-import pl.dev.bkwiatkowski.feature.maps.domain.interactor.MapsBackendInteractor
-import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
+import pl.dev.bkwiatkowski.feature.maps.domain.interactor.MapsBackendInteractor
+import pl.dev.bkwiatkowski.feature.maps.domain.model.EventSession
+import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileEventDetails
 
 interface EventDetailsVM {
   sealed interface State {
     data object Loading : State
-    data class Initialized(
-      val event: MobileEventDetails,
-    ) : State
+
+    sealed interface Initialized : State {
+      data class InitializedNoSession(
+        val event: MobileEventDetails,
+      ) : Initialized
+
+      data class InitializedNotJoined(
+        val event: MobileEventDetails,
+        val session: EventSession,
+      ) : Initialized
+
+      data class InitializedAlreadyJoined(
+        val event: MobileEventDetails,
+        val session: EventSession,
+      ) : Initialized
+    }
   }
 
   sealed interface Action {
     sealed interface Navigation : Action {
       data object Back : Navigation
+      data class ToEventSession(
+        val eventId: String,
+        val sessionUuid: String,
+      ) : Navigation
     }
 
     data object Back : Action
-    data object Play : Action
+    data object ToEventSession : Action
   }
 
   sealed interface ScreenData {
     val onBackClick: () -> Unit
 
-    data class Main(
+    data class MainWithSession(
       override val onBackClick: () -> Unit,
       val event: MobileEventDetails,
       val topAppBarData: TopAppBarData,
       val startDateTime: String,
       val map: Bitmap?,
       val playButtonData: LargeButtonData?,
+    ) : ScreenData
+
+    data class MainNoSession(
+      override val onBackClick: () -> Unit,
+      val event: MobileEventDetails,
+      val topAppBarData: TopAppBarData,
+      val startDateTime: String,
+      val map: Bitmap?,
     ) : ScreenData
 
     data class Loading(
@@ -85,7 +112,40 @@ class EventDetailsVMImpl @AssistedInject constructor(
           }
           else -> {}
         }
-        is EventDetailsVM.State.Initialized -> when (action) {
+        is EventDetailsVM.State.Initialized.InitializedAlreadyJoined -> when (action) {
+          is EventDetailsVM.Action.Back -> {
+            EventDetailsVM.Action.Navigation.Back.emit()
+          }
+          is EventDetailsVM.Action.ToEventSession -> {
+            EventDetailsVM.Action.Navigation.ToEventSession(
+              eventId = currentState.event.id.toString(),
+              sessionUuid = currentState.session.id,
+            ).emit()
+          }
+          else -> {}
+        }
+        is EventDetailsVM.State.Initialized.InitializedNotJoined -> when (action) {
+          is EventDetailsVM.Action.Back -> {
+            EventDetailsVM.Action.Navigation.Back.emit()
+          }
+          is EventDetailsVM.Action.ToEventSession -> {
+            mapsBackendInteractor.joinEventSession(
+              sessionUuid = currentState.session.id,
+            ).fold(
+              onRight = {
+                EventDetailsVM.Action.Navigation.ToEventSession(
+                  eventId = currentState.event.id.toString(),
+                  sessionUuid = currentState.session.id,
+                ).emit()
+              },
+              onLeft = { error ->
+                //TODO handle error
+              }
+            )
+          }
+          else -> {}
+        }
+        is EventDetailsVM.State.Initialized.InitializedNoSession -> when (action) {
           is EventDetailsVM.Action.Back -> {
             EventDetailsVM.Action.Navigation.Back.emit()
           }
@@ -97,15 +157,39 @@ class EventDetailsVMImpl @AssistedInject constructor(
 
   override suspend fun onStateEnter(newState: EventDetailsVM.State) {
     when (newState) {
-      is EventDetailsVM.State.Loading -> runWithLoaderUC {
-        mapsBackendInteractor.getMobileEventDetails(eventId = setupData.eventId).fold(
-          onRight = { details ->
-            EventDetailsVM.State.Initialized(event = details).override()
-          },
-          onLeft = { error ->
-            //TODO handle error
+      is EventDetailsVM.State.Loading -> either {
+        runWithLoaderUC {
+          val details = mapsBackendInteractor.getMobileEventDetails(
+            eventId = setupData.eventId,
+          ).getRight()
+
+          when {
+            details.session == null -> {
+              EventDetailsVM.State.Initialized.InitializedNoSession(
+                event = details,
+              ).override()
+            }
+            else -> {
+              val userHasAlreadyJoined = mapsBackendInteractor.checkUserInEventSession(
+                sessionUuid = details.session.id,
+              ).getRight()
+
+              if (userHasAlreadyJoined) {
+                EventDetailsVM.State.Initialized.InitializedAlreadyJoined(
+                  event = details,
+                  session = details.session,
+                ).override()
+              } else {
+                EventDetailsVM.State.Initialized.InitializedNotJoined(
+                  event = details,
+                  session = details.session,
+                ).override()
+              }
+            }
           }
-        )
+        }
+      }.onLeft { error ->
+        // TODO handle error
       }
       is EventDetailsVM.State.Initialized -> {}
     }
@@ -115,7 +199,7 @@ class EventDetailsVMImpl @AssistedInject constructor(
     params = EventDetailsMapper.Params(
       state = state.value,
       onBackClick = { dispatchAction(EventDetailsVM.Action.Back) },
-      onPlayClick = { dispatchAction(EventDetailsVM.Action.Play) },
+      onPlayClick = { dispatchAction(EventDetailsVM.Action.ToEventSession) },
     ),
   )
 }

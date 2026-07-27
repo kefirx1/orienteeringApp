@@ -4,12 +4,12 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.navigation
 import pl.dev.bkwiatkowski.common.core.navigation.AppNavController
 import pl.dev.bkwiatkowski.common.core.navigation.createDestination
-import pl.dev.bkwiatkowski.feature.maps.presentation.eventsmap.EventsMapScreen
-import pl.dev.bkwiatkowski.feature.maps.presentation.eventsmap.EventsMapVM
-import pl.dev.bkwiatkowski.feature.maps.presentation.eventsmap.EventsMapVMImpl
 import pl.dev.bkwiatkowski.feature.maps.presentation.eventdetails.EventDetailsScreen
 import pl.dev.bkwiatkowski.feature.maps.presentation.eventdetails.EventDetailsVM
 import pl.dev.bkwiatkowski.feature.maps.presentation.eventdetails.EventDetailsVMImpl
+import pl.dev.bkwiatkowski.feature.maps.presentation.eventsmap.EventsMapScreen
+import pl.dev.bkwiatkowski.feature.maps.presentation.eventsmap.EventsMapVM
+import pl.dev.bkwiatkowski.feature.maps.presentation.eventsmap.EventsMapVMImpl
 
 fun NavGraphBuilder.mapsNavGraph(
   navController: AppNavController,
@@ -48,6 +48,13 @@ fun NavGraphBuilder.mapsNavGraph(
       navActionHandler = { action, contractViewModel ->
         when (action) {
           is EventDetailsVM.Action.Navigation.Back -> navController.popBackStack()
+          is EventDetailsVM.Action.Navigation.ToEventSession ->
+            onResult(
+              MapsResult.ToEventSession(
+                sessionUuid = action.sessionUuid,
+                eventId = action.eventId,
+              )
+            )
         }
       }
     )

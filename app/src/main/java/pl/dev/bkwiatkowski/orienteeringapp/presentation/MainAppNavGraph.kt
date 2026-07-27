@@ -8,6 +8,10 @@ import pl.dev.bkwiatkowski.common.core.navigation.AppNavController
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.DashboardDestination
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.DashboardResult
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.dashboardNavGraph
+import pl.dev.bkwiatkowski.feature.event.presentation.EventDestination
+import pl.dev.bkwiatkowski.feature.event.presentation.EventResult
+import pl.dev.bkwiatkowski.feature.event.presentation.eventNavGraph
+import pl.dev.bkwiatkowski.feature.event.presentation.main.EventMainVM
 import pl.dev.bkwiatkowski.feature.login.presentation.LoginDestinations
 import pl.dev.bkwiatkowski.feature.login.presentation.LoginResult
 import pl.dev.bkwiatkowski.feature.login.presentation.loginNavGraph
@@ -53,6 +57,27 @@ fun MainAppNavGraph(
       onResult = { result ->
         when (result) {
           MapsResult.Back -> appNavController.popBackStack()
+          is MapsResult.ToEventSession -> {
+            appContractVM.setContractData(
+              destination = EventDestination.EventMain,
+              data = EventMainVM.SetupData(
+                sessionUuid = result.sessionUuid,
+                eventId = result.eventId,
+              ),
+            )
+            appNavController.navigate(
+              destination = EventDestination.EventGraph,
+            )
+          }
+        }
+      },
+    )
+    eventNavGraph(
+      appContractVM = appContractVM,
+      navController = appNavController,
+      onResult = { result ->
+        when (result) {
+          is EventResult.Back -> appNavController.popBackStack()
         }
       },
     )

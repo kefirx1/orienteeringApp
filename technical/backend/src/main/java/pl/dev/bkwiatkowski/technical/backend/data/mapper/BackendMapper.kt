@@ -1,18 +1,20 @@
 package pl.dev.bkwiatkowski.technical.backend.data.mapper
 
+import pl.dev.bkwiatkowski.technical.backend.data.EventSessionResponseDto
+import pl.dev.bkwiatkowski.technical.backend.data.MobileEventDetailResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileEventListResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileMapDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileSettingsResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileSignInRequestDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileSignInResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileSignUpRequestDto
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMobileMap
+import pl.dev.bkwiatkowski.technical.backend.domain.model.EventSessionResponse
+import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventListResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSettingsResponse
-import pl.dev.bkwiatkowski.technical.backend.data.MobileEventDetailResponseDto
-import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
-import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInRequest
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignUpRequest
@@ -94,5 +96,14 @@ object BackendMapper {
       },
       finishedAt = finishedAt,
       allowOfflineTracking = allowOfflineTracking,
+      session = session?.toDomain(),
+    )
+
+  fun EventSessionResponseDto.toDomain(): EventSessionResponse =
+    EventSessionResponse(
+      id = id,
+      startedAt = startedAt,
+      finishedAt = finishedAt,
+      userCanJoin = userCanJoin,
     )
 }

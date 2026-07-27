@@ -2,14 +2,20 @@ package pl.dev.bkwiatkowski.technical.backend.data.repository
 
 import io.ktor.client.call.body
 import io.ktor.client.plugins.resources.get
+import io.ktor.client.plugins.resources.post
+import io.ktor.client.request.setBody
 import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.network.CallMediator
 import pl.dev.bkwiatkowski.common.network.HttpClientFactory
+import pl.dev.bkwiatkowski.technical.backend.api.CheckUserInEventSession
 import pl.dev.bkwiatkowski.technical.backend.api.GetMobileEventById
 import pl.dev.bkwiatkowski.technical.backend.api.GetMobileEvents
-import pl.dev.bkwiatkowski.technical.backend.data.MobileEventListResponseDto
+import pl.dev.bkwiatkowski.technical.backend.api.JoinEventSession
+import pl.dev.bkwiatkowski.technical.backend.data.IsUserInSessionResponseDto
+import pl.dev.bkwiatkowski.technical.backend.data.JoinSessionRequestDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileEventDetailResponseDto
+import pl.dev.bkwiatkowski.technical.backend.data.MobileEventListResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.mapper.BackendMapper.toDomain
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventListResponse
@@ -35,5 +41,19 @@ class BackendEventsRepositoryImpl(
       response
         .body<List<MobileEventListResponseDto>>()
         .map { it.toDomain() }
+    }
+
+  override suspend fun joinEventSession(sessionUuid: String): Either<DomainError, Unit> =
+    callMediator<JoinEventSession> {
+      client.post(resource = JoinEventSession) {
+        setBody(JoinSessionRequestDto(sessionUuid = sessionUuid))
+      }
+    }.mapRight { }
+
+  override suspend fun checkUserInEventSession(sessionUuid: String): Either<DomainError, Boolean> =
+    callMediator<CheckUserInEventSession> {
+      client.get(resource = CheckUserInEventSession(sessionUuid = sessionUuid)).body()
+    }.mapRight { response ->
+      response.body<IsUserInSessionResponseDto>().joined
     }
 }

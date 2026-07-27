@@ -5,18 +5,20 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import pl.dev.bkwiatkowski.feature.maps.domain.interactor.MapsBackendInteractor
+import pl.dev.bkwiatkowski.feature.maps.domain.model.EventSession
+import pl.dev.bkwiatkowski.feature.maps.domain.model.EventStatus
+import pl.dev.bkwiatkowski.feature.maps.domain.model.EventType
 import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileEventListDetails
 import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileEvents
 import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileMap
-import pl.dev.bkwiatkowski.feature.maps.domain.model.EventType
-import pl.dev.bkwiatkowski.feature.maps.domain.model.EventStatus
-import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepository
-import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMobileMap
-import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMobileMap
+import pl.dev.bkwiatkowski.technical.backend.domain.model.EventSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventListResponse
+import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -40,6 +42,12 @@ object MapsSetupModule {
       backendEventsRepository.getMobileEventDetails(eventId).mapRight { response ->
         response.toFeature()
       }
+
+    override suspend fun joinEventSession(sessionUuid: String) =
+      backendEventsRepository.joinEventSession(sessionUuid)
+
+    override suspend fun checkUserInEventSession(sessionUuid: String) =
+      backendEventsRepository.checkUserInEventSession(sessionUuid)
 
     fun BEMobileMap.toFeature(): MobileMap = MobileMap(
       id = id,
@@ -86,6 +94,14 @@ object MapsSetupModule {
       eventType = eventType.toFeature(),
       finishedAt = finishedAt,
       allowOfflineTracking = allowOfflineTracking,
+      session = session?.toFeature(),
+    )
+
+    fun EventSessionResponse.toFeature(): EventSession = EventSession(
+      id = id,
+      startedAt = startedAt,
+      userCanJoin = userCanJoin,
+      finishedAt = finishedAt
     )
 
   }

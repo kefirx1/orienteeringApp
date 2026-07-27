@@ -8,4 +8,6 @@ import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileEvents
 interface MapsBackendInteractor {
   suspend fun getMobileEvents(): Either<DomainError, MobileEvents>
   suspend fun getMobileEventDetails(eventId: Int): Either<DomainError, MobileEventDetails>
+  suspend fun joinEventSession(sessionUuid: String): Either<DomainError, Unit>
+  suspend fun checkUserInEventSession(sessionUuid: String): Either<DomainError, Boolean>
 }

@@ -35,7 +35,8 @@ fun EventDetailsScreen(viewModel: EventDetailsVM) {
 
   when (val screenData = state) {
     is EventDetailsVM.ScreenData.Loading -> EmptyScreen()
-    is EventDetailsVM.ScreenData.Main -> EventDetailsScreenContent(data = screenData)
+    is EventDetailsVM.ScreenData.MainNoSession -> EventDetailsNoSessionScreenContent(data = screenData)
+    is EventDetailsVM.ScreenData.MainWithSession -> EventDetailsWithSessionScreenContent(data = screenData)
   }
 
   BackHandler {
@@ -44,8 +45,55 @@ fun EventDetailsScreen(viewModel: EventDetailsVM) {
 }
 
 @Composable
-fun EventDetailsScreenContent(
-  data: EventDetailsVM.ScreenData.Main,
+fun EventDetailsNoSessionScreenContent(
+  data: EventDetailsVM.ScreenData.MainNoSession,
+) {
+  BaseScaffold(
+    topBarData = data.topAppBarData,
+    content = {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .addDefaultPadding()
+          .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.Start,
+      ) {
+        data.map?.let { bmp ->
+          Image(
+            bitmap = bmp.asImageBitmap(),
+            contentDescription = data.event.map.name,
+            modifier = Modifier
+              .fillMaxWidth()
+              .fillMaxHeight(0.3f)
+          )
+          Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        CustomText(
+          text = data.event.name,
+          style =MaterialTheme.typography.titleLarge,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        CustomText(
+          text = data.event.description,
+          style = MaterialTheme.typography.bodyMedium,
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        CustomText(
+          text = data.startDateTime,
+          style = MaterialTheme.typography.bodySmall,
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+      }
+    },
+  )
+}
+
+@Composable
+fun EventDetailsWithSessionScreenContent(
+  data: EventDetailsVM.ScreenData.MainWithSession,
 ) {
   BaseScaffold(
     topBarData = data.topAppBarData,

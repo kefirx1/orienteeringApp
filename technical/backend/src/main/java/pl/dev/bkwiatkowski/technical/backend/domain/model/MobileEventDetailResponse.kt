@@ -15,6 +15,7 @@ data class MobileEventDetailResponse(
   val eventType: BEEventType,
   val finishedAt: LocalDateTime? = null,
   val allowOfflineTracking: Boolean? = null,
+  val session: EventSessionResponse? = null,
 )
 
 enum class BEEventStatus(val value: String) {

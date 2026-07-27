@@ -8,4 +8,6 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventListRespons
 interface BackendEventsRepository {
   suspend fun getMobileEvents(): Either<DomainError, List<MobileEventListResponse>>
   suspend fun getMobileEventDetails(eventId: Int): Either<DomainError, MobileEventDetailResponse>
+  suspend fun joinEventSession(sessionUuid: String): Either<DomainError, Unit>
+  suspend fun checkUserInEventSession(sessionUuid: String): Either<DomainError, Boolean>
 }

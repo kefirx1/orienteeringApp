@@ -80,7 +80,7 @@ class HttpClientFactoryImpl(
             Log.i(tag = Tag(this@HttpClientFactoryImpl), message = message)
           }
         }
-        level = LogLevel.HEADERS
+        level = LogLevel.BODY
       }
       install(plugin = ContentNegotiation) {
         json(json = jsonBuilder)

@@ -13,8 +13,16 @@ data class MobileEventDetails(
   val startLocationY: Float,
   val eventStatus: EventStatus,
   val eventType: EventType,
-  val finishedAt: LocalDateTime? = null,
-  val allowOfflineTracking: Boolean? = null,
+  val finishedAt: LocalDateTime?,
+  val allowOfflineTracking: Boolean?,
+  val session: EventSession?,
+)
+
+data class EventSession(
+  val id: String,
+  val startedAt: LocalDateTime,
+  val userCanJoin: Boolean,
+  val finishedAt: LocalDateTime?,
 )
 
 enum class EventStatus {

@@ -24,7 +24,7 @@ class EventDetailsMapperImpl(
       is EventDetailsVM.State.Loading -> EventDetailsVM.ScreenData.Loading(
         onBackClick = params.onBackClick,
       )
-      is EventDetailsVM.State.Initialized -> EventDetailsVM.ScreenData.Main(
+      is EventDetailsVM.State.Initialized.InitializedAlreadyJoined -> EventDetailsVM.ScreenData.MainWithSession(
         onBackClick = params.onBackClick,
         event = params.state.event,
         topAppBarData = TopAppBarData.Back(onNavigationIconClick = params.onBackClick),
@@ -34,8 +34,26 @@ class EventDetailsMapperImpl(
         ),
         map = bitmapReader.decode(encoded = params.state.event.map.imageData),
         playButtonData = when (params.state.event.eventStatus) {
-          EventStatus.CONTINUOUS,
-          EventStatus.PLANNED -> LargeButtonData.Primary(
+          EventStatus.IN_PROGRESS,
+          EventStatus.CONTINUOUS -> LargeButtonData.Primary(
+            text = "Kontynuuj",
+            onClick = params.onPlayClick,
+          )
+          EventStatus.PLANNED,
+          EventStatus.COMPLETED -> null
+        }.takeIf { params.state.event.session?.userCanJoin == true }
+      )
+      is EventDetailsVM.State.Initialized.InitializedNotJoined -> EventDetailsVM.ScreenData.MainWithSession(
+        onBackClick = params.onBackClick,
+        event = params.state.event,
+        topAppBarData = TopAppBarData.Back(onNavigationIconClick = params.onBackClick),
+        startDateTime = dateFormatter.format(
+          dateTime = params.state.event.startDate,
+          format = DateFormatter.Format.DATE_TIME,
+        ),
+        map = bitmapReader.decode(encoded = params.state.event.map.imageData),
+        playButtonData = when (params.state.event.eventStatus) {
+          EventStatus.CONTINUOUS -> LargeButtonData.Primary(
             text = "Zagraj",
             onClick = params.onPlayClick,
           )
@@ -43,8 +61,19 @@ class EventDetailsMapperImpl(
             text = "Dołącz",
             onClick = params.onPlayClick,
           )
+          EventStatus.PLANNED,
           EventStatus.COMPLETED -> null
-        }
+        }.takeIf { params.state.event.session?.userCanJoin == true }
+      )
+      is EventDetailsVM.State.Initialized.InitializedNoSession -> EventDetailsVM.ScreenData.MainNoSession(
+        onBackClick = params.onBackClick,
+        event = params.state.event,
+        topAppBarData = TopAppBarData.Back(onNavigationIconClick = params.onBackClick),
+        startDateTime = dateFormatter.format(
+          dateTime = params.state.event.startDate,
+          format = DateFormatter.Format.DATE_TIME,
+        ),
+        map = bitmapReader.decode(encoded = params.state.event.map.imageData),
       )
     }
 }
