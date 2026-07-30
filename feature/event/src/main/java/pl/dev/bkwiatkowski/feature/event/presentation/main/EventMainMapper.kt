@@ -15,7 +15,7 @@ class EventMainMapperImpl : EventMainMapper {
       is EventMainVM.State.Initial -> EventMainVM.ScreenData.Loading
       is EventMainVM.State.Active -> EventMainVM.ScreenData.Main(
         onBackClick = params.onBackClick,
-        title = params.state.title,
+        title = "tytul"
       )
     }
 }

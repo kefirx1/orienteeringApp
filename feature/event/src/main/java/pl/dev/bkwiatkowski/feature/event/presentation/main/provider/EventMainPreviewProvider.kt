@@ -12,7 +12,7 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
   override val values: Sequence<EventMainVM> = sequenceOf(
     object : EventMainVM {
       override val screenData = MutableStateFlow(
-        value = mapper(params = getMapperParams(state = EventMainVM.State.Active(title = "Events"))),
+        value = mapper(params = getMapperParams(state = EventMainVM.State.Active)),
       )
     }
   )

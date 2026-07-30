@@ -28,6 +28,8 @@ import pl.dev.bkwiatkowski.common.network.CallMediator
 import pl.dev.bkwiatkowski.common.network.CallMediatorImpl
 import pl.dev.bkwiatkowski.common.network.HttpClientFactory
 import pl.dev.bkwiatkowski.common.network.HttpClientFactoryImpl
+import pl.dev.bkwiatkowski.common.network.WebSocketManager
+import pl.dev.bkwiatkowski.common.network.WebSocketManagerImpl
 import pl.dev.bkwiatkowski.common.network.RefreshTokenHandler
 import pl.dev.bkwiatkowski.common.security.CryptoManagerImpl
 import pl.dev.bkwiatkowski.common.security.MasterKeyDataStore
@@ -93,6 +95,16 @@ object CommonModule {
     sessionRepository: SessionRepository,
   ): RefreshTokenHandler = RefreshTokenHandlerImpl(
     sessionRepository = sessionRepository,
+  )
+
+  @Provides
+  @Singleton
+  fun provideWebSocketManager(
+    environmentConfig: EnvironmentConfig,
+    httpClientFactory: HttpClientFactory,
+  ): WebSocketManager = WebSocketManagerImpl(
+    environmentConfig = environmentConfig,
+    httpClientFactory = httpClientFactory,
   )
 
   @Provides

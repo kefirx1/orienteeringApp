@@ -8,6 +8,7 @@ import pl.dev.bkwiatkowski.technical.backend.data.MobileSettingsResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileSignInRequestDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileSignInResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileSignUpRequestDto
+import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitDto
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMobileMap
@@ -18,6 +19,7 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSettingsResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInRequest
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignUpRequest
+import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisit
 
 object BackendMapper {
 
@@ -105,5 +107,11 @@ object BackendMapper {
       startedAt = startedAt,
       finishedAt = finishedAt,
       userCanJoin = userCanJoin,
+    )
+
+  fun WebsocketWaypointVisit.toDto(): WebsocketWaypointVisitDto =
+    WebsocketWaypointVisitDto(
+      waypointId = waypointId,
+      visitedAt = visitedAt,
     )
 }

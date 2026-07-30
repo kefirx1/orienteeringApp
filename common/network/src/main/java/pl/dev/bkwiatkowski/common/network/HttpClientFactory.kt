@@ -2,6 +2,7 @@ package pl.dev.bkwiatkowski.common.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
+import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
@@ -11,6 +12,7 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.resources.Resources
+import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.encodedPath
@@ -26,6 +28,7 @@ import pl.dev.bkwiatkowski.common.network.serialization.LocalDateTimeSerializer
 
 interface HttpClientFactory {
   fun create(): HttpClient
+  fun createWebSocketClient(): HttpClient
 }
 
 class HttpClientFactoryImpl(
@@ -45,11 +48,41 @@ class HttpClientFactoryImpl(
     }
 
     val baseUrl = environmentConfig.baseUrl
+    return buildClient(
+      installWebSockets = false,
+      jsonBuilder = jsonBuilder,
+      baseUrl = baseUrl,
+    )
+  }
 
-    return HttpClient(engineFactory = Android) {
+  override fun createWebSocketClient(): HttpClient {
+    val jsonBuilder = Json {
+      encodeDefaults = true
+      prettyPrint = true
+      isLenient = true
+      ignoreUnknownKeys = true
+      serializersModule = SerializersModule {
+        contextual(LocalDateTimeSerializer)
+      }
+    }
+
+    val baseUrl = environmentConfig.baseUrl
+
+    return buildClient(
+      installWebSockets = true,
+      jsonBuilder = jsonBuilder,
+      baseUrl = baseUrl,
+    )
+  }
+
+  private fun buildClient(installWebSockets: Boolean, jsonBuilder: Json, baseUrl: String): HttpClient {
+    return HttpClient(engineFactory = OkHttp) {
       defaultRequest {
         url(urlString = baseUrl)
         contentType(ContentType.Application.Json)
+      }
+      if (installWebSockets) {
+        install(WebSockets)
       }
       install(plugin = Auth) {
         bearer {

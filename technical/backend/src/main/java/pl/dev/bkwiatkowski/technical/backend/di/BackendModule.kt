@@ -6,12 +6,16 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import pl.dev.bkwiatkowski.common.network.CallMediator
 import pl.dev.bkwiatkowski.common.network.HttpClientFactory
+import pl.dev.bkwiatkowski.common.network.WebSocketManager
+import pl.dev.bkwiatkowski.common.core.storage.JsonSerializer
 import pl.dev.bkwiatkowski.technical.backend.data.repository.BackendAuthenticationRepositoryImpl
 import pl.dev.bkwiatkowski.technical.backend.data.repository.BackendSettingsRepositoryImpl
 import pl.dev.bkwiatkowski.technical.backend.data.repository.BackendEventsRepositoryImpl
+import pl.dev.bkwiatkowski.technical.backend.data.repository.SessionWebSocketRepositoryImpl
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendAuthenticationRepository
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendSettingsRepository
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepository
+import pl.dev.bkwiatkowski.technical.backend.domain.repository.SessionWebSocketRepository
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetMobileSettingsUC
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetMobileSettingsUCImpl
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.RegisterUserUC
@@ -73,5 +77,15 @@ object BackendModule {
     backendSettingsRepository: BackendSettingsRepository,
   ): GetMobileSettingsUC = GetMobileSettingsUCImpl(
     backendSettingsRepository = backendSettingsRepository,
+  )
+
+  @Provides
+  @Singleton
+  fun provideSessionWebSocketRepository(
+    webSocketManager: WebSocketManager,
+    jsonSerializer: JsonSerializer,
+  ): SessionWebSocketRepository = SessionWebSocketRepositoryImpl(
+    webSocketManager = webSocketManager,
+    jsonSerializer = jsonSerializer,
   )
 }

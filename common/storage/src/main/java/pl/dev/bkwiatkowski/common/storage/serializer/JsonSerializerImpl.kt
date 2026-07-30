@@ -2,6 +2,8 @@ package pl.dev.bkwiatkowski.common.storage.serializer
 
 import java.lang.reflect.Type
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.contextual
 import kotlinx.serialization.serializer
 import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.storage.JsonSerializer
@@ -10,6 +12,10 @@ import pl.dev.bkwiatkowski.common.core.usecase.either
 
 class JsonSerializerImpl : JsonSerializer {
   private val json = Json {
+    serializersModule = SerializersModule {
+      contextual(LocalDateTimeSerializer)
+      contextual(LocalDateSerializer)
+    }
     ignoreUnknownKeys = true
     encodeDefaults = true
     isLenient = true
