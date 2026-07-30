@@ -6,6 +6,8 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
@@ -16,9 +18,20 @@ import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteracto
 import java.time.LocalDateTime
 
 interface EventMainVM {
+  data class StateData(
+    val currentTab: CurrentTab,
+  ) {
+    enum class CurrentTab {
+      MAP,
+      GAME,
+    }
+  }
+
   sealed interface State {
     data object Initial : State
-    data object Active : State
+    data class Active(
+      val stateData: StateData,
+    ) : State
   }
 
   sealed interface Action {
@@ -26,6 +39,13 @@ interface EventMainVM {
       data object Back : Navigation
     }
 
+    sealed interface NestedNavigation : Action {
+      data object GoToMap : NestedNavigation
+      data object GoToGame : NestedNavigation
+    }
+
+    data object GoToMap : Action
+    data object GoToGame : Action
     data object Back : Action
   }
 
@@ -38,8 +58,17 @@ interface EventMainVM {
 
     data class Main(
       override val onBackClick: () -> Unit,
+      val onOpenMapClick: () -> Unit,
+      val onOpenGameClick: () -> Unit,
       val title: String,
-    ) : ScreenData
+      val currentTab: StateData.CurrentTab,
+      val tabs: List<TabData>,
+    ) : ScreenData {
+      data class TabData(
+        val title: String,
+        val onClick: () -> Unit,
+      )
+    }
   }
 
   data class SetupData(
@@ -47,6 +76,11 @@ interface EventMainVM {
     val sessionUuid: String,
   )
 
+  fun onMapClick()
+  fun onGameClick()
+  fun onBackClick()
+
+  val nestedNavAction: SharedFlow<Action.NestedNavigation>
   val screenData: StateFlow<ScreenData>
 }
 
@@ -61,6 +95,10 @@ class EventMainVMImpl @AssistedInject constructor(
 ), EventMainVM {
 
   override val screenData: StateFlow<EventMainVM.ScreenData> = _screenData
+
+  private val _nestedNavAction: MutableSharedFlow<EventMainVM.Action.NestedNavigation> = MutableSharedFlow()
+  override val nestedNavAction: SharedFlow<EventMainVM.Action.NestedNavigation>
+    get() = _nestedNavAction
 
   @AssistedFactory
   interface Factory : CustomViewModelFactory<EventMainVM.SetupData, EventMainVMImpl>
@@ -84,6 +122,24 @@ class EventMainVMImpl @AssistedInject constructor(
             eventBackendInteractor.closeSession()
             EventMainVM.Action.Navigation.Back.emit()
           }
+          is EventMainVM.Action.GoToMap -> {
+            if (currentState.stateData.currentTab == EventMainVM.StateData.CurrentTab.MAP) return@launch
+            EventMainVM.State.Active(
+              stateData = currentState.stateData.copy(
+                currentTab = EventMainVM.StateData.CurrentTab.MAP,
+              )
+            ).mutate()
+            _nestedNavAction.emit(value = EventMainVM.Action.NestedNavigation.GoToMap)
+          }
+          is EventMainVM.Action.GoToGame -> {
+            if (currentState.stateData.currentTab == EventMainVM.StateData.CurrentTab.GAME) return@launch
+            EventMainVM.State.Active(
+              stateData = currentState.stateData.copy(
+                currentTab = EventMainVM.StateData.CurrentTab.GAME,
+              )
+            ).mutate()
+            _nestedNavAction.emit(value = EventMainVM.Action.NestedNavigation.GoToGame)
+          }
           else -> {}
         }
       }
@@ -96,7 +152,11 @@ class EventMainVMImpl @AssistedInject constructor(
         either {
           runWithLoaderUC {
             eventBackendInteractor.openSession(sessionUuid = setupData.sessionUuid).getRight()
-            EventMainVM.State.Active.override()
+            EventMainVM.State.Active(
+              stateData = EventMainVM.StateData(
+                currentTab = EventMainVM.StateData.CurrentTab.MAP,
+              )
+            ).override()
           }
         }.onLeft { error ->
           // todo handle error
@@ -108,24 +168,28 @@ class EventMainVMImpl @AssistedInject constructor(
             println(event)
           }
         }
-
-        viewModelScope.launch {
-          while (true) {
-            delay(2000)
-            eventBackendInteractor.sendMessage(
-              waypointId = 1,
-              visitedAt = LocalDateTime.now(),
-            )
-          }
-        }
       }
     }
+  }
+
+  override fun onGameClick() {
+    dispatchAction(EventMainVM.Action.GoToGame)
+  }
+
+  override fun onMapClick() {
+    dispatchAction(EventMainVM.Action.GoToMap)
+  }
+
+  override fun onBackClick() {
+    dispatchAction(EventMainVM.Action.Back)
   }
 
   override fun mapScreenData(): EventMainVM.ScreenData = mapper(
     params = EventMainMapper.Params(
       state = state.value,
       onBackClick = { dispatchAction(EventMainVM.Action.Back) },
+      onOpenMapClick = { dispatchAction(EventMainVM.Action.GoToMap) },
+      onOpenGameClick = { dispatchAction(EventMainVM.Action.GoToGame) },
     ),
   )
 

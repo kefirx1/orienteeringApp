@@ -10,6 +10,12 @@ sealed interface EventDestination : Destination {
 
   @Serializable
   data object EventMain : EventDestination
+
+  @Serializable
+  data object EventMap : EventDestination
+
+  @Serializable
+  data object EventGame : EventDestination
 }
 
 sealed interface EventResult {

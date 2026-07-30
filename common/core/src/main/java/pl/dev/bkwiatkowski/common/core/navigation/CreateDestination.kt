@@ -18,8 +18,7 @@ sealed interface DestinationType {
 @Composable
 inline fun <reified CVM: ContractViewModel> rememberContractViewModel(navController: AppNavController): CVM {
   val currentBackStackEntry = navController.navController.currentBackStackEntry
-  val parentGraphRoute = currentBackStackEntry?.destination?.parent?.route
-    ?: throw IllegalStateException("Parent graph not found")
+  val parentGraphRoute = currentBackStackEntry?.destination?.parent?.route ?: return hiltViewModel()
 
   val parentEntry = remember(currentBackStackEntry) {
     navController.navController.getBackStackEntry(parentGraphRoute)

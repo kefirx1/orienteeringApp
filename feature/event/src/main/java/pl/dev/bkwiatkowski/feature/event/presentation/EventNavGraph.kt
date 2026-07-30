@@ -22,7 +22,16 @@ fun NavGraphBuilder.eventNavGraph(
       graphInitContract = appContractVM,
       destination = EventDestination.EventMain,
       navController = navController,
-      content = { viewModel -> EventMainScreen(viewModel = viewModel) },
+      content = { viewModel ->
+        EventMainScreen(
+          viewModel = viewModel,
+          nestedContent = {
+            MainNestedNavGraph(
+              mainVM = viewModel,
+            )
+          },
+        )
+      },
       navActionHandler = { action, contractViewModel ->
         when (action) {
           is EventMainVM.Action.Navigation.Back -> onResult(EventResult.Back)
@@ -31,5 +40,3 @@ fun NavGraphBuilder.eventNavGraph(
     )
   }
 }
-
-
