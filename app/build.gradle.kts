@@ -77,6 +77,7 @@ dependencies {
   implementation(libs.ktor.auth)
   implementation(libs.ktor.resources)
   implementation(platform(libs.firebase.bom))
+  implementation(libs.play.services.location)
 
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)
@@ -98,6 +99,8 @@ dependencies {
   implementation(project(":common:core"))
   implementation(project(":common:ui"))
   implementation(project(":common:loader"))
+  implementation(project(":common:localization"))
+  implementation(project(":common:permissions"))
   implementation(project(":common:activityconnector"))
   implementation(project(":common:storage"))
   implementation(project(":common:network"))

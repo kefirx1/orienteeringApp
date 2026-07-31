@@ -27,7 +27,9 @@
             <option value="$PROJECT_DIR$/common/activityconnector" />
             <option value="$PROJECT_DIR$/common/core" />
             <option value="$PROJECT_DIR$/common/loader" />
+            <option value="$PROJECT_DIR$/common/localization" />
             <option value="$PROJECT_DIR$/common/network" />
+            <option value="$PROJECT_DIR$/common/permissions" />
             <option value="$PROJECT_DIR$/common/security" />
             <option value="$PROJECT_DIR$/common/storage" />
             <option value="$PROJECT_DIR$/common/time" />

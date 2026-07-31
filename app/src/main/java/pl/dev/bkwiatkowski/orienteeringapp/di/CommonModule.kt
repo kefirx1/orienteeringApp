@@ -1,6 +1,8 @@
 package pl.dev.bkwiatkowski.orienteeringapp.di
 
 import android.content.Context
+import com.google.android.gms.location.LocationServices
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -8,6 +10,7 @@ import dagger.hilt.components.SingletonComponent
 import pl.dev.bkwiatkowski.common.activityconnector.ActivityConnector
 import pl.dev.bkwiatkowski.common.core.config.EnvironmentConfig
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
+import pl.dev.bkwiatkowski.common.core.localization.GpsManager
 import pl.dev.bkwiatkowski.common.core.network.SessionManager
 import pl.dev.bkwiatkowski.common.core.security.CryptoManager
 import pl.dev.bkwiatkowski.common.core.security.generator.AesKeyGenerator
@@ -18,19 +21,25 @@ import pl.dev.bkwiatkowski.common.core.storage.Base64Coder
 import pl.dev.bkwiatkowski.common.core.storage.JsonSerializer
 import pl.dev.bkwiatkowski.common.core.storage.provider.DataStoreProvider
 import pl.dev.bkwiatkowski.common.core.storage.provider.DatabaseProvider
+import pl.dev.bkwiatkowski.common.core.time.DateFormatter
 import pl.dev.bkwiatkowski.common.core.validators.DateValidator
 import pl.dev.bkwiatkowski.common.core.validators.TextValidator
-import pl.dev.bkwiatkowski.common.core.time.DateFormatter
 import pl.dev.bkwiatkowski.common.loader.LoaderManager
 import pl.dev.bkwiatkowski.common.loader.LoaderManagerImpl
 import pl.dev.bkwiatkowski.common.loader.domain.RunWithLoaderUCImpl
+import pl.dev.bkwiatkowski.common.localization.GpsManagerImpl
 import pl.dev.bkwiatkowski.common.network.CallMediator
 import pl.dev.bkwiatkowski.common.network.CallMediatorImpl
 import pl.dev.bkwiatkowski.common.network.HttpClientFactory
 import pl.dev.bkwiatkowski.common.network.HttpClientFactoryImpl
+import pl.dev.bkwiatkowski.common.network.RefreshTokenHandler
 import pl.dev.bkwiatkowski.common.network.WebSocketManager
 import pl.dev.bkwiatkowski.common.network.WebSocketManagerImpl
-import pl.dev.bkwiatkowski.common.network.RefreshTokenHandler
+import pl.dev.bkwiatkowski.common.permission.AppPermissionMapper
+import pl.dev.bkwiatkowski.common.permission.AppPermissionMapperImpl
+import pl.dev.bkwiatkowski.common.permission.PermissionManagerImpl
+import pl.dev.bkwiatkowski.common.permission.PermissionsActivityConnector
+import pl.dev.bkwiatkowski.common.permission.PermissionsManager
 import pl.dev.bkwiatkowski.common.security.CryptoManagerImpl
 import pl.dev.bkwiatkowski.common.security.MasterKeyDataStore
 import pl.dev.bkwiatkowski.common.security.generator.AesKeyGeneratorImpl
@@ -41,17 +50,17 @@ import pl.dev.bkwiatkowski.common.storage.coder.Base64CoderImpl
 import pl.dev.bkwiatkowski.common.storage.provider.DataStoreProviderImpl
 import pl.dev.bkwiatkowski.common.storage.provider.DatabaseProviderImpl
 import pl.dev.bkwiatkowski.common.storage.serializer.JsonSerializerImpl
+import pl.dev.bkwiatkowski.common.time.DateFormatterImpl
+import pl.dev.bkwiatkowski.common.ui.image.BitmapReader
+import pl.dev.bkwiatkowski.common.ui.image.BitmapReaderImpl
 import pl.dev.bkwiatkowski.common.validators.DateValidatorImpl
 import pl.dev.bkwiatkowski.common.validators.TextValidatorImpl
-import pl.dev.bkwiatkowski.common.time.DateFormatterImpl
 import pl.dev.bkwiatkowski.orienteeringapp.config.EnvironmentConfigImpl
 import pl.dev.bkwiatkowski.orienteeringapp.core.lifecycle.ActivityConnectorImpl
 import pl.dev.bkwiatkowski.orienteeringapp.core.network.RefreshTokenHandlerImpl
 import pl.dev.bkwiatkowski.orienteeringapp.core.network.SessionManagerImpl
 import pl.dev.bkwiatkowski.technical.user.data.datastore.MasterKeyCacheDataStore
 import pl.dev.bkwiatkowski.technical.user.domain.repository.SessionRepository
-import pl.dev.bkwiatkowski.common.ui.image.BitmapReader
-import pl.dev.bkwiatkowski.common.ui.image.BitmapReaderImpl
 import javax.inject.Singleton
 
 @Module
@@ -75,7 +84,11 @@ object CommonModule {
 
   @Provides
   @Singleton
-  fun provideActivityConnector(): ActivityConnector = ActivityConnectorImpl()
+  fun provideActivityConnector(
+    permissionsActivityConnector: PermissionsActivityConnector,
+  ): ActivityConnector = ActivityConnectorImpl(
+    permissionsActivityConnector = permissionsActivityConnector,
+  )
 
   @Provides
   @Singleton
@@ -199,4 +212,39 @@ object CommonModule {
   ): CallMediator = CallMediatorImpl(
     jsonSerializer = jsonSerializer,
   )
+
+  @Provides
+  @Singleton
+  fun provideGpsManager(
+    context: Context,
+  ): GpsManager = GpsManagerImpl(
+    context = context,
+    locationProvider = LocationServices.getFusedLocationProviderClient(context),
+  )
+
+  @Provides
+  fun provideAppPermissionMapper(): AppPermissionMapper = AppPermissionMapperImpl()
+
+  @Provides
+  @Singleton
+  fun providePermissionsManager(
+    appPermissionMapper: AppPermissionMapper,
+  ) = PermissionManagerImpl(
+    appPermissionMapper = appPermissionMapper,
+  )
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class CommonBinder {
+
+  @Binds
+  abstract fun bindPermissionsManager(
+    permissionManagerImpl: PermissionManagerImpl,
+  ): PermissionsManager
+
+  @Binds
+  abstract fun bindPermissionsActivityConnector(
+    permissionManagerImpl: PermissionManagerImpl,
+  ): PermissionsActivityConnector
 }
