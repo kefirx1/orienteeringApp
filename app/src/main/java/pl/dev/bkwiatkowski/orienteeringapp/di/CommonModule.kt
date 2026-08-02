@@ -35,6 +35,9 @@ import pl.dev.bkwiatkowski.common.network.HttpClientFactoryImpl
 import pl.dev.bkwiatkowski.common.network.RefreshTokenHandler
 import pl.dev.bkwiatkowski.common.network.WebSocketManager
 import pl.dev.bkwiatkowski.common.network.WebSocketManagerImpl
+import pl.dev.bkwiatkowski.common.camera.CameraActivityConnector
+import pl.dev.bkwiatkowski.common.camera.CameraManager
+import pl.dev.bkwiatkowski.common.camera.CameraManagerImpl
 import pl.dev.bkwiatkowski.common.permission.AppPermissionMapper
 import pl.dev.bkwiatkowski.common.permission.AppPermissionMapperImpl
 import pl.dev.bkwiatkowski.common.permission.PermissionManagerImpl
@@ -86,8 +89,10 @@ object CommonModule {
   @Singleton
   fun provideActivityConnector(
     permissionsActivityConnector: PermissionsActivityConnector,
+    cameraActivityConnector: CameraActivityConnector,
   ): ActivityConnector = ActivityConnectorImpl(
     permissionsActivityConnector = permissionsActivityConnector,
+    cameraActivityConnector = cameraActivityConnector,
   )
 
   @Provides
@@ -232,6 +237,14 @@ object CommonModule {
   ) = PermissionManagerImpl(
     appPermissionMapper = appPermissionMapper,
   )
+
+  @Provides
+  @Singleton
+  fun provideCameraManager(
+    context: Context,
+  ): CameraManager = CameraManagerImpl(
+    context = context,
+  )
 }
 
 @Module
@@ -247,4 +260,9 @@ abstract class CommonBinder {
   abstract fun bindPermissionsActivityConnector(
     permissionManagerImpl: PermissionManagerImpl,
   ): PermissionsActivityConnector
+
+  @Binds
+  abstract fun bindCameraActivityConnector(
+    cameraManagerImpl: CameraManagerImpl,
+  ): CameraActivityConnector
 }

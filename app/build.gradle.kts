@@ -102,6 +102,7 @@ dependencies {
   implementation(project(":common:localization"))
   implementation(project(":common:permissions"))
   implementation(project(":common:activityconnector"))
+  implementation(project(":common:camera"))
   implementation(project(":common:storage"))
   implementation(project(":common:network"))
   implementation(project(":common:security"))
