@@ -27,6 +27,7 @@
             <option value="$PROJECT_DIR$/common/activityconnector" />
             <option value="$PROJECT_DIR$/common/camera" />
             <option value="$PROJECT_DIR$/common/core" />
+            <option value="$PROJECT_DIR$/common/intents" />
             <option value="$PROJECT_DIR$/common/loader" />
             <option value="$PROJECT_DIR$/common/localization" />
             <option value="$PROJECT_DIR$/common/network" />

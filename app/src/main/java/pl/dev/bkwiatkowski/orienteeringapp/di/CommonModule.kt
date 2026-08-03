@@ -8,7 +8,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import pl.dev.bkwiatkowski.common.activityconnector.ActivityConnector
+import pl.dev.bkwiatkowski.common.camera.CameraActivityConnector
+import pl.dev.bkwiatkowski.common.camera.CameraManager
+import pl.dev.bkwiatkowski.common.camera.CameraManagerImpl
 import pl.dev.bkwiatkowski.common.core.config.EnvironmentConfig
+import pl.dev.bkwiatkowski.common.core.intents.OpenAppSettingsIntentUC
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.localization.GpsManager
 import pl.dev.bkwiatkowski.common.core.network.SessionManager
@@ -24,6 +28,10 @@ import pl.dev.bkwiatkowski.common.core.storage.provider.DatabaseProvider
 import pl.dev.bkwiatkowski.common.core.time.DateFormatter
 import pl.dev.bkwiatkowski.common.core.validators.DateValidator
 import pl.dev.bkwiatkowski.common.core.validators.TextValidator
+import pl.dev.bkwiatkowski.common.intents.IntentsActivityConnector
+import pl.dev.bkwiatkowski.common.intents.IntentsManager
+import pl.dev.bkwiatkowski.common.intents.IntentsManagerImpl
+import pl.dev.bkwiatkowski.common.intents.usecase.OpenAppSettingsIntentUCImpl
 import pl.dev.bkwiatkowski.common.loader.LoaderManager
 import pl.dev.bkwiatkowski.common.loader.LoaderManagerImpl
 import pl.dev.bkwiatkowski.common.loader.domain.RunWithLoaderUCImpl
@@ -35,9 +43,6 @@ import pl.dev.bkwiatkowski.common.network.HttpClientFactoryImpl
 import pl.dev.bkwiatkowski.common.network.RefreshTokenHandler
 import pl.dev.bkwiatkowski.common.network.WebSocketManager
 import pl.dev.bkwiatkowski.common.network.WebSocketManagerImpl
-import pl.dev.bkwiatkowski.common.camera.CameraActivityConnector
-import pl.dev.bkwiatkowski.common.camera.CameraManager
-import pl.dev.bkwiatkowski.common.camera.CameraManagerImpl
 import pl.dev.bkwiatkowski.common.permission.AppPermissionMapper
 import pl.dev.bkwiatkowski.common.permission.AppPermissionMapperImpl
 import pl.dev.bkwiatkowski.common.permission.PermissionManagerImpl
@@ -56,6 +61,8 @@ import pl.dev.bkwiatkowski.common.storage.serializer.JsonSerializerImpl
 import pl.dev.bkwiatkowski.common.time.DateFormatterImpl
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReader
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReaderImpl
+import pl.dev.bkwiatkowski.common.ui.snackbar.SnackbarHost
+import pl.dev.bkwiatkowski.common.ui.snackbar.SnackbarHostImpl
 import pl.dev.bkwiatkowski.common.validators.DateValidatorImpl
 import pl.dev.bkwiatkowski.common.validators.TextValidatorImpl
 import pl.dev.bkwiatkowski.orienteeringapp.config.EnvironmentConfigImpl
@@ -90,9 +97,11 @@ object CommonModule {
   fun provideActivityConnector(
     permissionsActivityConnector: PermissionsActivityConnector,
     cameraActivityConnector: CameraActivityConnector,
+    intentsActivityConnector: IntentsActivityConnector,
   ): ActivityConnector = ActivityConnectorImpl(
     permissionsActivityConnector = permissionsActivityConnector,
     cameraActivityConnector = cameraActivityConnector,
+    intentsActivityConnector = intentsActivityConnector,
   )
 
   @Provides
@@ -242,9 +251,23 @@ object CommonModule {
   @Singleton
   fun provideCameraManager(
     context: Context,
-  ): CameraManager = CameraManagerImpl(
+  ) = CameraManagerImpl(
     context = context,
   )
+
+  @Provides
+  @Singleton
+  fun provideIntentsManager() = IntentsManagerImpl()
+
+  @Provides
+  fun provideOpenAppSettingsIntentUC(
+    intentsManager: IntentsManager,
+  ): OpenAppSettingsIntentUC = OpenAppSettingsIntentUCImpl(
+    intentsManager = intentsManager,
+  )
+
+  @Provides
+  fun provideSnackbarHost() = SnackbarHostImpl()
 }
 
 @Module
@@ -265,4 +288,19 @@ abstract class CommonBinder {
   abstract fun bindCameraActivityConnector(
     cameraManagerImpl: CameraManagerImpl,
   ): CameraActivityConnector
+
+  @Binds
+  abstract fun bindCameraManager(
+    cameraManagerImpl: CameraManagerImpl,
+  ): CameraManager
+
+  @Binds
+  abstract fun bindIntentsActivityConnector(
+    intentsManagerImpl: IntentsManagerImpl,
+  ): IntentsActivityConnector
+
+  @Binds
+  abstract fun bindIntentsManager(
+    intentsManagerImpl: IntentsManagerImpl,
+  ): IntentsManager
 }

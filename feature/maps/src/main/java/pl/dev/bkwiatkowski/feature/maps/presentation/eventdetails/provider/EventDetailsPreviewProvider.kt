@@ -90,6 +90,7 @@ class EventDetailsPreviewProvider : ViewModelPreviewProvider<EventDetailsVM, Eve
               finishedAt = null
             )
           ),
+          deniedForever = false,
         ))),
       )
     },
@@ -126,5 +127,7 @@ class EventDetailsPreviewProvider : ViewModelPreviewProvider<EventDetailsVM, Eve
       state = state,
       onBackClick = {},
       onPlayClick = {},
+      onGoToSettingsClick = {},
+      snackbarHostState = mock.snackbarHost,
     )
 }

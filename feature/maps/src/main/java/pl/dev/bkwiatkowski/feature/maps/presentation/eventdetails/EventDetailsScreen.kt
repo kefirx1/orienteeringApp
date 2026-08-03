@@ -146,7 +146,8 @@ fun EventDetailsWithSessionScreenContent(
           LargeButton(buttonData = button)
         }
       }
-    }
+    },
+    snackbarHostState = data.snackbarHostState,
   )
 }
 

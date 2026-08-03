@@ -1,6 +1,7 @@
 package pl.dev.bkwiatkowski.common.ui.preview
 
 import android.graphics.BitmapFactory
+import androidx.compose.material3.SnackbarHostState
 import pl.dev.bkwiatkowski.common.core.time.DateFormatter
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReader
 import java.time.LocalDateTime
@@ -25,4 +26,6 @@ class MockProvider {
       return dateTime.format(formatter)
     }
   }
+
+  val snackbarHost = SnackbarHostState()
 }

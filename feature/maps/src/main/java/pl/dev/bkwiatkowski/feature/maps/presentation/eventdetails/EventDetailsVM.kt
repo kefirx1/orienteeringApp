@@ -1,6 +1,7 @@
 package pl.dev.bkwiatkowski.feature.maps.presentation.eventdetails
 
 import android.graphics.Bitmap
+import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -8,12 +9,19 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import pl.dev.bkwiatkowski.common.core.intents.OpenAppSettingsIntentUC
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
+import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
+import pl.dev.bkwiatkowski.common.permission.AppPermission
+import pl.dev.bkwiatkowski.common.permission.PermissionResult
+import pl.dev.bkwiatkowski.common.permission.PermissionsManager
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
+import pl.dev.bkwiatkowski.common.ui.snackbar.SnackbarHost
+import pl.dev.bkwiatkowski.common.ui.snackbar.SnackbarHostImpl
 import pl.dev.bkwiatkowski.feature.maps.domain.interactor.MapsBackendInteractor
 import pl.dev.bkwiatkowski.feature.maps.domain.model.EventSession
 import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileEventDetails
@@ -30,6 +38,7 @@ interface EventDetailsVM {
       data class InitializedNotJoined(
         val event: MobileEventDetails,
         val session: EventSession,
+        val deniedForever: Boolean,
       ) : Initialized
 
       data class InitializedAlreadyJoined(
@@ -49,6 +58,9 @@ interface EventDetailsVM {
     }
 
     data object Back : Action
+    data object ShowLocationPermissionDeniedSnackbar : Action
+    data object SetDeniedForeverLocationPermission : Action
+    data object OpenAppSettings : Action
     data object ToEventSession : Action
   }
 
@@ -57,6 +69,7 @@ interface EventDetailsVM {
 
     data class MainWithSession(
       override val onBackClick: () -> Unit,
+      val snackbarHostState: SnackbarHostState,
       val event: MobileEventDetails,
       val topAppBarData: TopAppBarData,
       val startDateTime: String,
@@ -89,10 +102,13 @@ class EventDetailsVMImpl @AssistedInject constructor(
   @Assisted private val setupData: EventDetailsVM.SetupData,
   private val mapper: EventDetailsMapper,
   private val mapsBackendInteractor: MapsBackendInteractor,
+  private val permissionsManager: PermissionsManager,
   private val runWithLoaderUC: RunWithLoaderUC,
+  private val openAppSettingsIntentUC: OpenAppSettingsIntentUC,
+  snackbarHost: SnackbarHostImpl,
 ) : CustomViewModel<EventDetailsVM.State, EventDetailsVM.ScreenData, EventDetailsVM.Action.Navigation>(
   initialStateValue = EventDetailsVM.State.Loading,
-), EventDetailsVM {
+), EventDetailsVM, SnackbarHost by snackbarHost {
 
   override val screenData: StateFlow<EventDetailsVM.ScreenData> = _screenData
 
@@ -129,6 +145,8 @@ class EventDetailsVMImpl @AssistedInject constructor(
             EventDetailsVM.Action.Navigation.Back.emit()
           }
           is EventDetailsVM.Action.ToEventSession -> {
+            if (!ensureLocationPermission()) return@launch
+
             mapsBackendInteractor.joinEventSession(
               sessionUuid = currentState.session.id,
             ).fold(
@@ -142,6 +160,17 @@ class EventDetailsVMImpl @AssistedInject constructor(
                 //TODO handle error
               }
             )
+          }
+          is EventDetailsVM.Action.ShowLocationPermissionDeniedSnackbar -> {
+            snackbarHost.showSnackbar(
+              message = "Zgoda na lokalizację jest wymagana",
+            )
+          }
+          is EventDetailsVM.Action.SetDeniedForeverLocationPermission -> {
+            currentState.copy(deniedForever = true).mutate()
+          }
+          is EventDetailsVM.Action.OpenAppSettings -> {
+            openAppSettingsIntentUC(UseCase.Params.Empty)
           }
           else -> {}
         }
@@ -183,6 +212,7 @@ class EventDetailsVMImpl @AssistedInject constructor(
                 EventDetailsVM.State.Initialized.InitializedNotJoined(
                   event = details,
                   session = details.session,
+                  deniedForever = false,
                 ).override()
               }
             }
@@ -198,8 +228,29 @@ class EventDetailsVMImpl @AssistedInject constructor(
   override fun mapScreenData(): EventDetailsVM.ScreenData = mapper(
     params = EventDetailsMapper.Params(
       state = state.value,
+      snackbarHostState = snackbarHost,
       onBackClick = { dispatchAction(EventDetailsVM.Action.Back) },
       onPlayClick = { dispatchAction(EventDetailsVM.Action.ToEventSession) },
+      onGoToSettingsClick = { dispatchAction(EventDetailsVM.Action.OpenAppSettings) }
     ),
   )
+
+  private suspend fun ensureLocationPermission(): Boolean {
+    val result = permissionsManager.requestPermission(
+      permission = AppPermission.LOCATION,
+    )
+
+    return when (result) {
+      is PermissionResult.Granted -> true
+      is PermissionResult.Denied -> {
+        dispatchAction(EventDetailsVM.Action.ShowLocationPermissionDeniedSnackbar)
+        false
+      }
+      is PermissionResult.DeniedForever -> {
+        dispatchAction(EventDetailsVM.Action.ShowLocationPermissionDeniedSnackbar)
+        dispatchAction(EventDetailsVM.Action.SetDeniedForeverLocationPermission)
+        false
+      }
+    }
+  }
 }

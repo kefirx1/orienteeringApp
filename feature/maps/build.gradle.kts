@@ -45,4 +45,5 @@ dependencies {
 
   implementation(project(":common:core"))
   implementation(project(":common:ui"))
+  implementation(project(":common:permissions"))
 }

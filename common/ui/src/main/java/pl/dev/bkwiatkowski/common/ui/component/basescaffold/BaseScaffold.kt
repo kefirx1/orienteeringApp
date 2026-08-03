@@ -9,15 +9,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,10 +46,16 @@ fun BaseScaffold(
   bottomBar: @Composable () -> Unit = {},
   fabData: FabData? = null,
   content: @Composable () -> Unit,
+  snackbarHostState: SnackbarHostState? = null,
 ) {
   Scaffold(
     modifier = modifier.imePadding(),
     contentWindowInsets = WindowInsets.navigationBars,
+    snackbarHost = {
+      snackbarHostState?.let {
+        SnackbarHost(hostState = it)
+      }
+    },
     topBar = {
       topBarData?.let {
         Row(
