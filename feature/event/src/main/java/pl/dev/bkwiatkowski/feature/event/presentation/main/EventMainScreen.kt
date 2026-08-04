@@ -1,10 +1,13 @@
 package pl.dev.bkwiatkowski.feature.event.presentation.main
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
@@ -12,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -55,25 +59,27 @@ fun EventMainScreenContent(
   }
 
   BaseScaffold(
+    topBarData = data.topAppBarData,
     content = {
       Column(
         modifier = Modifier
           .fillMaxSize(),
       ) {
         SecondaryTabRow(
+          containerColor = MaterialTheme.colorScheme.background,
           modifier = Modifier.fillMaxWidth(),
           selectedTabIndex = data.currentTab.ordinal,
         ) {
           data.tabs.forEachIndexed { index, tab ->
             Tab(
-              modifier = Modifier
-                .padding(top = 16.dp),
               selected = data.currentTab.ordinal == index,
               onClick = tab.onClick,
               text = {
                 CustomText(
                   text = tab.title,
-                  style = MaterialTheme.typography.titleLarge,
+                  style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.SemiBold,
+                  ),
                 )
               },
             )

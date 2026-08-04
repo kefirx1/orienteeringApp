@@ -4,6 +4,7 @@ import pl.dev.bkwiatkowski.common.core.location.Position
 import pl.dev.bkwiatkowski.common.core.usecase.Mapper
 import pl.dev.bkwiatkowski.common.ui.component.map.MapComponentData
 import pl.dev.bkwiatkowski.common.ui.component.map.MarkerData
+import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileEventListDetails
 
 interface EventsMapMapper : Mapper<EventsMapMapper.Params, EventsMapVM.ScreenData> {
@@ -24,6 +25,9 @@ class EventsMapMapperImpl : EventsMapMapper {
       is EventsMapVM.State.Initialized -> {
         EventsMapVM.ScreenData.Main(
           onBackClick = params.onBackClick,
+          barData = TopAppBarData.Back(
+            onNavigationIconClick = params.onBackClick,
+          ),
           mapComponentData = MapComponentData(
             markers = params.state.events?.events?.map { event ->
               event.getMarkerData(onEventClick = params.onEventDetailsClick)

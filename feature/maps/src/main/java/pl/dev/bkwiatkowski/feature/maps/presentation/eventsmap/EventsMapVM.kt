@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.ui.component.map.MapComponentData
+import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.feature.maps.domain.interactor.MapsBackendInteractor
 import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileEvents
 import javax.inject.Inject
@@ -38,6 +39,7 @@ interface EventsMapVM {
 
     data class Main(
       override val onBackClick: () -> Unit,
+      val barData: TopAppBarData,
       val mapComponentData: MapComponentData,
     ) : ScreenData
 

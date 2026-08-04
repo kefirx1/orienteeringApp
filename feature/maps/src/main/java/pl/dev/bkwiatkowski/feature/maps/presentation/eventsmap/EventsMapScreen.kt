@@ -31,6 +31,7 @@ fun EventsMapsScreenContent(
   data: EventsMapVM.ScreenData.Main,
 ) {
   BaseScaffold(
+    topBarData = data.barData,
     content = {
       MapComponent(
         data = data.mapComponentData

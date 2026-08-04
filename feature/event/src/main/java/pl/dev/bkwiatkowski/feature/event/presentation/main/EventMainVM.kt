@@ -13,6 +13,7 @@ import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
+import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 
@@ -60,7 +61,7 @@ interface EventMainVM {
       override val onBackClick: () -> Unit,
       val onOpenMapClick: () -> Unit,
       val onOpenGameClick: () -> Unit,
-      val title: String,
+      val topAppBarData: TopAppBarData,
       val currentTab: StateData.CurrentTab,
       val tabs: List<TabData>,
     ) : ScreenData {

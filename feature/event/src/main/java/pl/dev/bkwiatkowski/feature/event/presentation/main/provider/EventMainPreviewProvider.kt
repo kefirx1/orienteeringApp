@@ -9,6 +9,7 @@ import pl.dev.bkwiatkowski.feature.event.domain.model.EventStatus
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventType
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileMap
+import pl.dev.bkwiatkowski.feature.event.presentation.main.EventMainContract
 import pl.dev.bkwiatkowski.feature.event.presentation.main.EventMainMapper
 import pl.dev.bkwiatkowski.feature.event.presentation.main.EventMainMapperImpl
 import pl.dev.bkwiatkowski.feature.event.presentation.main.EventMainVM
@@ -22,6 +23,7 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
       override fun onBackClick() = Unit
       override fun onGameClick() = Unit
       override fun onMapClick() = Unit
+      override fun setupContract(contract: EventMainContract) = Unit
 
       override val nestedNavAction: SharedFlow<EventMainVM.Action.NestedNavigation> =
         MutableSharedFlow()

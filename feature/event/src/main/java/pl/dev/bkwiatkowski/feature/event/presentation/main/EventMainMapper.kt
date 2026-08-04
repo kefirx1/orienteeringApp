@@ -1,6 +1,7 @@
 package pl.dev.bkwiatkowski.feature.event.presentation.main
 
 import pl.dev.bkwiatkowski.common.core.usecase.Mapper
+import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 
 interface EventMainMapper : Mapper<EventMainMapper.Params, EventMainVM.ScreenData> {
   data class Params(
@@ -19,8 +20,10 @@ class EventMainMapperImpl : EventMainMapper {
         onBackClick = params.onBackClick,
         onOpenMapClick = params.onOpenMapClick,
         onOpenGameClick = params.onOpenGameClick,
-        title = "tytul",
         currentTab = params.state.stateData.currentTab,
+        topAppBarData = TopAppBarData.Back(
+          onNavigationIconClick = params.onBackClick,
+        ),
         tabs = listOf(
           EventMainVM.ScreenData.Main.TabData(
             title = "Mapa",
