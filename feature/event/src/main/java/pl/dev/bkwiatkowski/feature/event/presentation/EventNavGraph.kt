@@ -1,5 +1,6 @@
 package pl.dev.bkwiatkowski.feature.event.presentation
 
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.navigation
 import pl.dev.bkwiatkowski.common.core.navigation.AppNavController
@@ -23,11 +24,15 @@ fun NavGraphBuilder.eventNavGraph(
       destination = EventDestination.EventMain,
       navController = navController,
       content = { viewModel ->
+        val shared = hiltViewModel<EventSharedVM>()
+        viewModel.setupContract(contract = shared)
+
         EventMainScreen(
           viewModel = viewModel,
           nestedContent = {
             MainNestedNavGraph(
               mainVM = viewModel,
+              shared = shared,
             )
           },
         )

@@ -5,7 +5,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,11 +14,12 @@ import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
-import java.time.LocalDateTime
+import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 
 interface EventMainVM {
   data class StateData(
     val currentTab: CurrentTab,
+    val details: MobileEventDetails,
   ) {
     enum class CurrentTab {
       MAP,
@@ -40,8 +40,8 @@ interface EventMainVM {
     }
 
     sealed interface NestedNavigation : Action {
-      data object GoToMap : NestedNavigation
-      data object GoToGame : NestedNavigation
+      data class GoToMap(val details: MobileEventDetails) : NestedNavigation
+      data class GoToGame(val details: MobileEventDetails) : NestedNavigation
     }
 
     data object GoToMap : Action
@@ -72,13 +72,14 @@ interface EventMainVM {
   }
 
   data class SetupData(
-    val eventId: String,
+    val eventId: Int,
     val sessionUuid: String,
   )
 
   fun onMapClick()
   fun onGameClick()
   fun onBackClick()
+  fun setupContract(contract: EventMainContract)
 
   val nestedNavAction: SharedFlow<Action.NestedNavigation>
   val screenData: StateFlow<ScreenData>
@@ -93,12 +94,13 @@ class EventMainVMImpl @AssistedInject constructor(
 ) : CustomViewModel<EventMainVM.State, EventMainVM.ScreenData, EventMainVM.Action.Navigation>(
   initialStateValue = EventMainVM.State.Initial,
 ), EventMainVM {
-
   override val screenData: StateFlow<EventMainVM.ScreenData> = _screenData
 
   private val _nestedNavAction: MutableSharedFlow<EventMainVM.Action.NestedNavigation> = MutableSharedFlow()
   override val nestedNavAction: SharedFlow<EventMainVM.Action.NestedNavigation>
     get() = _nestedNavAction
+
+  private lateinit var contract: EventMainContract
 
   @AssistedFactory
   interface Factory : CustomViewModelFactory<EventMainVM.SetupData, EventMainVMImpl>
@@ -129,7 +131,9 @@ class EventMainVMImpl @AssistedInject constructor(
                 currentTab = EventMainVM.StateData.CurrentTab.MAP,
               )
             ).mutate()
-            _nestedNavAction.emit(value = EventMainVM.Action.NestedNavigation.GoToMap)
+            _nestedNavAction.emit(
+              value = EventMainVM.Action.NestedNavigation.GoToMap(details = currentState.stateData.details),
+            )
           }
           is EventMainVM.Action.GoToGame -> {
             if (currentState.stateData.currentTab == EventMainVM.StateData.CurrentTab.GAME) return@launch
@@ -138,7 +142,9 @@ class EventMainVMImpl @AssistedInject constructor(
                 currentTab = EventMainVM.StateData.CurrentTab.GAME,
               )
             ).mutate()
-            _nestedNavAction.emit(value = EventMainVM.Action.NestedNavigation.GoToGame)
+            _nestedNavAction.emit(
+              value = EventMainVM.Action.NestedNavigation.GoToGame(details = currentState.stateData.details),
+            )
           }
           else -> {}
         }
@@ -151,10 +157,16 @@ class EventMainVMImpl @AssistedInject constructor(
       is EventMainVM.State.Initial -> {
         either {
           runWithLoaderUC {
+            val details = eventBackendInteractor.getMobileEventDetails(
+              eventId = setupData.eventId,
+            ).getRight()
+            contract.setEventDetails(eventDetails = details)
+
             eventBackendInteractor.openSession(sessionUuid = setupData.sessionUuid).getRight()
             EventMainVM.State.Active(
               stateData = EventMainVM.StateData(
                 currentTab = EventMainVM.StateData.CurrentTab.MAP,
+                details = details,
               )
             ).override()
           }
@@ -170,6 +182,10 @@ class EventMainVMImpl @AssistedInject constructor(
         }
       }
     }
+  }
+
+  override fun setupContract(contract: EventMainContract) {
+    this.contract = contract
   }
 
   override fun onGameClick() {

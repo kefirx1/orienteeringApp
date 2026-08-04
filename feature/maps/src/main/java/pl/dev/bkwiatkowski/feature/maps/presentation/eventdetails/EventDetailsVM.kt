@@ -52,7 +52,7 @@ interface EventDetailsVM {
     sealed interface Navigation : Action {
       data object Back : Navigation
       data class ToEventSession(
-        val eventId: String,
+        val eventId: Int,
         val sessionUuid: String,
       ) : Navigation
     }
@@ -134,7 +134,7 @@ class EventDetailsVMImpl @AssistedInject constructor(
           }
           is EventDetailsVM.Action.ToEventSession -> {
             EventDetailsVM.Action.Navigation.ToEventSession(
-              eventId = currentState.event.id.toString(),
+              eventId = currentState.event.id,
               sessionUuid = currentState.session.id,
             ).emit()
           }
@@ -152,7 +152,7 @@ class EventDetailsVMImpl @AssistedInject constructor(
             ).fold(
               onRight = {
                 EventDetailsVM.Action.Navigation.ToEventSession(
-                  eventId = currentState.event.id.toString(),
+                  eventId = currentState.event.id,
                   sessionUuid = currentState.session.id,
                 ).emit()
               },

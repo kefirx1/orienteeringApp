@@ -27,11 +27,12 @@ inline fun <reified CVM: ContractViewModel> rememberContractViewModel(navControl
   return hiltViewModel(parentEntry)
 }
 
-inline fun <CONTRACT: Any?, reified CVM: ContractViewModel, reified VM: CustomViewModel<*, *, NAV>, NAV> NavGraphBuilder.createDestination(
+inline fun <CONTRACT, reified CVM: ContractViewModel, reified VM: CustomViewModel<*, *, NAV>, NAV> NavGraphBuilder.createDestination(
   destination: Destination,
   destinationType: DestinationType = DestinationType.Screen,
   navController: AppNavController,
   graphInitContract: ContractViewModel? = null,
+  contract: CONTRACT? = null,
   noinline navActionHandler: (NAV, ContractViewModel) -> Unit = { _, _ -> },
   crossinline content: @Composable (VM) -> Unit
 ) {
@@ -49,7 +50,7 @@ inline fun <CONTRACT: Any?, reified CVM: ContractViewModel, reified VM: CustomVi
           )
         }
       }
-      val setupData = sharedViewModel.retrieveData<CONTRACT>(destination = destination)
+      val setupData = contract ?: sharedViewModel.retrieveData(destination = destination)
 
       val viewModel = if (setupData != null) {
         hiltViewModel(
@@ -78,7 +79,7 @@ inline fun <CONTRACT: Any?, reified CVM: ContractViewModel, reified VM: CustomVi
           )
         }
       }
-      val setupData = sharedViewModel.retrieveData<CONTRACT>(destination = destination)
+      val setupData = contract ?: sharedViewModel.retrieveData(destination = destination)
 
       val viewModel = if (setupData != null) {
         hiltViewModel(

@@ -1,11 +1,14 @@
 package pl.dev.bkwiatkowski.feature.event.presentation.map
 
 import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
-import javax.inject.Inject
+import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
 
 interface EventMapVM {
   sealed interface State {
@@ -32,12 +35,16 @@ interface EventMapVM {
   val screenData: StateFlow<ScreenData>
 }
 
-@HiltViewModel
-class EventMapVMImpl @Inject constructor(
+@HiltViewModel(assistedFactory = EventMapVMImpl.Factory::class)
+class EventMapVMImpl @AssistedInject constructor(
+  @Assisted private val contract: EventMapContract,
   private val mapper: EventMapMapper,
 ) : CustomViewModel<EventMapVM.State, EventMapVM.ScreenData, EventMapVM.Action.Navigation>(
   initialStateValue = EventMapVM.State.Active,
 ), EventMapVM {
+
+  @AssistedFactory
+  interface Factory : CustomViewModelFactory<EventMapContract, EventMapVMImpl>
 
   override val screenData: StateFlow<EventMapVM.ScreenData> = _screenData
 

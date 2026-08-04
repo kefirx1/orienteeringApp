@@ -19,6 +19,6 @@ sealed interface MapsResult {
   data object Back : MapsResult
   data class ToEventSession(
     val sessionUuid: String,
-    val eventId: String,
+    val eventId: Int,
   ) : MapsResult
 }

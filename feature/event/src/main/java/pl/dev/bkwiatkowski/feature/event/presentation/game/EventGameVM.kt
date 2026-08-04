@@ -1,11 +1,14 @@
 package pl.dev.bkwiatkowski.feature.event.presentation.game
 
 import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
-import javax.inject.Inject
+import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
 
 interface EventGameVM {
   sealed interface State {
@@ -32,12 +35,16 @@ interface EventGameVM {
   val screenData: StateFlow<ScreenData>
 }
 
-@HiltViewModel
-class EventGameVMImpl @Inject constructor(
+@HiltViewModel(assistedFactory = EventGameVMImpl.Factory::class)
+class EventGameVMImpl @AssistedInject constructor(
+  @Assisted private val contract: EventGameContract,
   private val mapper: EventGameMapper,
 ) : CustomViewModel<EventGameVM.State, EventGameVM.ScreenData, EventGameVM.Action.Navigation>(
   initialStateValue = EventGameVM.State.Active,
 ), EventGameVM {
+
+  @AssistedFactory
+  interface Factory : CustomViewModelFactory<EventGameContract, EventGameVMImpl>
 
   override val screenData: StateFlow<EventGameVM.ScreenData> = _screenData
 
@@ -58,7 +65,6 @@ class EventGameVMImpl @Inject constructor(
 
   override suspend fun onStateEnter(newState: EventGameVM.State) {
     when (newState) {
-
       is EventGameVM.State.Active -> {}
     }
   }

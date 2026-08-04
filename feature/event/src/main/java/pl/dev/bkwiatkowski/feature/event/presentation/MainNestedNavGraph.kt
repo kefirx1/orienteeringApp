@@ -17,6 +17,7 @@ import pl.dev.bkwiatkowski.feature.event.presentation.map.EventMapVMImpl
 @Composable
 fun MainNestedNavGraph(
   mainVM: EventMainVM,
+  shared: EventShared,
 ) {
   val navController = AppNavController(
     navController = rememberNavController(),
@@ -25,14 +26,17 @@ fun MainNestedNavGraph(
   LaunchedEffect(Unit) {
     mainVM.nestedNavAction.collect { action ->
       when (action) {
-        is EventMainVM.Action.NestedNavigation.GoToMap -> navController.navigate(
-          destination = EventDestination.EventMap,
-        )
-        is EventMainVM.Action.NestedNavigation.GoToGame -> navController.navigate(
-          destination = EventDestination.EventGame,
-        )
+        is EventMainVM.Action.NestedNavigation.GoToMap -> {
+          navController.navigate(
+            destination = EventDestination.EventMap,
+          )
+        }
+        is EventMainVM.Action.NestedNavigation.GoToGame -> {
+          navController.navigate(
+            destination = EventDestination.EventGame,
+          )
+        }
       }
-
     }
   }
 
@@ -40,9 +44,10 @@ fun MainNestedNavGraph(
     navController = navController.navController,
     startDestination = EventDestination.EventMap.route,
   ) {
-    createDestination<Nothing, EventContractVM, EventMapVMImpl, EventMapVM.Action.Navigation>(
+    createDestination<EventShared, EventContractVM, EventMapVMImpl, EventMapVM.Action.Navigation>(
       destination = EventDestination.EventMap,
       navController = navController,
+      contract = shared,
       content = { viewModel -> EventMapScreen(viewModel = viewModel) },
       navActionHandler = { action, contractViewModel ->
         when (action) {
@@ -51,9 +56,10 @@ fun MainNestedNavGraph(
       }
     )
 
-    createDestination<Nothing, EventContractVM, EventGameVMImpl, EventGameVM.Action.Navigation>(
+    createDestination<EventShared, EventContractVM, EventGameVMImpl, EventGameVM.Action.Navigation>(
       destination = EventDestination.EventGame,
       navController = navController,
+      contract = shared,
       content = { viewModel -> EventGameScreen(viewModel = viewModel) },
       navActionHandler = { action, contractViewModel ->
         when (action) {
