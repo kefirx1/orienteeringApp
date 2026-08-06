@@ -63,6 +63,42 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
           ),
         ),
       )
+    },
+    object : EventMainVM {
+      override fun onBackClick() = Unit
+      override fun onGameClick() = Unit
+      override fun onMapClick() = Unit
+      override fun setupContract(contract: EventMainContract) = Unit
+
+      override val nestedNavAction: SharedFlow<EventMainVM.Action.NestedNavigation> =
+        MutableSharedFlow()
+      override val screenData = MutableStateFlow(
+        value = mapper(
+          params = getMapperParams(
+            state = EventMainVM.State.PermissionDenied(
+              isDeniedForever = false,
+            ),
+          ),
+        ),
+      )
+    },
+    object : EventMainVM {
+      override fun onBackClick() = Unit
+      override fun onGameClick() = Unit
+      override fun onMapClick() = Unit
+      override fun setupContract(contract: EventMainContract) = Unit
+
+      override val nestedNavAction: SharedFlow<EventMainVM.Action.NestedNavigation> =
+        MutableSharedFlow()
+      override val screenData = MutableStateFlow(
+        value = mapper(
+          params = getMapperParams(
+            state = EventMainVM.State.PermissionDenied(
+              isDeniedForever = true,
+            ),
+          ),
+        ),
+      )
     }
   )
 
@@ -72,5 +108,7 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
       onBackClick = {},
       onOpenMapClick = {},
       onOpenGameClick = {},
+      onOpenSettingsClick = {},
+      onRequestPermissionClick = {},
     )
 }

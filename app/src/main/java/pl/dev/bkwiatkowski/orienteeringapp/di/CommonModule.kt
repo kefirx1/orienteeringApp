@@ -32,6 +32,9 @@ import pl.dev.bkwiatkowski.common.intents.IntentsActivityConnector
 import pl.dev.bkwiatkowski.common.intents.IntentsManager
 import pl.dev.bkwiatkowski.common.intents.IntentsManagerImpl
 import pl.dev.bkwiatkowski.common.intents.usecase.OpenAppSettingsIntentUCImpl
+import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitor
+import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitorActivityConnector
+import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitorImpl
 import pl.dev.bkwiatkowski.common.loader.LoaderManager
 import pl.dev.bkwiatkowski.common.loader.LoaderManagerImpl
 import pl.dev.bkwiatkowski.common.loader.domain.RunWithLoaderUCImpl
@@ -61,7 +64,6 @@ import pl.dev.bkwiatkowski.common.storage.serializer.JsonSerializerImpl
 import pl.dev.bkwiatkowski.common.time.DateFormatterImpl
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReader
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReaderImpl
-import pl.dev.bkwiatkowski.common.ui.snackbar.SnackbarHost
 import pl.dev.bkwiatkowski.common.ui.snackbar.SnackbarHostImpl
 import pl.dev.bkwiatkowski.common.validators.DateValidatorImpl
 import pl.dev.bkwiatkowski.common.validators.TextValidatorImpl
@@ -98,10 +100,12 @@ object CommonModule {
     permissionsActivityConnector: PermissionsActivityConnector,
     cameraActivityConnector: CameraActivityConnector,
     intentsActivityConnector: IntentsActivityConnector,
+    lifecycleMonitorActivityConnector: LifecycleMonitorActivityConnector,
   ): ActivityConnector = ActivityConnectorImpl(
     permissionsActivityConnector = permissionsActivityConnector,
     cameraActivityConnector = cameraActivityConnector,
     intentsActivityConnector = intentsActivityConnector,
+    lifecycleMonitorActivityConnector = lifecycleMonitorActivityConnector,
   )
 
   @Provides
@@ -268,6 +272,10 @@ object CommonModule {
 
   @Provides
   fun provideSnackbarHost() = SnackbarHostImpl()
+
+  @Provides
+  @Singleton
+  fun provideLifecycleMonitor() = LifecycleMonitorImpl()
 }
 
 @Module
@@ -303,4 +311,14 @@ abstract class CommonBinder {
   abstract fun bindIntentsManager(
     intentsManagerImpl: IntentsManagerImpl,
   ): IntentsManager
+
+  @Binds
+  abstract fun bindLifecycleActivityConnector(
+    lifecycleMonitorImpl: LifecycleMonitorImpl,
+  ): LifecycleMonitorActivityConnector
+
+  @Binds
+  abstract fun bindLifecycleMonitor(
+    lifecycleMonitorImpl: LifecycleMonitorImpl,
+  ): LifecycleMonitor
 }

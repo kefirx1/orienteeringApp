@@ -109,4 +109,5 @@ dependencies {
   implementation(project(":common:validators"))
   implementation(project(":common:time"))
   implementation(project(":common:intents"))
+  implementation(project(":common:lifecycle"))
 }

@@ -1,13 +1,10 @@
 plugins {
   alias(libs.plugins.android.library)
   alias(libs.plugins.kotlin.compose)
-  alias(libs.plugins.kotlin.serialization)
-  alias(libs.plugins.dagger)
-  alias(libs.plugins.kotlin.ksp)
 }
 
 android {
-  namespace = "pl.dev.bkwiatkowski.feature.event"
+  namespace = "pl.dev.bkwiatkowski.common.lifecycle"
   compileSdk {
     version = release(37)
   }
@@ -27,24 +24,15 @@ android {
 
 dependencies {
   implementation(libs.androidx.core.ktx)
-  implementation(libs.kotlinx.serialization)
+  implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.activity.compose)
   implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.compose.ui)
   implementation(libs.androidx.compose.ui.graphics)
   implementation(libs.androidx.compose.ui.tooling.preview)
-  implementation(libs.androidx.navigation.compose)
-  implementation(libs.androidx.hilt.navigation.compose)
   implementation(libs.androidx.compose.material3)
-  implementation(libs.dagger.hilt)
-  ksp(libs.dagger.hilt.compiler)
-
-  testImplementation(libs.junit)
-  androidTestImplementation(libs.androidx.espresso.core)
-  androidTestImplementation(libs.androidx.junit)
+  implementation(libs.androidx.appcompat)
 
   implementation(project(":common:core"))
-  implementation(project(":common:ui"))
-  implementation(project(":common:permissions"))
-  implementation(project(":common:lifecycle"))
+  implementation(project(":common:activityconnector"))
 }

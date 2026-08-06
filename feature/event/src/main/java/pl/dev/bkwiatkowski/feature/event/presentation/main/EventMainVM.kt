@@ -1,5 +1,8 @@
 package pl.dev.bkwiatkowski.feature.event.presentation.main
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -9,10 +12,19 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import pl.dev.bkwiatkowski.common.core.intents.OpenAppSettingsIntentUC
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
+import pl.dev.bkwiatkowski.common.core.localization.GpsManager
+import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
+import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitor
+import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitorImpl
+import pl.dev.bkwiatkowski.common.permission.AppPermission
+import pl.dev.bkwiatkowski.common.permission.PermissionResult
+import pl.dev.bkwiatkowski.common.permission.PermissionsManager
+import pl.dev.bkwiatkowski.common.ui.component.permissions.PermissionRequesterData
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
@@ -30,6 +42,9 @@ interface EventMainVM {
 
   sealed interface State {
     data object Initial : State
+    data class PermissionDenied(
+      val isDeniedForever: Boolean,
+    ) : State
     data class Active(
       val stateData: StateData,
     ) : State
@@ -45,6 +60,8 @@ interface EventMainVM {
       data class GoToGame(val details: MobileEventDetails) : NestedNavigation
     }
 
+    data object OpenAppSettings : Action
+    data object CheckPermission : Action
     data object GoToMap : Action
     data object GoToGame : Action
     data object Back : Action
@@ -53,9 +70,15 @@ interface EventMainVM {
   sealed interface ScreenData {
     val onBackClick: () -> Unit
 
-    data object Loading : ScreenData {
-      override val onBackClick: () -> Unit = {}
-    }
+    data class Loading(
+      override val onBackClick: () -> Unit
+    ) : ScreenData
+
+    data class PermissionDenied(
+      override val onBackClick: () -> Unit,
+      val topAppBarData: TopAppBarData,
+      val permissionRequesterData: PermissionRequesterData,
+    ) : ScreenData
 
     data class Main(
       override val onBackClick: () -> Unit,
@@ -84,6 +107,7 @@ interface EventMainVM {
 
   val nestedNavAction: SharedFlow<Action.NestedNavigation>
   val screenData: StateFlow<ScreenData>
+  var lifecycleOwner: LifecycleOwner
 }
 
 @HiltViewModel(assistedFactory = EventMainVMImpl.Factory::class)
@@ -92,9 +116,17 @@ class EventMainVMImpl @AssistedInject constructor(
   private val mapper: EventMainMapper,
   private val runWithLoaderUC: RunWithLoaderUC,
   private val eventBackendInteractor: EventBackendInteractor,
-) : CustomViewModel<EventMainVM.State, EventMainVM.ScreenData, EventMainVM.Action.Navigation>(
+  private val gpsManager: GpsManager,
+  private val permissionsManager: PermissionsManager,
+  private val openAppSettingsIntentUC: OpenAppSettingsIntentUC,
+  private val lifecycleMonitor: LifecycleMonitor,
+  lifecycleMonitorImpl: LifecycleMonitorImpl,
+  ) : CustomViewModel<EventMainVM.State, EventMainVM.ScreenData, EventMainVM.Action.Navigation>(
   initialStateValue = EventMainVM.State.Initial,
-), EventMainVM {
+), EventMainVM, LifecycleEventObserver by lifecycleMonitorImpl {
+
+  override lateinit var lifecycleOwner: LifecycleOwner
+
   override val screenData: StateFlow<EventMainVM.ScreenData> = _screenData
 
   private val _nestedNavAction: MutableSharedFlow<EventMainVM.Action.NestedNavigation> = MutableSharedFlow()
@@ -116,6 +148,31 @@ class EventMainVMImpl @AssistedInject constructor(
         is EventMainVM.State.Initial -> when (action) {
           is EventMainVM.Action.Back -> {
             EventMainVM.Action.Navigation.Back.emit()
+          }
+          else -> {}
+        }
+
+        is EventMainVM.State.PermissionDenied -> when (action) {
+          is EventMainVM.Action.Back -> {
+            EventMainVM.Action.Navigation.Back.emit()
+          }
+          is EventMainVM.Action.CheckPermission -> {
+            val result = permissionsManager.requestPermission(
+              permission = AppPermission.LOCATION,
+            )
+
+            when (result) {
+              is PermissionResult.Granted -> {
+                EventMainVM.State.Initial.override()
+              }
+              is PermissionResult.Denied -> {}
+              is PermissionResult.DeniedForever -> {
+                EventMainVM.State.PermissionDenied(isDeniedForever = true).mutate()
+              }
+            }
+          }
+          is EventMainVM.Action.OpenAppSettings -> {
+            openAppSettingsIntentUC(UseCase.Params.Empty)
           }
           else -> {}
         }
@@ -158,6 +215,8 @@ class EventMainVMImpl @AssistedInject constructor(
       is EventMainVM.State.Initial -> {
         either {
           runWithLoaderUC {
+            if (!ensureLocationPermission()) return@runWithLoaderUC
+
             val details = eventBackendInteractor.getMobileEventDetails(
               eventId = setupData.eventId,
             ).getRight()
@@ -175,7 +234,23 @@ class EventMainVMImpl @AssistedInject constructor(
           // todo handle error
         }
       }
+      is EventMainVM.State.PermissionDenied -> {
+        viewModelScope.launch {
+          lifecycleMonitor.monitor().collect { lifecycleState ->
+            if (lifecycleState == Lifecycle.Event.ON_RESUME) {
+              if (ensureLocationPermission()) {
+                EventMainVM.State.Initial.override()
+              }
+            }
+          }
+        }
+      }
       is EventMainVM.State.Active -> {
+        viewModelScope.launch {
+          gpsManager.getLocationFlow().collect { location ->
+            println("Location update: ${location.latitude}, ${location.longitude}")
+          }
+        }
         viewModelScope.launch {
           eventBackendInteractor.observeSession().collect { event ->
             println(event)
@@ -207,6 +282,8 @@ class EventMainVMImpl @AssistedInject constructor(
       onBackClick = { dispatchAction(EventMainVM.Action.Back) },
       onOpenMapClick = { dispatchAction(EventMainVM.Action.GoToMap) },
       onOpenGameClick = { dispatchAction(EventMainVM.Action.GoToGame) },
+      onRequestPermissionClick = { dispatchAction(EventMainVM.Action.CheckPermission) },
+      onOpenSettingsClick = { dispatchAction(EventMainVM.Action.OpenAppSettings) }
     ),
   )
 
@@ -215,6 +292,24 @@ class EventMainVMImpl @AssistedInject constructor(
 
     viewModelScope.launch {
       eventBackendInteractor.closeSession()
+    }
+  }
+
+  private suspend fun ensureLocationPermission(): Boolean {
+    val result = permissionsManager.requestPermission(
+      permission = AppPermission.LOCATION,
+    )
+
+    return when (result) {
+      is PermissionResult.Granted -> true
+      is PermissionResult.Denied -> {
+        EventMainVM.State.PermissionDenied(isDeniedForever = false).override()
+        false
+      }
+      is PermissionResult.DeniedForever -> {
+        EventMainVM.State.PermissionDenied(isDeniedForever = true).override()
+        false
+      }
     }
   }
 }

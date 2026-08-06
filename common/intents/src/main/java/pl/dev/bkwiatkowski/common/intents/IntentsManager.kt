@@ -12,7 +12,7 @@ interface IntentsManager {
   suspend fun startAppSettingsIntent()
 }
 
-class IntentsManagerImpl(): IntentsManager, IntentsActivityConnector {
+class IntentsManagerImpl : IntentsManager, IntentsActivityConnector {
   lateinit var activity: AppCompatActivity
 
   override suspend fun startAppSettingsIntent() {
