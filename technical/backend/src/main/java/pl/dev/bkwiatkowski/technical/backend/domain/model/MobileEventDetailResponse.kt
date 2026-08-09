@@ -15,6 +15,7 @@ data class MobileEventDetailResponse(
   val eventType: BEEventType,
   val finishedAt: LocalDateTime? = null,
   val allowOfflineTracking: Boolean? = null,
+  val eventWaypoints: List<BEMapWaypoint>,
   val session: EventSessionResponse? = null,
 )
 

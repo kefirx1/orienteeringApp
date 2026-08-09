@@ -1,5 +1,6 @@
 package pl.dev.bkwiatkowski.feature.event.domain.model
 
+import pl.dev.bkwiatkowski.common.core.location.Position
 import java.time.LocalDateTime
 
 data class MobileEventDetails(
@@ -16,6 +17,7 @@ data class MobileEventDetails(
   val finishedAt: LocalDateTime?,
   val allowOfflineTracking: Boolean?,
   val session: EventSession,
+  val eventWaypoints: List<MapWaypoint>,
 )
 
 data class EventSession(
@@ -42,7 +44,11 @@ data class MobileMap(
   val name: String,
   val description: String,
   val imageData: String,
+  val waypoints: List<MapWaypoint>,
 )
 
-
-
+data class MapWaypoint(
+  val id: Int,
+  val label: String,
+  val position: Position,
+)

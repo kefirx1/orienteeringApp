@@ -1,5 +1,6 @@
 package pl.dev.bkwiatkowski.feature.event.presentation.main.provider
 
+import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -25,6 +26,8 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
       override fun onMapClick() = Unit
       override fun setupContract(contract: EventMainContract) = Unit
 
+      override var lifecycleOwner: LifecycleOwner = mock.lifecycleOwner
+
       override val nestedNavAction: SharedFlow<EventMainVM.Action.NestedNavigation> =
         MutableSharedFlow()
       override val screenData = MutableStateFlow(
@@ -40,6 +43,7 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
                     name = "Test Map",
                     description = "Test Map Description",
                     imageData = "",
+                    waypoints = emptyList(),
                   ),
                   name = "Laski Arboretum",
                   description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt",
@@ -56,7 +60,8 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
                     startedAt = LocalDateTime.of(2026, 4, 30, 10, 0),
                     userCanJoin = true,
                     finishedAt = null
-                  )
+                  ),
+                  eventWaypoints = emptyList(),
                 ),
               ),
             ),
@@ -69,6 +74,8 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
       override fun onGameClick() = Unit
       override fun onMapClick() = Unit
       override fun setupContract(contract: EventMainContract) = Unit
+
+      override var lifecycleOwner: LifecycleOwner = mock.lifecycleOwner
 
       override val nestedNavAction: SharedFlow<EventMainVM.Action.NestedNavigation> =
         MutableSharedFlow()
@@ -87,6 +94,8 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
       override fun onGameClick() = Unit
       override fun onMapClick() = Unit
       override fun setupContract(contract: EventMainContract) = Unit
+
+      override var lifecycleOwner: LifecycleOwner = mock.lifecycleOwner
 
       override val nestedNavAction: SharedFlow<EventMainVM.Action.NestedNavigation> =
         MutableSharedFlow()

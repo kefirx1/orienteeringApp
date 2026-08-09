@@ -2,6 +2,9 @@ package pl.dev.bkwiatkowski.common.ui.preview
 
 import android.graphics.BitmapFactory
 import androidx.compose.material3.SnackbarHostState
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import pl.dev.bkwiatkowski.common.core.time.DateFormatter
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReader
 import java.time.LocalDateTime
@@ -28,4 +31,13 @@ class MockProvider {
   }
 
   val snackbarHost = SnackbarHostState()
+
+  val lifecycleOwner: LifecycleOwner = object : LifecycleOwner {
+    private val lifecycleRegistry = LifecycleRegistry(this).apply {
+      currentState = Lifecycle.State.RESUMED
+    }
+
+    override val lifecycle: Lifecycle
+      get() = lifecycleRegistry
+  }
 }

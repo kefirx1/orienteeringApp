@@ -1,6 +1,8 @@
 package pl.dev.bkwiatkowski.technical.backend.data.mapper
 
+import pl.dev.bkwiatkowski.common.core.location.Position
 import pl.dev.bkwiatkowski.technical.backend.data.EventSessionResponseDto
+import pl.dev.bkwiatkowski.technical.backend.data.MapWaypointDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileEventDetailResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileEventListResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileMapDto
@@ -11,6 +13,7 @@ import pl.dev.bkwiatkowski.technical.backend.data.MobileSignUpRequestDto
 import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitDto
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMapWaypoint
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMobileMap
 import pl.dev.bkwiatkowski.technical.backend.domain.model.EventSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
@@ -57,6 +60,7 @@ object BackendMapper {
       name = name,
       description = description,
       imageData = imageData,
+      waypoints = mapWaypoints?.map { it.toDomain() } ?: emptyList()
     )
 
   fun MobileEventListResponseDto.toDomain(): MobileEventListResponse =
@@ -99,6 +103,17 @@ object BackendMapper {
       finishedAt = finishedAt,
       allowOfflineTracking = allowOfflineTracking,
       session = session?.toDomain(),
+      eventWaypoints = eventWaypoints?.map { it.toDomain() } ?: emptyList()
+    )
+
+  fun MapWaypointDto.toDomain(): BEMapWaypoint =
+    BEMapWaypoint(
+      id = id,
+      label = label,
+      position = Position(
+        latitude =  coordinateY.toDouble(),
+        longitude = coordinateX.toDouble(),
+      ),
     )
 
   fun EventSessionResponseDto.toDomain(): EventSessionResponse =

@@ -1,5 +1,6 @@
 package pl.dev.bkwiatkowski.feature.event.presentation.main
 
+import android.location.Location
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -28,6 +29,7 @@ import pl.dev.bkwiatkowski.common.ui.component.permissions.PermissionRequesterDa
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.CompareUserLocationUC
 
 interface EventMainVM {
   data class StateData(
@@ -60,6 +62,9 @@ interface EventMainVM {
       data class GoToGame(val details: MobileEventDetails) : NestedNavigation
     }
 
+    data class CheckUserLocation(
+      val newLocation: Location,
+    ) : Action
     data object OpenAppSettings : Action
     data object CheckPermission : Action
     data object GoToMap : Action
@@ -120,6 +125,7 @@ class EventMainVMImpl @AssistedInject constructor(
   private val permissionsManager: PermissionsManager,
   private val openAppSettingsIntentUC: OpenAppSettingsIntentUC,
   private val lifecycleMonitor: LifecycleMonitor,
+  private val compareUserLocationUC: CompareUserLocationUC,
   lifecycleMonitorImpl: LifecycleMonitorImpl,
   ) : CustomViewModel<EventMainVM.State, EventMainVM.ScreenData, EventMainVM.Action.Navigation>(
   initialStateValue = EventMainVM.State.Initial,
@@ -204,6 +210,14 @@ class EventMainVMImpl @AssistedInject constructor(
               value = EventMainVM.Action.NestedNavigation.GoToGame(details = currentState.stateData.details),
             )
           }
+          is EventMainVM.Action.CheckUserLocation -> either {
+            val result = compareUserLocationUC(
+              params = CompareUserLocationUC.Params(
+                currentLocation = action.newLocation,
+                waypoints = currentState.stateData.details.eventWaypoints,
+              )
+            ).getRight()
+          }
           else -> {}
         }
       }
@@ -248,7 +262,9 @@ class EventMainVMImpl @AssistedInject constructor(
       is EventMainVM.State.Active -> {
         viewModelScope.launch {
           gpsManager.getLocationFlow().collect { location ->
-            println("Location update: ${location.latitude}, ${location.longitude}")
+            dispatchAction(
+              action = EventMainVM.Action.CheckUserLocation(newLocation = location),
+            )
           }
         }
         viewModelScope.launch {

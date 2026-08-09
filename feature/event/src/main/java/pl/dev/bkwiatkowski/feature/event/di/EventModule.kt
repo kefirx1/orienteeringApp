@@ -11,6 +11,8 @@ import pl.dev.bkwiatkowski.feature.event.presentation.map.EventMapMapperImpl
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReader
 import pl.dev.bkwiatkowski.feature.event.presentation.game.EventGameMapper
 import pl.dev.bkwiatkowski.feature.event.presentation.game.EventGameMapperImpl
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.CompareUserLocationUC
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.CompareUserLocationUCImpl
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -24,4 +26,7 @@ object EventModule {
 
   @Provides
   fun provideEventGameMapper(): EventGameMapper = EventGameMapperImpl()
+
+  @Provides
+  fun provideCompareUserLocationUC(): CompareUserLocationUC = CompareUserLocationUCImpl()
 }

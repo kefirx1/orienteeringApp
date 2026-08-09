@@ -1,6 +1,5 @@
 package pl.dev.bkwiatkowski.common.ui.preview
 
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import pl.dev.bkwiatkowski.common.core.usecase.Mapper
 

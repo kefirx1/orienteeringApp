@@ -8,12 +8,14 @@ import pl.dev.bkwiatkowski.feature.maps.domain.interactor.MapsBackendInteractor
 import pl.dev.bkwiatkowski.feature.maps.domain.model.EventSession
 import pl.dev.bkwiatkowski.feature.maps.domain.model.EventStatus
 import pl.dev.bkwiatkowski.feature.maps.domain.model.EventType
+import pl.dev.bkwiatkowski.feature.maps.domain.model.MapWaypoint
 import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileEventListDetails
 import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileEvents
 import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileMap
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMapWaypoint
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMobileMap
 import pl.dev.bkwiatkowski.technical.backend.domain.model.EventSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
@@ -54,6 +56,7 @@ object MapsSetupModule {
       name = name,
       description = description,
       imageData = imageData,
+      waypoints = waypoints.map { it.toFeature() },
     )
 
     fun BEEventType.toFeature(): EventType = when (this) {
@@ -95,7 +98,15 @@ object MapsSetupModule {
       finishedAt = finishedAt,
       allowOfflineTracking = allowOfflineTracking,
       session = session?.toFeature(),
+      eventWaypoints = eventWaypoints.map { it.toFeature() },
     )
+
+    fun BEMapWaypoint.toFeature(): MapWaypoint = MapWaypoint(
+      id = id,
+      label = label,
+      position = position,
+    )
+
 
     fun EventSessionResponse.toFeature(): EventSession = EventSession(
       id = id,

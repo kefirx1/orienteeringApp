@@ -5,4 +5,5 @@ data class BEMobileMap(
   val name: String,
   val description: String,
   val imageData: String,
+  val waypoints: List<BEMapWaypoint>,
 )

@@ -28,6 +28,7 @@ class EventMapPreviewProvider : ViewModelPreviewProvider<EventMapVM, EventMapVM.
                   name = "Test Map",
                   description = "Test Map Description",
                   imageData = "",
+                  waypoints = emptyList(),
                 ),
                 name = "Laski Arboretum",
                 description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt",
@@ -44,7 +45,8 @@ class EventMapPreviewProvider : ViewModelPreviewProvider<EventMapVM, EventMapVM.
                   startedAt = LocalDateTime.of(2026, 4, 30, 10, 0),
                   userCanJoin = true,
                   finishedAt = null
-                )
+                ),
+                eventWaypoints = emptyList(),
               ),
             ),
           ),

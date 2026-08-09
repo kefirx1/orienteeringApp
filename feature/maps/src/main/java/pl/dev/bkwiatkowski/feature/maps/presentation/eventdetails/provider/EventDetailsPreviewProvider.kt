@@ -35,6 +35,7 @@ class EventDetailsPreviewProvider : ViewModelPreviewProvider<EventDetailsVM, Eve
               name = "Test Map",
               description = "Test Map Description",
               imageData = "",
+              waypoints = emptyList(),
             ),
             name = "Laski Arboretum",
             description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt",
@@ -51,7 +52,8 @@ class EventDetailsPreviewProvider : ViewModelPreviewProvider<EventDetailsVM, Eve
               startedAt = LocalDateTime.of(2026, 4, 30, 10, 0),
               userCanJoin = true,
               finishedAt = null
-            )
+            ),
+            eventWaypoints = emptyList(),
           ),
         ))),
       )
@@ -72,6 +74,7 @@ class EventDetailsPreviewProvider : ViewModelPreviewProvider<EventDetailsVM, Eve
               name = "Test Map",
               description = "Test Map Description",
               imageData = "",
+              waypoints = emptyList(),
             ),
             name = "Laski Arboretum",
             description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt",
@@ -88,7 +91,8 @@ class EventDetailsPreviewProvider : ViewModelPreviewProvider<EventDetailsVM, Eve
               startedAt = LocalDateTime.of(2026, 4, 30, 10, 0),
               userCanJoin = true,
               finishedAt = null
-            )
+            ),
+            eventWaypoints = emptyList(),
           ),
           deniedForever = false,
         ))),
@@ -104,6 +108,7 @@ class EventDetailsPreviewProvider : ViewModelPreviewProvider<EventDetailsVM, Eve
               name = "Test Map",
               description = "Test Map Description",
               imageData = "",
+              waypoints = emptyList(),
             ),
             name = "Laski Arboretum",
             description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt",
@@ -115,7 +120,8 @@ class EventDetailsPreviewProvider : ViewModelPreviewProvider<EventDetailsVM, Eve
             eventType = EventType.ONLINE,
             finishedAt = null,
             allowOfflineTracking = true,
-            session = null
+            session = null,
+            eventWaypoints = emptyList(),
           ),
         ))),
       )

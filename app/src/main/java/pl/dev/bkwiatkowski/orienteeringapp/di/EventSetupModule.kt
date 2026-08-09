@@ -12,10 +12,12 @@ import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteracto
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventSession
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventStatus
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventType
+import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileMap
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMapWaypoint
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMobileMap
 import pl.dev.bkwiatkowski.technical.backend.domain.model.EventSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
@@ -75,6 +77,7 @@ object EventSetupModule {
         allowOfflineTracking = allowOfflineTracking,
         session = session?.toFeature()
           ?: raise(error = DomainError.Custom(IllegalStateException("Session is null"))),
+        eventWaypoints = eventWaypoints.map { it.toFeature() },
       )
     }
 
@@ -83,6 +86,13 @@ object EventSetupModule {
       name = name,
       description = description,
       imageData = imageData,
+      waypoints = waypoints.map { it.toFeature() }
+    )
+
+    fun BEMapWaypoint.toFeature(): MapWaypoint = MapWaypoint(
+      id = id,
+      label = label,
+      position = position,
     )
 
     fun BEEventType.toFeature(): EventType = when (this) {
