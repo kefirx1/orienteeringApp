@@ -1,10 +1,12 @@
 package pl.dev.bkwiatkowski.feature.login.presentation.dialog
 
+import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
 import pl.dev.bkwiatkowski.common.ui.component.dialog.DialogData
@@ -48,24 +50,30 @@ class AuthDialogVMImpl @AssistedInject constructor(
     AuthDialogVM.ScreenData(
       dialogData = setupData.copy(
         onDismiss = {
-          AuthDialogVM.Action.Navigation.OnDialogAction(
-            dialogAction = setupData.onDismiss
-          ).emit()
+          viewModelScope.launch {
+            AuthDialogVM.Action.Navigation.OnDialogAction(
+              dialogAction = setupData.onDismiss
+            ).emit()
+          }
         },
         onPrimaryButtonData = setupData.onPrimaryButtonData.copy(
           text = setupData.onPrimaryButtonData.text,
           onClick = {
-            AuthDialogVM.Action.Navigation.OnDialogAction(
-              dialogAction = setupData.onPrimaryButtonData.onClick,
-            ).emit()
+            viewModelScope.launch {
+              AuthDialogVM.Action.Navigation.OnDialogAction(
+                dialogAction = setupData.onPrimaryButtonData.onClick,
+              ).emit()
+            }
           }
         ),
         onSecondaryButtonData = setupData.onSecondaryButtonData?.copy(
           text = setupData.onSecondaryButtonData!!.text,
           onClick = {
-            AuthDialogVM.Action.Navigation.OnDialogAction(
-              dialogAction = setupData.onSecondaryButtonData!!.onClick,
-            ).emit()
+            viewModelScope.launch {
+              AuthDialogVM.Action.Navigation.OnDialogAction(
+                dialogAction = setupData.onSecondaryButtonData!!.onClick,
+              ).emit()
+            }
           }
         ),
       )

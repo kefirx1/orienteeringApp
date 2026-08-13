@@ -10,7 +10,7 @@ interface EventBackendInteractor {
   fun observeSession(): Flow<String>
   suspend fun openSession(sessionUuid: String): Either<DomainError, Unit>
   suspend fun closeSession(): Either<DomainError, Unit>
-  suspend fun sendMessage(
+  suspend fun confirmWaypoint(
     waypointId: Int,
     visitedAt: LocalDateTime,
   ): Either<DomainError, Unit>

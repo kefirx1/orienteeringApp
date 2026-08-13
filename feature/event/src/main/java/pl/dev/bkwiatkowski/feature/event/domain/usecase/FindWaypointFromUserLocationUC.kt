@@ -9,15 +9,15 @@ import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
 import kotlin.math.round
 
-interface CompareUserLocationUC : EitherUseCase<CompareUserLocationUC.Params, MapWaypoint?> {
+interface FindWaypointFromUserLocationUC : EitherUseCase<FindWaypointFromUserLocationUC.Params, MapWaypoint?> {
   data class Params(
     val currentLocation: Location,
     val waypoints: List<MapWaypoint>,
   ) : UseCase.Params
 }
 
-class CompareUserLocationUCImpl : CompareUserLocationUC {
-  override suspend fun invoke(params: CompareUserLocationUC.Params): Either<DomainError, MapWaypoint?> = either {
+class FindWaypointFromUserLocationUCImpl : FindWaypointFromUserLocationUC {
+  override suspend fun invoke(params: FindWaypointFromUserLocationUC.Params): Either<DomainError, MapWaypoint?> = either {
     fun Double.round4(): Double = round(this * 10000.0) / 10000.0
 
     val roundedUserLat = params.currentLocation.latitude.round4()

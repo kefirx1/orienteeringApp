@@ -1,6 +1,7 @@
 package pl.dev.bkwiatkowski.common.ui.component.map
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -61,6 +62,7 @@ fun MapComponent(
   val markersState = data.markers.map { marker ->
     rememberUpdatedMarkerState(position = LatLng(marker.position.latitude, marker.position.longitude))
   }
+  var isMapLoaded by remember { mutableStateOf(value = false) }
   var indexOfVisibleMarkerInfo by remember { mutableIntStateOf(value = -1) }
   var isInfoCardVisible by remember { mutableStateOf(value = false) }
 
@@ -72,6 +74,14 @@ fun MapComponent(
   }
 
   Box(modifier = Modifier.fillMaxSize()) {
+    if (!isMapLoaded) {
+      Box(
+        modifier = Modifier
+          .fillMaxSize()
+          .background(color = MaterialTheme.colorScheme.background)
+      )
+    }
+
     GoogleMap(
       modifier = Modifier.fillMaxSize(),
       cameraPositionState = cameraPositionState,
@@ -79,6 +89,9 @@ fun MapComponent(
       onMapClick = {
         isInfoCardVisible = false
       },
+      onMapLoaded = {
+        isMapLoaded = true
+      }
     ) {
       markersState.forEachIndexed { index, markerState ->
         Marker(

@@ -42,22 +42,18 @@ abstract class CustomViewModel<STATE, SCREEN_DATA, NAV_ACTION>(
   abstract fun mapScreenData(): SCREEN_DATA
 
 //  Use to change to new state
-  fun STATE.override() {
-    viewModelScope.launch {
-      stateAlreadyChanged = false
-      _state.emit(this@override)
-    }
+  suspend fun STATE.override() {
+    stateAlreadyChanged = false
+    _state.emit(this@override)
   }
 
 //  Use to update in current state
-  fun STATE.mutate() {
-    viewModelScope.launch {
-      stateAlreadyChanged = true
-      _state.emit(this@mutate)
-    }
+  suspend fun STATE.mutate() {
+    stateAlreadyChanged = true
+    _state.emit(this@mutate)
   }
 
-  fun NAV_ACTION.emit() = viewModelScope.launch {
+  suspend fun NAV_ACTION.emit() {
     navAction.emit(this@emit)
   }
 }

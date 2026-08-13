@@ -44,7 +44,7 @@ object EventSetupModule {
     override suspend fun closeSession(): Either<DomainError, Unit> =
       sessionWebSocketRepository.closeSession()
 
-    override suspend fun sendMessage(
+    override suspend fun confirmWaypoint(
       waypointId: Int,
       visitedAt: LocalDateTime,
     ): Either<DomainError, Unit> =

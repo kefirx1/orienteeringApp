@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.intents.OpenAppSettingsIntentUC
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.localization.GpsManager
+import pl.dev.bkwiatkowski.common.core.location.Position
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
@@ -29,7 +30,7 @@ import pl.dev.bkwiatkowski.common.ui.component.permissions.PermissionRequesterDa
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
-import pl.dev.bkwiatkowski.feature.event.domain.usecase.CompareUserLocationUC
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.FindWaypointFromUserLocationUC
 
 interface EventMainVM {
   data class StateData(
@@ -125,7 +126,7 @@ class EventMainVMImpl @AssistedInject constructor(
   private val permissionsManager: PermissionsManager,
   private val openAppSettingsIntentUC: OpenAppSettingsIntentUC,
   private val lifecycleMonitor: LifecycleMonitor,
-  private val compareUserLocationUC: CompareUserLocationUC,
+  private val findWaypointFromUserLocationUC: FindWaypointFromUserLocationUC,
   lifecycleMonitorImpl: LifecycleMonitorImpl,
   ) : CustomViewModel<EventMainVM.State, EventMainVM.ScreenData, EventMainVM.Action.Navigation>(
   initialStateValue = EventMainVM.State.Initial,
@@ -211,12 +212,21 @@ class EventMainVMImpl @AssistedInject constructor(
             )
           }
           is EventMainVM.Action.CheckUserLocation -> either {
-            val result = compareUserLocationUC(
-              params = CompareUserLocationUC.Params(
+            contract.setCurrentUserPosition(
+              position = Position(
+                latitude = action.newLocation.latitude,
+                longitude = action.newLocation.longitude,
+              ),
+            )
+
+            val result = findWaypointFromUserLocationUC(
+              params = FindWaypointFromUserLocationUC.Params(
                 currentLocation = action.newLocation,
                 waypoints = currentState.stateData.details.eventWaypoints,
               )
             ).getRight()
+
+            contract.setCurrentWaypoint(waypoint = result)
           }
           else -> {}
         }

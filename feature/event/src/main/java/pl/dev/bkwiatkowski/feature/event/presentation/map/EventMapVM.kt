@@ -1,6 +1,5 @@
 package pl.dev.bkwiatkowski.feature.event.presentation.map
 
-import android.graphics.Bitmap
 import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -8,16 +7,25 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import pl.dev.bkwiatkowski.common.camera.CameraManager
+import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
+import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.icon.ZoomImageData
+import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 
 interface EventMapVM {
   sealed interface State {
     data object Loading : State
-    data class Active(val eventDetails: MobileEventDetails) : State
+    data class Active(
+      val eventDetails: MobileEventDetails,
+      val currentWaypoint: MapWaypoint?,
+      val visitedWrongWaypoint: Boolean = false,
+      val nextWaypoint: MapWaypoint?,
+    ) : State
   }
 
   sealed interface Action {
@@ -26,6 +34,14 @@ interface EventMapVM {
     }
 
     data object Back : Action
+    data class UpdateCurrentWaypoint(
+      val waypoint: MapWaypoint?,
+      val wrongWaypoint: Boolean,
+    ) : Action
+    data class UpdateNextWaypoint(
+      val nextWaypoint: MapWaypoint?,
+    ) : Action
+    data object CheckWaypoint : Action
   }
 
   sealed interface ScreenData {
@@ -39,6 +55,9 @@ interface EventMapVM {
       override val onBackClick: () -> Unit,
       val title: String,
       val mapData: ZoomImageData?,
+      val nextWaypointLabel: String,
+      val wrongWaypointInfo: String?,
+      val checkWaypointButton: LargeButtonData.Primary?,
     ) : ScreenData
   }
 
@@ -49,6 +68,8 @@ interface EventMapVM {
 class EventMapVMImpl @AssistedInject constructor(
   @Assisted private val contract: EventMapContract,
   private val mapper: EventMapMapper,
+  private val cameraManager: CameraManager,
+  private val runWithLoaderUC: RunWithLoaderUC,
 ) : CustomViewModel<EventMapVM.State, EventMapVM.ScreenData, EventMapVM.Action.Navigation>(
   initialStateValue = EventMapVM.State.Loading,
 ), EventMapVM {
@@ -71,6 +92,29 @@ class EventMapVMImpl @AssistedInject constructor(
         }
         is EventMapVM.State.Active -> when (action) {
           is EventMapVM.Action.Back -> EventMapVM.Action.Navigation.Back.emit()
+          is EventMapVM.Action.UpdateCurrentWaypoint -> {
+            currentState.copy(
+              currentWaypoint = action.waypoint,
+              visitedWrongWaypoint = action.wrongWaypoint,
+            ).mutate()
+          }
+          is EventMapVM.Action.UpdateNextWaypoint -> {
+            currentState.copy(
+              nextWaypoint = action.nextWaypoint,
+            ).mutate()
+          }
+          is EventMapVM.Action.CheckWaypoint -> {
+            runWithLoaderUC {
+              cameraManager.takePicture().fold(
+                onRight = { uri ->
+                  println(uri)
+                },
+                onLeft = { error ->
+                  //TODO: handle error
+                }
+              )
+            }
+          }
           else -> {}
         }
       }
@@ -82,11 +126,65 @@ class EventMapVMImpl @AssistedInject constructor(
       is EventMapVM.State.Loading -> either {
         val details = contract.getEventDetails().getRight()
 
-        EventMapVM.State.Active(eventDetails = details).override()
+        EventMapVM.State.Active(
+          eventDetails = details,
+          currentWaypoint = null,
+          nextWaypoint = contract.getNextWaypoint(),
+        ).override()
       }.onLeft {
         // Handle error
       }
-      is EventMapVM.State.Active -> {}
+      is EventMapVM.State.Active -> {
+        viewModelScope.launch {
+          contract.currentWaypointMonitor().collect { waypoint ->
+            val nextWaypoint = contract.getNextWaypoint()
+
+            when {
+              nextWaypoint == null -> {
+                // event completed?
+              }
+              waypoint == null -> {
+                dispatchAction(
+                  EventMapVM.Action.UpdateCurrentWaypoint(
+                    waypoint = waypoint,
+                    wrongWaypoint = false,
+                  ),
+                )
+              }
+              waypoint.id == nextWaypoint.id -> {
+                dispatchAction(
+                  EventMapVM.Action.UpdateCurrentWaypoint(
+                    waypoint = waypoint,
+                    wrongWaypoint = false,
+                  ),
+                )
+              }
+              waypoint.id != nextWaypoint.id -> {
+                dispatchAction(
+                  EventMapVM.Action.UpdateCurrentWaypoint(
+                    waypoint = null,
+                    wrongWaypoint = true,
+                  ),
+                )
+              }
+            }
+          }
+        }
+        viewModelScope.launch {
+          contract.nextWaypointMonitor().collect { nextWaypoint ->
+            when (val current = state.value) {
+              is EventMapVM.State.Active -> {
+                dispatchAction(
+                  EventMapVM.Action.UpdateNextWaypoint(
+                    nextWaypoint = nextWaypoint,
+                  ),
+                )
+              }
+              else -> {}
+            }
+          }
+        }
+      }
     }
   }
 
@@ -94,6 +192,9 @@ class EventMapVMImpl @AssistedInject constructor(
     params = EventMapMapper.Params(
       state = state.value,
       onBackClick = { dispatchAction(EventMapVM.Action.Back) },
+      onCheckWaypointClick = {
+        dispatchAction(EventMapVM.Action.CheckWaypoint)
+      },
     ),
   )
 }

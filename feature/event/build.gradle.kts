@@ -47,4 +47,5 @@ dependencies {
   implementation(project(":common:ui"))
   implementation(project(":common:permissions"))
   implementation(project(":common:lifecycle"))
+  implementation(project(":common:camera"))
 }

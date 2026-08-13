@@ -1,6 +1,7 @@
 package pl.dev.bkwiatkowski.feature.event.presentation.map
 
 import pl.dev.bkwiatkowski.common.core.usecase.Mapper
+import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.icon.ZoomImageData
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReader
 
@@ -8,6 +9,7 @@ interface EventMapMapper : Mapper<EventMapMapper.Params, EventMapVM.ScreenData> 
   data class Params(
     val state: EventMapVM.State,
     val onBackClick: () -> Unit,
+    val onCheckWaypointClick: () -> Unit,
   )
 }
 
@@ -30,7 +32,13 @@ class EventMapMapperImpl(
               bitmap = bitmap,
               contentDescription = "Event map",
             )
-          }
+          },
+          nextWaypointLabel = "Aktualnie poszukiwany punkt: ${params.state.nextWaypoint?.label ?: "Brak"}",
+          wrongWaypointInfo = "Odwiedzono niewłaściwe miejsce, musisz szukać innego punktu na mapie!".takeIf { params.state.visitedWrongWaypoint },
+          checkWaypointButton = LargeButtonData.Primary(
+            text = "Zatwierdź punkt",
+            onClick = params.onCheckWaypointClick,
+          ).takeIf { params.state.currentWaypoint != null  && !params.state.visitedWrongWaypoint },
         )
       }
     }
