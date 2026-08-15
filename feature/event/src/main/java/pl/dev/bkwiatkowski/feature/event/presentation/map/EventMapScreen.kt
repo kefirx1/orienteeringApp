@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -86,32 +88,36 @@ fun EventMapScreenContent(
         }
         Spacer(modifier = Modifier.height(24.dp))
 
-        data.wrongWaypointInfo?.let { info ->
-          BaseCard {
-            Column(
-              modifier = Modifier
-                .padding(all = 12.dp),
-            ) {
-              CustomImage(
-                iconRes = R.drawable.outline_warning_24,
-                imageSize = ImageSize.LARGE,
-                color = MaterialTheme.colorScheme.tertiary
-              )
-              Spacer(modifier = Modifier.height(12.dp))
+        Column(
+          modifier = Modifier.verticalScroll(state = rememberScrollState()),
+        ) {
+          data.wrongWaypointInfo?.let { info ->
+            BaseCard {
+              Column(
+                modifier = Modifier
+                  .padding(all = 12.dp),
+              ) {
+                CustomImage(
+                  iconRes = R.drawable.outline_warning_24,
+                  imageSize = ImageSize.LARGE,
+                  color = MaterialTheme.colorScheme.tertiary
+                )
+                Spacer(modifier = Modifier.height(12.dp))
 
-              CustomText(
-                text = info,
-                style = MaterialTheme.typography.titleLarge,
-              )
+                CustomText(
+                  text = info,
+                  style = MaterialTheme.typography.titleLarge,
+                )
+              }
             }
+            Spacer(modifier = Modifier.height(32.dp))
           }
-          Spacer(modifier = Modifier.height(32.dp))
-        }
 
-        CustomText(
-          text = data.nextWaypointLabel,
-          style = MaterialTheme.typography.headlineLarge,
-        )
+          CustomText(
+            text = data.nextWaypointLabel,
+            style = MaterialTheme.typography.headlineLarge,
+          )
+        }
       }
     },
     bottomBar = {

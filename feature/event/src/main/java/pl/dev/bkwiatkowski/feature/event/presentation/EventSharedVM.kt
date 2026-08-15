@@ -109,11 +109,11 @@ class EventSharedVM @Inject constructor(
 
   override suspend fun currentWaypointMonitor(): Flow<MapWaypoint?> = state.map { currentState ->
     currentState.currentWaypoint
-  }
+  }.distinctUntilChanged()
 
   override suspend fun nextWaypointMonitor(): Flow<MapWaypoint?> = state.map { currentState ->
     currentState.nextWaypoint
-  }
+  }.distinctUntilChanged()
 
   override suspend fun setEventDetails(eventDetails: MobileEventDetails) {
     dispatchAction(EventShared.Action.SetEventDetails(eventDetails))

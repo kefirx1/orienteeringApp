@@ -12,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.intents.OpenAppSettingsIntentUC
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
@@ -63,6 +64,9 @@ interface EventMainVM {
       data class GoToGame(val details: MobileEventDetails) : NestedNavigation
     }
 
+    data class SetWaypointVisited(
+      val waypointId: Int,
+    ) : Action
     data class CheckUserLocation(
       val newLocation: Location,
     ) : Action
@@ -228,6 +232,13 @@ class EventMainVMImpl @AssistedInject constructor(
 
             contract.setCurrentWaypoint(waypoint = result)
           }
+          is EventMainVM.Action.SetWaypointVisited -> {
+            val waypoint = currentState.stateData.details.eventWaypoints.firstOrNull { waypoint ->
+              waypoint.id == action.waypointId
+            } ?: return@launch
+
+            contract.setWaypointVisited(waypoint = waypoint)
+          }
           else -> {}
         }
       }
@@ -271,7 +282,7 @@ class EventMainVMImpl @AssistedInject constructor(
       }
       is EventMainVM.State.Active -> {
         viewModelScope.launch {
-          gpsManager.getLocationFlow().collect { location ->
+          gpsManager.getLocationFlow().distinctUntilChanged().collect { location ->
             dispatchAction(
               action = EventMainVM.Action.CheckUserLocation(newLocation = location),
             )
@@ -279,7 +290,7 @@ class EventMainVMImpl @AssistedInject constructor(
         }
         viewModelScope.launch {
           eventBackendInteractor.observeSession().collect { event ->
-            println(event)
+            dispatchAction(action = EventMainVM.Action.SetWaypointVisited(waypointId = event.waypointId))
           }
         }
       }

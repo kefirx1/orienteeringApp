@@ -65,6 +65,12 @@ import pl.dev.bkwiatkowski.common.time.DateFormatterImpl
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReader
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReaderImpl
 import pl.dev.bkwiatkowski.common.ui.snackbar.SnackbarHostImpl
+import pl.dev.bkwiatkowski.common.core.image.ImageCompressor
+import pl.dev.bkwiatkowski.common.camera.image.ImageCompressorImpl
+import pl.dev.bkwiatkowski.common.camera.domain.usecase.TakePictureAndCompressUC
+import pl.dev.bkwiatkowski.common.camera.domain.usecase.TakePictureAndCompressUCImpl
+import pl.dev.bkwiatkowski.common.core.storage.file.LocalFileManager
+import pl.dev.bkwiatkowski.common.storage.local.LocalFileManagerImpl
 import pl.dev.bkwiatkowski.common.validators.DateValidatorImpl
 import pl.dev.bkwiatkowski.common.validators.TextValidatorImpl
 import pl.dev.bkwiatkowski.orienteeringapp.config.EnvironmentConfigImpl
@@ -255,8 +261,31 @@ object CommonModule {
   @Singleton
   fun provideCameraManager(
     context: Context,
+    localFileManager: LocalFileManager,
   ) = CameraManagerImpl(
     context = context,
+    localFileManager = localFileManager,
+  )
+
+
+  @Provides
+  @Singleton
+  fun provideImageCompressor(): ImageCompressor = ImageCompressorImpl()
+
+  @Provides
+  fun provideLocalFileManager(
+    context: Context,
+  ): LocalFileManager = LocalFileManagerImpl(context = context)
+
+  @Provides
+  fun provideTakePictureAndCompressUC(
+    cameraManager: CameraManager,
+    imageCompressor: ImageCompressor,
+    localFileManager: LocalFileManager,
+  ): TakePictureAndCompressUC = TakePictureAndCompressUCImpl(
+    cameraManager = cameraManager,
+    imageCompressor = imageCompressor,
+    localFileManager = localFileManager,
   )
 
   @Provides

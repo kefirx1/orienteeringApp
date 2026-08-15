@@ -38,7 +38,9 @@ class EventMapMapperImpl(
           checkWaypointButton = LargeButtonData.Primary(
             text = "Zatwierdź punkt",
             onClick = params.onCheckWaypointClick,
-          ).takeIf { params.state.currentWaypoint != null  && !params.state.visitedWrongWaypoint },
+          ).takeIf {
+            params.state.currentWaypoint != null && params.state.nextWaypoint != null && params.state.currentWaypoint.id == params.state.nextWaypoint.id
+          },
         )
       }
     }

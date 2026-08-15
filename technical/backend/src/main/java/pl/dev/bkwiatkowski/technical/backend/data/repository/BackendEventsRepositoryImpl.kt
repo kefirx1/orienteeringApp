@@ -12,11 +12,15 @@ import pl.dev.bkwiatkowski.technical.backend.api.CheckUserInEventSession
 import pl.dev.bkwiatkowski.technical.backend.api.GetMobileEventById
 import pl.dev.bkwiatkowski.technical.backend.api.GetMobileEvents
 import pl.dev.bkwiatkowski.technical.backend.api.JoinEventSession
+import pl.dev.bkwiatkowski.technical.backend.api.UploadSessionImage
 import pl.dev.bkwiatkowski.technical.backend.data.IsUserInSessionResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.JoinSessionRequestDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileEventDetailResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileEventListResponseDto
+import pl.dev.bkwiatkowski.technical.backend.data.UploadImageRequest
+import pl.dev.bkwiatkowski.technical.backend.data.UploadImageResponse
 import pl.dev.bkwiatkowski.technical.backend.data.mapper.BackendMapper.toDomain
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUploadImageResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventListResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepository
@@ -55,5 +59,17 @@ class BackendEventsRepositoryImpl(
       client.get(resource = CheckUserInEventSession(sessionUuid = sessionUuid)).body()
     }.mapRight { response ->
       response.body<IsUserInSessionResponseDto>().joined
+    }
+
+  override suspend fun uploadSessionImage(
+    sessionUuid: String,
+    imageBase64: String
+  ): Either<DomainError, BEUploadImageResponse> =
+    callMediator<UploadSessionImage> {
+      client.post(resource = UploadSessionImage(sessionUuid = sessionUuid)) {
+        setBody(UploadImageRequest(image = imageBase64))
+      }
+    }.mapRight { response ->
+      response.body<UploadImageResponse>().toDomain()
     }
 }

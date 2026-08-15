@@ -2,7 +2,6 @@ package pl.dev.bkwiatkowski.common.camera
 
 import android.content.Context
 import android.net.Uri
-import android.os.Environment
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
@@ -11,9 +10,10 @@ import kotlinx.coroutines.withContext
 import pl.dev.bkwiatkowski.common.activityconnector.ActivityConnector
 import pl.dev.bkwiatkowski.common.activityconnector.ActivityForResult
 import pl.dev.bkwiatkowski.common.core.error.DomainError
+import pl.dev.bkwiatkowski.common.core.storage.file.FileExtension
+import pl.dev.bkwiatkowski.common.core.storage.file.LocalFileManager
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.core.usecase.either
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -26,6 +26,7 @@ interface CameraManager {
 
 class CameraManagerImpl(
   private val context: Context,
+  private val localFileManager: LocalFileManager,
 ) : ActivityForResult<Uri, Boolean>(), CameraManager, CameraActivityConnector {
 
   override val resultContract: ActivityResultContract<Uri, Boolean> =
@@ -33,7 +34,11 @@ class CameraManagerImpl(
 
   override suspend fun takePicture(): Either<DomainError, Uri> = either {
     val (imageFile, photoUri) = withContext(Dispatchers.IO) {
-      val file = createImageFile().getRight()
+      val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+      val file = localFileManager.createTempFile(
+        fileName = "IMG_$timeStamp",
+        extension = FileExtension.JPG,
+      ).getRight()
       val uri = FileProvider.getUriForFile(
         context,
         "${context.packageName}.fileprovider",
@@ -54,12 +59,5 @@ class CameraManagerImpl(
         error = DomainError.Custom(IllegalStateException("Failed to take picture or user cancelled"))
       )
     }
-  }
-
-  private fun createImageFile(): Either<DomainError, File> = either {
-    val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-      ?: raise(error = DomainError.Custom(IllegalStateException("External storage directory is not available")))
-    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-    File.createTempFile("IMG_$timeStamp", ".jpg", storageDir)
   }
 }

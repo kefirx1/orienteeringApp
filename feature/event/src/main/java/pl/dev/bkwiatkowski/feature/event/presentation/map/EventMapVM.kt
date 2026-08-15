@@ -7,15 +7,19 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import pl.dev.bkwiatkowski.common.camera.CameraManager
+import pl.dev.bkwiatkowski.common.camera.domain.usecase.TakePictureAndCompressUC
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
+import pl.dev.bkwiatkowski.common.core.storage.Base64Coder
+import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.icon.ZoomImageData
+import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
 import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
+import java.time.LocalDateTime
 
 interface EventMapVM {
   sealed interface State {
@@ -23,6 +27,7 @@ interface EventMapVM {
     data class Active(
       val eventDetails: MobileEventDetails,
       val currentWaypoint: MapWaypoint?,
+      val alreadyConfirmedWaypointId: Int? = null,
       val visitedWrongWaypoint: Boolean = false,
       val nextWaypoint: MapWaypoint?,
     ) : State
@@ -68,8 +73,10 @@ interface EventMapVM {
 class EventMapVMImpl @AssistedInject constructor(
   @Assisted private val contract: EventMapContract,
   private val mapper: EventMapMapper,
-  private val cameraManager: CameraManager,
+  private val takePictureAndCompressUC: TakePictureAndCompressUC,
   private val runWithLoaderUC: RunWithLoaderUC,
+  private val eventBackendInteractor: EventBackendInteractor,
+  private val base64Coder: Base64Coder,
 ) : CustomViewModel<EventMapVM.State, EventMapVM.ScreenData, EventMapVM.Action.Navigation>(
   initialStateValue = EventMapVM.State.Loading,
 ), EventMapVM {
@@ -93,9 +100,16 @@ class EventMapVMImpl @AssistedInject constructor(
         is EventMapVM.State.Active -> when (action) {
           is EventMapVM.Action.Back -> EventMapVM.Action.Navigation.Back.emit()
           is EventMapVM.Action.UpdateCurrentWaypoint -> {
+            val visitedWrongWaypoint = if (currentState.alreadyConfirmedWaypointId == action.waypoint?.id) {
+              false
+            } else {
+              action.wrongWaypoint
+            }
+
             currentState.copy(
-              currentWaypoint = action.waypoint,
-              visitedWrongWaypoint = action.wrongWaypoint,
+              currentWaypoint = action.waypoint.takeIf { !visitedWrongWaypoint },
+              visitedWrongWaypoint = visitedWrongWaypoint,
+              alreadyConfirmedWaypointId = null,
             ).mutate()
           }
           is EventMapVM.Action.UpdateNextWaypoint -> {
@@ -105,14 +119,28 @@ class EventMapVMImpl @AssistedInject constructor(
           }
           is EventMapVM.Action.CheckWaypoint -> {
             runWithLoaderUC {
-              cameraManager.takePicture().fold(
-                onRight = { uri ->
-                  println(uri)
-                },
-                onLeft = { error ->
-                  //TODO: handle error
-                }
-              )
+              currentState.currentWaypoint ?: return@runWithLoaderUC
+
+              either {
+                val bytes = takePictureAndCompressUC(params = UseCase.Params.Empty).getRight()
+
+                val imageResponse = eventBackendInteractor.uploadSessionImage(
+                  sessionUuid = currentState.eventDetails.session.id,
+                  imageBase64 = base64Coder.encode(data = bytes).getRight(),
+                ).getRight()
+
+                eventBackendInteractor.confirmWaypoint(
+                  waypointId = currentState.currentWaypoint.id,
+                  visitedAt = LocalDateTime.now(),
+                  imagePath = imageResponse.path,
+                ).getRight()
+
+                currentState.copy(
+                  alreadyConfirmedWaypointId = currentState.currentWaypoint.id,
+                ).mutate()
+              }.onLeft {
+                // TODO: handle error
+              }
             }
           }
           else -> {}
@@ -162,7 +190,7 @@ class EventMapVMImpl @AssistedInject constructor(
               waypoint.id != nextWaypoint.id -> {
                 dispatchAction(
                   EventMapVM.Action.UpdateCurrentWaypoint(
-                    waypoint = null,
+                    waypoint = waypoint,
                     wrongWaypoint = true,
                   ),
                 )

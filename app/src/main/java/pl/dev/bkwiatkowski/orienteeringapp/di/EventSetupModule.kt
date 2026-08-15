@@ -5,6 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.core.usecase.either
@@ -15,6 +16,8 @@ import pl.dev.bkwiatkowski.feature.event.domain.model.EventType
 import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileMap
+import pl.dev.bkwiatkowski.feature.event.domain.model.UploadImageResponse
+import pl.dev.bkwiatkowski.feature.event.domain.model.WebsocketWaypointVisitResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMapWaypoint
@@ -35,8 +38,12 @@ object EventSetupModule {
     sessionWebSocketRepository: SessionWebSocketRepository,
     backendEventsRepository: BackendEventsRepository,
   ): EventBackendInteractor = object : EventBackendInteractor {
-    override fun observeSession(): Flow<String> =
-      sessionWebSocketRepository.incoming
+    override fun observeSession(): Flow<WebsocketWaypointVisitResponse> =
+      sessionWebSocketRepository.incoming.map {
+        WebsocketWaypointVisitResponse(
+          waypointId = it.waypointId,
+        )
+      }
 
     override suspend fun openSession(sessionUuid: String): Either<DomainError, Unit> =
       sessionWebSocketRepository.openSession(sessionUuid = sessionUuid)
@@ -47,13 +54,27 @@ object EventSetupModule {
     override suspend fun confirmWaypoint(
       waypointId: Int,
       visitedAt: LocalDateTime,
+      imagePath: String,
     ): Either<DomainError, Unit> =
       sessionWebSocketRepository.sendMessage(
         message = WebsocketWaypointVisit(
           waypointId = waypointId,
           visitedAt = visitedAt,
+          imagePath = imagePath,
         ),
       )
+
+    override suspend fun uploadSessionImage(
+      sessionUuid: String,
+      imageBase64: String
+    ): Either<DomainError, UploadImageResponse> = backendEventsRepository.uploadSessionImage(
+      sessionUuid = sessionUuid,
+      imageBase64 = imageBase64,
+    ).mapRight { response ->
+      UploadImageResponse(
+        path = response.path,
+      )
+    }
 
     override suspend fun getMobileEventDetails(eventId: Int): Either<DomainError, MobileEventDetails> = either {
       backendEventsRepository.getMobileEventDetails(eventId).mapRight { response ->
