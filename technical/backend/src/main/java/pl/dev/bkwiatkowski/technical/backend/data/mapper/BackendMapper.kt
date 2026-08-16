@@ -10,6 +10,7 @@ import pl.dev.bkwiatkowski.technical.backend.data.MobileSettingsResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileSignInRequestDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileSignInResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileSignUpRequestDto
+import pl.dev.bkwiatkowski.technical.backend.data.SessionWaypointDetailDto
 import pl.dev.bkwiatkowski.technical.backend.data.UploadImageResponse
 import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitDto
 import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitResponseDto
@@ -17,6 +18,7 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMapWaypoint
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMobileMap
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionWaypointDetail
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUploadImageResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.EventSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
@@ -142,6 +144,13 @@ object BackendMapper {
 
   fun WebsocketWaypointVisitResponseDto.toDomain(): WebsocketWaypointVisitResponse =
     WebsocketWaypointVisitResponse(
+      lastVisitedWaypoint = this.lastVisitedWaypoint.toDomain(),
+    )
+
+  fun SessionWaypointDetailDto.toDomain(): BESessionWaypointDetail =
+    BESessionWaypointDetail(
+      id = id,
       waypointId = waypointId,
+      visitedAt = visitedAt,
     )
 }

@@ -13,6 +13,7 @@ import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
+import pl.dev.bkwiatkowski.feature.event.domain.model.SessionWaypointDetail
 import pl.dev.bkwiatkowski.feature.event.presentation.game.EventGameContract
 import pl.dev.bkwiatkowski.feature.event.presentation.main.EventMainContract
 import pl.dev.bkwiatkowski.feature.event.presentation.map.EventMapContract
@@ -24,7 +25,7 @@ interface EventShared {
     val currentUserPosition: Position?,
     val nextWaypoint: MapWaypoint?,
     val currentWaypoint: MapWaypoint?,
-    val visitedWaypoints: List<MapWaypoint>,
+    val visitedWaypoints: List<SessionWaypointDetail>,
   )
 
   sealed interface Action {
@@ -39,7 +40,7 @@ interface EventShared {
     ) : Action
 
     data class SetWaypointVisited(
-      val waypoint: MapWaypoint,
+      val waypoint: SessionWaypointDetail,
     ) : Action
 
     data class SetCurrentWaypoint(
@@ -88,7 +89,7 @@ class EventSharedVM @Inject constructor(
             currentState.copy(
               visitedWaypoints = updatedVisitedWaypoints,
               nextWaypoint = currentState.eventDetails?.eventWaypoints?.firstOrNull { waypoint ->
-                waypoint !in updatedVisitedWaypoints
+                waypoint.id !in updatedVisitedWaypoints.map { waypoint -> waypoint.waypointId }
               },
             ).mutate()
           }
@@ -115,6 +116,12 @@ class EventSharedVM @Inject constructor(
     currentState.nextWaypoint
   }.distinctUntilChanged()
 
+  override fun getVisitedWaypoints(): List<SessionWaypointDetail> = state.value.visitedWaypoints
+
+  override fun visitedWaypointsMonitor(): Flow<List<SessionWaypointDetail>> = state.map { currentState ->
+    currentState.visitedWaypoints
+  }.distinctUntilChanged()
+
   override suspend fun setEventDetails(eventDetails: MobileEventDetails) {
     dispatchAction(EventShared.Action.SetEventDetails(eventDetails))
   }
@@ -123,7 +130,7 @@ class EventSharedVM @Inject constructor(
     dispatchAction(EventShared.Action.SetCurrentUserPosition(position = position))
   }
 
-  override suspend fun setWaypointVisited(waypoint: MapWaypoint) {
+  override suspend fun setWaypointVisited(waypoint: SessionWaypointDetail) {
     dispatchAction(EventShared.Action.SetWaypointVisited(waypoint = waypoint))
   }
 

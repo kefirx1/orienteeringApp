@@ -16,8 +16,9 @@ import pl.dev.bkwiatkowski.feature.event.domain.model.EventType
 import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileMap
+import pl.dev.bkwiatkowski.feature.event.domain.model.SessionWaypointDetail
 import pl.dev.bkwiatkowski.feature.event.domain.model.UploadImageResponse
-import pl.dev.bkwiatkowski.feature.event.domain.model.WebsocketWaypointVisitResponse
+import pl.dev.bkwiatkowski.feature.event.domain.model.WaypointVisitResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMapWaypoint
@@ -25,6 +26,7 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMobileMap
 import pl.dev.bkwiatkowski.technical.backend.domain.model.EventSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisit
+import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisitResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepository
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.SessionWebSocketRepository
 import java.time.LocalDateTime
@@ -38,12 +40,8 @@ object EventSetupModule {
     sessionWebSocketRepository: SessionWebSocketRepository,
     backendEventsRepository: BackendEventsRepository,
   ): EventBackendInteractor = object : EventBackendInteractor {
-    override fun observeSession(): Flow<WebsocketWaypointVisitResponse> =
-      sessionWebSocketRepository.incoming.map {
-        WebsocketWaypointVisitResponse(
-          waypointId = it.waypointId,
-        )
-      }
+    override fun observeSession(): Flow<WaypointVisitResponse> =
+      sessionWebSocketRepository.incoming.map { it.toFeature() }
 
     override suspend fun openSession(sessionUuid: String): Either<DomainError, Unit> =
       sessionWebSocketRepository.openSession(sessionUuid = sessionUuid)
@@ -133,6 +131,14 @@ object EventSetupModule {
       startedAt = startedAt,
       userCanJoin = userCanJoin,
       finishedAt = finishedAt
+    )
+
+    fun WebsocketWaypointVisitResponse.toFeature(): WaypointVisitResponse = WaypointVisitResponse(
+      lastVisitedWaypoint = SessionWaypointDetail(
+        id = this.lastVisitedWaypoint.id,
+        waypointId = this.lastVisitedWaypoint.waypointId,
+        visitedAt = this.lastVisitedWaypoint.visitedAt,
+      )
     )
   }
 }

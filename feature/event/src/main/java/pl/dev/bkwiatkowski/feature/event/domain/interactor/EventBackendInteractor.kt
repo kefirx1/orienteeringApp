@@ -5,11 +5,11 @@ import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.UploadImageResponse
-import pl.dev.bkwiatkowski.feature.event.domain.model.WebsocketWaypointVisitResponse
+import pl.dev.bkwiatkowski.feature.event.domain.model.WaypointVisitResponse
 import java.time.LocalDateTime
 
 interface EventBackendInteractor {
-  fun observeSession(): Flow<WebsocketWaypointVisitResponse>
+  fun observeSession(): Flow<WaypointVisitResponse>
   suspend fun openSession(sessionUuid: String): Either<DomainError, Unit>
   suspend fun closeSession(): Either<DomainError, Unit>
   suspend fun confirmWaypoint(

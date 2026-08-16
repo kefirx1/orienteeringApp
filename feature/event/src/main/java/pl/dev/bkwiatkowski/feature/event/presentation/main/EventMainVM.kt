@@ -31,6 +31,7 @@ import pl.dev.bkwiatkowski.common.ui.component.permissions.PermissionRequesterDa
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
+import pl.dev.bkwiatkowski.feature.event.domain.model.SessionWaypointDetail
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.FindWaypointFromUserLocationUC
 
 interface EventMainVM {
@@ -65,7 +66,7 @@ interface EventMainVM {
     }
 
     data class SetWaypointVisited(
-      val waypointId: Int,
+      val lastWaypoint: SessionWaypointDetail,
     ) : Action
     data class CheckUserLocation(
       val newLocation: Location,
@@ -233,11 +234,7 @@ class EventMainVMImpl @AssistedInject constructor(
             contract.setCurrentWaypoint(waypoint = result)
           }
           is EventMainVM.Action.SetWaypointVisited -> {
-            val waypoint = currentState.stateData.details.eventWaypoints.firstOrNull { waypoint ->
-              waypoint.id == action.waypointId
-            } ?: return@launch
-
-            contract.setWaypointVisited(waypoint = waypoint)
+            contract.setWaypointVisited(waypoint = action.lastWaypoint)
           }
           else -> {}
         }
@@ -290,7 +287,11 @@ class EventMainVMImpl @AssistedInject constructor(
         }
         viewModelScope.launch {
           eventBackendInteractor.observeSession().collect { event ->
-            dispatchAction(action = EventMainVM.Action.SetWaypointVisited(waypointId = event.waypointId))
+            dispatchAction(
+              action = EventMainVM.Action.SetWaypointVisited(
+                lastWaypoint = event.lastVisitedWaypoint,
+              ),
+            )
           }
         }
       }
