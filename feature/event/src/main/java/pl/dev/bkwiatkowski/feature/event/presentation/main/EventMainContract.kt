@@ -10,4 +10,5 @@ interface EventMainContract {
   suspend fun setCurrentUserPosition(position: Position)
   suspend fun setWaypointVisited(waypoint: SessionWaypointDetail)
   suspend fun setCurrentWaypoint(waypoint: MapWaypoint?)
+  suspend fun setInitialVisitedWaypoints(waypoints: List<SessionWaypointDetail>)
 }

@@ -252,7 +252,12 @@ class EventMainVMImpl @AssistedInject constructor(
             val details = eventBackendInteractor.getMobileEventDetails(
               eventId = setupData.eventId,
             ).getRight()
+            val currentSessionWaypoints = eventBackendInteractor.getSessionWaypoints(
+              sessionUuid = setupData.sessionUuid,
+            ).getRight()
+
             contract.setEventDetails(eventDetails = details)
+            contract.setInitialVisitedWaypoints(waypoints = currentSessionWaypoints.waypoints)
 
             eventBackendInteractor.openSession(sessionUuid = setupData.sessionUuid).getRight()
             EventMainVM.State.Active(

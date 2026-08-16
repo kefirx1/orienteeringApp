@@ -19,10 +19,12 @@ import pl.dev.bkwiatkowski.feature.event.domain.model.MobileMap
 import pl.dev.bkwiatkowski.feature.event.domain.model.SessionWaypointDetail
 import pl.dev.bkwiatkowski.feature.event.domain.model.UploadImageResponse
 import pl.dev.bkwiatkowski.feature.event.domain.model.WaypointVisitResponse
+import pl.dev.bkwiatkowski.feature.event.domain.model.WaypointsVisitedResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMapWaypoint
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMobileMap
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionWaypointDetail
 import pl.dev.bkwiatkowski.technical.backend.domain.model.EventSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisit
@@ -80,6 +82,14 @@ object EventSetupModule {
       }.getRight()
     }
 
+    override suspend fun getSessionWaypoints(sessionUuid: String): Either<DomainError, WaypointsVisitedResponse> = either {
+      backendEventsRepository.getWaypointsVisited(sessionUuid = sessionUuid).mapRight { response ->
+        WaypointsVisitedResponse(
+          waypoints = response.sessionWaypointDetails.map { it.toFeature() }
+        )
+      }.getRight()
+    }
+
     fun MobileEventDetailResponse.toFeature(): Either<DomainError, MobileEventDetails> = either {
       MobileEventDetails(
         id = id,
@@ -134,11 +144,13 @@ object EventSetupModule {
     )
 
     fun WebsocketWaypointVisitResponse.toFeature(): WaypointVisitResponse = WaypointVisitResponse(
-      lastVisitedWaypoint = SessionWaypointDetail(
-        id = this.lastVisitedWaypoint.id,
-        waypointId = this.lastVisitedWaypoint.waypointId,
-        visitedAt = this.lastVisitedWaypoint.visitedAt,
-      )
+      lastVisitedWaypoint = this.lastVisitedWaypoint.toFeature(),
+    )
+
+    fun BESessionWaypointDetail.toFeature(): SessionWaypointDetail = SessionWaypointDetail(
+      id = this.id,
+      waypointId = this.waypointId,
+      visitedAt = this.visitedAt,
     )
   }
 }

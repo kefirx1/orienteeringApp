@@ -6,6 +6,7 @@ import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.UploadImageResponse
 import pl.dev.bkwiatkowski.feature.event.domain.model.WaypointVisitResponse
+import pl.dev.bkwiatkowski.feature.event.domain.model.WaypointsVisitedResponse
 import java.time.LocalDateTime
 
 interface EventBackendInteractor {
@@ -19,4 +20,5 @@ interface EventBackendInteractor {
   ): Either<DomainError, Unit>
   suspend fun uploadSessionImage(sessionUuid: String, imageBase64: String): Either<DomainError, UploadImageResponse>
   suspend fun getMobileEventDetails(eventId: Int): Either<DomainError, MobileEventDetails>
+  suspend fun getSessionWaypoints(sessionUuid: String): Either<DomainError, WaypointsVisitedResponse>
 }

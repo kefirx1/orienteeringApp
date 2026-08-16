@@ -88,7 +88,7 @@ fun EventGameScreenContent(
           .fillMaxSize()
           .addDefaultPadding(),
       ) {
-        Spacer(modifier = Modifier.height(64.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         BaseCard {
           LazyColumn(

@@ -43,6 +43,10 @@ interface EventShared {
       val waypoint: SessionWaypointDetail,
     ) : Action
 
+    data class SetInitialVisitedWaypoints(
+      val waypoints: List<SessionWaypointDetail>,
+    ) : Action
+
     data class SetCurrentWaypoint(
       val waypoint: MapWaypoint?,
     ) : Action
@@ -78,7 +82,6 @@ class EventSharedVM @Inject constructor(
           is EventShared.Action.SetEventDetails -> {
             currentState.copy(
               eventDetails = action.eventDetails,
-              nextWaypoint = action.eventDetails.eventWaypoints.firstOrNull(),
             ).mutate()
           }
           is EventShared.Action.SetCurrentUserPosition -> {
@@ -95,6 +98,14 @@ class EventSharedVM @Inject constructor(
           }
           is EventShared.Action.SetCurrentWaypoint -> {
             currentState.copy(currentWaypoint = action.waypoint).mutate()
+          }
+          is EventShared.Action.SetInitialVisitedWaypoints -> {
+            currentState.copy(
+              visitedWaypoints = action.waypoints,
+              nextWaypoint = currentState.eventDetails?.eventWaypoints?.firstOrNull { waypoint ->
+                waypoint.id !in action.waypoints.map { waypoint -> waypoint.waypointId }
+              },
+            ).mutate()
           }
           else -> {}
         }
@@ -136,6 +147,10 @@ class EventSharedVM @Inject constructor(
 
   override suspend fun setCurrentWaypoint(waypoint: MapWaypoint?) {
     dispatchAction(EventShared.Action.SetCurrentWaypoint(waypoint = waypoint))
+  }
+
+  override suspend fun setInitialVisitedWaypoints(waypoints: List<SessionWaypointDetail>) {
+    dispatchAction(EventShared.Action.SetInitialVisitedWaypoints(waypoints = waypoints))
   }
 
 }
