@@ -21,6 +21,10 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.EventSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventListResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepository
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUserSessionStatus
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionParticipant
+import pl.dev.bkwiatkowski.feature.maps.domain.model.SessionParticipant
+import pl.dev.bkwiatkowski.feature.maps.domain.model.UserSessionStatus
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -49,7 +53,18 @@ object MapsSetupModule {
       backendEventsRepository.joinEventSession(sessionUuid)
 
     override suspend fun checkUserInEventSession(sessionUuid: String) =
-      backendEventsRepository.checkUserInEventSession(sessionUuid)
+      backendEventsRepository.checkUserInEventSession(sessionUuid).mapRight { beStatus ->
+        when (beStatus) {
+          BEUserSessionStatus.JOINED -> UserSessionStatus.JOINED
+          BEUserSessionStatus.NOT_JOINED -> UserSessionStatus.NOT_JOINED
+          BEUserSessionStatus.FINISHED -> UserSessionStatus.FINISHED
+        }
+      }
+
+    override suspend fun getSessionParticipantForUser(sessionUuid: String) =
+      backendEventsRepository.getSessionParticipantForUser(sessionUuid = sessionUuid).mapRight { response ->
+        response.toFeature()
+      }
 
     fun BEMobileMap.toFeature(): MobileMap = MobileMap(
       id = id,
@@ -115,5 +130,10 @@ object MapsSetupModule {
       finishedAt = finishedAt
     )
 
+    fun BESessionParticipant.toFeature(): SessionParticipant = SessionParticipant(
+      sessionUuid = this.sessionUuid,
+      joinedAt = this.joinedAt,
+      finishedAt = this.finishedAt,
+    )
   }
 }

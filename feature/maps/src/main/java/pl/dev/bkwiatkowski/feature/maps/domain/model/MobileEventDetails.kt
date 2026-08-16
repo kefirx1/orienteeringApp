@@ -34,6 +34,12 @@ enum class EventStatus {
   CONTINUOUS,
 }
 
+enum class UserSessionStatus {
+  JOINED,
+  NOT_JOINED,
+  FINISHED,
+}
+
 data class MapWaypoint(
   val id: Int,
   val label: String,

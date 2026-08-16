@@ -8,6 +8,7 @@ import pl.dev.bkwiatkowski.common.ui.preview.ViewModelPreviewProvider
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventSession
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventStatus
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventType
+import pl.dev.bkwiatkowski.feature.event.domain.model.FinishSessionResponse
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileMap
 import pl.dev.bkwiatkowski.feature.event.presentation.main.EventMainContract
@@ -24,6 +25,7 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
       override fun onBackClick() = Unit
       override fun onGameClick() = Unit
       override fun onMapClick() = Unit
+      override fun onCompleted(response: FinishSessionResponse) = Unit
       override fun setupContract(contract: EventMainContract) = Unit
 
       override var lifecycleOwner: LifecycleOwner = mock.lifecycleOwner
@@ -73,6 +75,7 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
       override fun onBackClick() = Unit
       override fun onGameClick() = Unit
       override fun onMapClick() = Unit
+      override fun onCompleted(response: FinishSessionResponse) = Unit
       override fun setupContract(contract: EventMainContract) = Unit
 
       override var lifecycleOwner: LifecycleOwner = mock.lifecycleOwner
@@ -93,6 +96,7 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
       override fun onBackClick() = Unit
       override fun onGameClick() = Unit
       override fun onMapClick() = Unit
+      override fun onCompleted(response: FinishSessionResponse) = Unit
       override fun setupContract(contract: EventMainContract) = Unit
 
       override var lifecycleOwner: LifecycleOwner = mock.lifecycleOwner

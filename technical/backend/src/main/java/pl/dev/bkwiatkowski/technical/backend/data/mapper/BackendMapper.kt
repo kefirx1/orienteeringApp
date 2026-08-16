@@ -2,6 +2,7 @@ package pl.dev.bkwiatkowski.technical.backend.data.mapper
 
 import pl.dev.bkwiatkowski.common.core.location.Position
 import pl.dev.bkwiatkowski.technical.backend.data.EventSessionResponseDto
+import pl.dev.bkwiatkowski.technical.backend.data.FinishSessionResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MapWaypointDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileEventDetailResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileEventListResponseDto
@@ -10,15 +11,20 @@ import pl.dev.bkwiatkowski.technical.backend.data.MobileSettingsResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileSignInRequestDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileSignInResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileSignUpRequestDto
+import pl.dev.bkwiatkowski.technical.backend.data.SessionParticipantDto
+import pl.dev.bkwiatkowski.technical.backend.data.SessionParticipantResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.SessionWaypointDetailDto
 import pl.dev.bkwiatkowski.technical.backend.data.SessionWaypointDetailsResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.UploadImageResponse
 import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitDto
 import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitResponseDto
+import pl.dev.bkwiatkowski.technical.backend.data.IsUserInSessionResponseDto
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEFinishSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMapWaypoint
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMobileMap
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionParticipant
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionWaypointDetail
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionWaypointDetailsResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUploadImageResponse
@@ -31,6 +37,7 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignUpRequest
 import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisit
 import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisitResponse
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUserSessionStatus
 
 object BackendMapper {
 
@@ -151,7 +158,6 @@ object BackendMapper {
 
   fun SessionWaypointDetailDto.toDomain(): BESessionWaypointDetail =
     BESessionWaypointDetail(
-      id = id,
       waypointId = waypointId,
       visitedAt = visitedAt,
     )
@@ -159,4 +165,27 @@ object BackendMapper {
   fun SessionWaypointDetailsResponseDto.toDomain() = BESessionWaypointDetailsResponse(
     sessionWaypointDetails = this.sessionWaypointDetails.map { it.toDomain() },
   )
+
+  fun FinishSessionResponseDto.toDomain() = BEFinishSessionResponse(
+    participant = this.participant.toDomain(),
+    sessionWaypointDetails = this.sessionWaypointDetails.map { it.toDomain() },
+  )
+
+  fun SessionParticipantDto.toDomain() = BESessionParticipant(
+    sessionUuid = this.sessionUuid,
+    joinedAt = this.joinedAt,
+    finishedAt = this.finishedAt,
+  )
+
+  fun SessionParticipantResponseDto.toDomain() = BESessionParticipant(
+    sessionUuid = this.sessionUuid,
+    joinedAt = this.joinedAt,
+    finishedAt = this.finishedAt,
+  )
+
+  fun IsUserInSessionResponseDto.Status.toDomain(): BEUserSessionStatus = when (this) {
+    IsUserInSessionResponseDto.Status.JOINED -> BEUserSessionStatus.JOINED
+    IsUserInSessionResponseDto.Status.NOT_JOINED -> BEUserSessionStatus.NOT_JOINED
+    IsUserInSessionResponseDto.Status.FINISHED -> BEUserSessionStatus.FINISHED
+  }
 }

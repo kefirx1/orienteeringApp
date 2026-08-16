@@ -9,23 +9,30 @@ import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.network.CallMediator
 import pl.dev.bkwiatkowski.common.network.HttpClientFactory
 import pl.dev.bkwiatkowski.technical.backend.api.CheckUserInEventSession
+import pl.dev.bkwiatkowski.technical.backend.api.FinishEventSession
 import pl.dev.bkwiatkowski.technical.backend.api.GetMobileEventById
 import pl.dev.bkwiatkowski.technical.backend.api.GetMobileEvents
+import pl.dev.bkwiatkowski.technical.backend.api.GetSessionParticipantForUser
 import pl.dev.bkwiatkowski.technical.backend.api.GetSessionWaypointDetails
 import pl.dev.bkwiatkowski.technical.backend.api.JoinEventSession
 import pl.dev.bkwiatkowski.technical.backend.api.UploadSessionImage
+import pl.dev.bkwiatkowski.technical.backend.data.FinishSessionResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.IsUserInSessionResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.JoinSessionRequestDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileEventDetailResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileEventListResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.SessionWaypointDetailsResponseDto
+import pl.dev.bkwiatkowski.technical.backend.data.SessionParticipantResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.UploadImageRequest
 import pl.dev.bkwiatkowski.technical.backend.data.UploadImageResponse
 import pl.dev.bkwiatkowski.technical.backend.data.mapper.BackendMapper.toDomain
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEFinishSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionWaypointDetailsResponse
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionParticipant
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUploadImageResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventListResponse
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUserSessionStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepository
 
 class BackendEventsRepositoryImpl(
@@ -57,11 +64,11 @@ class BackendEventsRepositoryImpl(
       }
     }.mapRight { }
 
-  override suspend fun checkUserInEventSession(sessionUuid: String): Either<DomainError, Boolean> =
+  override suspend fun checkUserInEventSession(sessionUuid: String): Either<DomainError, BEUserSessionStatus> =
     callMediator<CheckUserInEventSession> {
       client.get(resource = CheckUserInEventSession(sessionUuid = sessionUuid)).body()
     }.mapRight { response ->
-      response.body<IsUserInSessionResponseDto>().joined
+      response.body<IsUserInSessionResponseDto>().status.toDomain()
     }
 
   override suspend fun uploadSessionImage(
@@ -83,5 +90,19 @@ class BackendEventsRepositoryImpl(
       client.get(resource = GetSessionWaypointDetails(sessionUuid = sessionUuid)).body()
     }.mapRight { response ->
       response.body<SessionWaypointDetailsResponseDto>().toDomain()
+    }
+
+  override suspend fun finishEventSession(sessionUuid: String): Either<DomainError, BEFinishSessionResponse> =
+    callMediator<FinishEventSession> {
+      client.post(resource = FinishEventSession(sessionUuid = sessionUuid)).body()
+    }.mapRight { response ->
+      response.body<FinishSessionResponseDto>().toDomain()
+    }
+
+  override suspend fun getSessionParticipantForUser(sessionUuid: String): Either<DomainError, BESessionParticipant> =
+    callMediator<GetSessionParticipantForUser> {
+      client.get(resource = GetSessionParticipantForUser(sessionUuid = sessionUuid)).body()
+    }.mapRight { response ->
+      response.body<SessionParticipantResponseDto>().toDomain()
     }
 }

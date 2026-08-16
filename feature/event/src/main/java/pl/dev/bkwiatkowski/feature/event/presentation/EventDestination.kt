@@ -16,6 +16,9 @@ sealed interface EventDestination : Destination {
 
   @Serializable
   data object EventGame : EventDestination
+
+  @Serializable
+  data object Success : EventDestination
 }
 
 sealed interface EventResult {

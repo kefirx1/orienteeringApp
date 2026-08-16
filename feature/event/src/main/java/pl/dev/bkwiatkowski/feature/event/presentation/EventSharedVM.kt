@@ -89,11 +89,13 @@ class EventSharedVM @Inject constructor(
           }
           is EventShared.Action.SetWaypointVisited -> {
             val updatedVisitedWaypoints = currentState.visitedWaypoints + action.waypoint
+            val nextWaypoint = currentState.eventDetails?.eventWaypoints?.firstOrNull { waypoint ->
+              waypoint.id !in updatedVisitedWaypoints.map { waypoint -> waypoint.waypointId }
+            }
+
             currentState.copy(
               visitedWaypoints = updatedVisitedWaypoints,
-              nextWaypoint = currentState.eventDetails?.eventWaypoints?.firstOrNull { waypoint ->
-                waypoint.id !in updatedVisitedWaypoints.map { waypoint -> waypoint.waypointId }
-              },
+              nextWaypoint = nextWaypoint,
             ).mutate()
           }
           is EventShared.Action.SetCurrentWaypoint -> {
@@ -152,5 +154,4 @@ class EventSharedVM @Inject constructor(
   override suspend fun setInitialVisitedWaypoints(waypoints: List<SessionWaypointDetail>) {
     dispatchAction(EventShared.Action.SetInitialVisitedWaypoints(waypoints = waypoints))
   }
-
 }

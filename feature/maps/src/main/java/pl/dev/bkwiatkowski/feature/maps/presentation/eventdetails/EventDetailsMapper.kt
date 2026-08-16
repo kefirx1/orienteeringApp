@@ -34,7 +34,9 @@ class EventDetailsMapperImpl(
         startDateTime = dateFormatter.format(
           dateTime = params.state.event.startDate,
           format = DateFormatter.Format.DATE_TIME,
-        ),
+        ).let { time ->
+          "Rozpoczęto: $time"
+        },
         map = bitmapReader.decode(encoded = params.state.event.map.imageData),
         playButtonData = when (params.state.event.eventStatus) {
           EventStatus.IN_PROGRESS,
@@ -54,7 +56,9 @@ class EventDetailsMapperImpl(
         startDateTime = dateFormatter.format(
           dateTime = params.state.event.startDate,
           format = DateFormatter.Format.DATE_TIME,
-        ),
+        ).let { time ->
+          "Rozpoczęto: $time"
+        },
         map = bitmapReader.decode(encoded = params.state.event.map.imageData),
         playButtonData = when {
           params.state.deniedForever -> LargeButtonData.Primary(
@@ -80,8 +84,37 @@ class EventDetailsMapperImpl(
         startDateTime = dateFormatter.format(
           dateTime = params.state.event.startDate,
           format = DateFormatter.Format.DATE_TIME,
-        ),
+        ).let { time ->
+          "Rozpoczyna się: $time"
+        },
         map = bitmapReader.decode(encoded = params.state.event.map.imageData),
+      )
+      is EventDetailsVM.State.Initialized.InitializedFinished -> EventDetailsVM.ScreenData.MainFinished(
+        onBackClick = params.onBackClick,
+        event = params.state.event,
+        topAppBarData = TopAppBarData.Back(onNavigationIconClick = params.onBackClick),
+        startDateTime = dateFormatter.format(
+          dateTime = params.state.event.startDate,
+          format = DateFormatter.Format.DATE_TIME,
+        ).let { time ->
+          "Rozpoczęto: $time"
+        },
+        map = bitmapReader.decode(encoded = params.state.event.map.imageData),
+        userSessionSection = EventDetailsVM.ScreenData.MainFinished.UserSessionSection(
+          sectionLabel = "Uskończono już to wydarzenie z wynikiem:",
+          joinTime = dateFormatter.format(
+            dateTime = params.state.sessionParticipant.joinedAt,
+            format = DateFormatter.Format.DATE_TIME,
+          ).let { time ->
+            "Czas rozpoczęcia: $time"
+          },
+          finishTime = dateFormatter.format(
+            dateTime = params.state.sessionParticipant.finishedAt,
+            format = DateFormatter.Format.DATE_TIME,
+          ).let { time ->
+            "Czas zakończenia: $time"
+          },
+        )
       )
     }
 }

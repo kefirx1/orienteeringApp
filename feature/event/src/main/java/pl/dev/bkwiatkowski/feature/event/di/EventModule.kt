@@ -14,6 +14,8 @@ import pl.dev.bkwiatkowski.feature.event.presentation.main.EventMainMapper
 import pl.dev.bkwiatkowski.feature.event.presentation.main.EventMainMapperImpl
 import pl.dev.bkwiatkowski.feature.event.presentation.map.EventMapMapper
 import pl.dev.bkwiatkowski.feature.event.presentation.map.EventMapMapperImpl
+import pl.dev.bkwiatkowski.feature.event.presentation.success.SuccessEventMapper
+import pl.dev.bkwiatkowski.feature.event.presentation.success.SuccessEventMapperImpl
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -34,4 +36,7 @@ object EventModule {
 
   @Provides
   fun provideCompareUserLocationUC(): FindWaypointFromUserLocationUC = FindWaypointFromUserLocationUCImpl()
+
+  @Provides
+  fun provideSuccessEventMapper(): SuccessEventMapper = SuccessEventMapperImpl()
 }

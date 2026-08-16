@@ -13,9 +13,11 @@ import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteracto
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventSession
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventStatus
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventType
+import pl.dev.bkwiatkowski.feature.event.domain.model.FinishSessionResponse
 import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileMap
+import pl.dev.bkwiatkowski.feature.event.domain.model.SessionParticipant
 import pl.dev.bkwiatkowski.feature.event.domain.model.SessionWaypointDetail
 import pl.dev.bkwiatkowski.feature.event.domain.model.UploadImageResponse
 import pl.dev.bkwiatkowski.feature.event.domain.model.WaypointVisitResponse
@@ -24,6 +26,7 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMapWaypoint
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMobileMap
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionParticipant
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionWaypointDetail
 import pl.dev.bkwiatkowski.technical.backend.domain.model.EventSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
@@ -90,6 +93,14 @@ object EventSetupModule {
       }.getRight()
     }
 
+    override suspend fun finishEventSession(sessionUuid: String): Either<DomainError, FinishSessionResponse> =
+      backendEventsRepository.finishEventSession(sessionUuid = sessionUuid).mapRight { response ->
+        FinishSessionResponse(
+          participant = response.participant.toFeature(),
+          sessionWaypointDetails = response.sessionWaypointDetails.map { it.toFeature() }
+        )
+      }
+
     fun MobileEventDetailResponse.toFeature(): Either<DomainError, MobileEventDetails> = either {
       MobileEventDetails(
         id = id,
@@ -148,9 +159,14 @@ object EventSetupModule {
     )
 
     fun BESessionWaypointDetail.toFeature(): SessionWaypointDetail = SessionWaypointDetail(
-      id = this.id,
       waypointId = this.waypointId,
       visitedAt = this.visitedAt,
+    )
+
+    fun BESessionParticipant.toFeature(): SessionParticipant = SessionParticipant(
+      sessionUuid = this.sessionUuid,
+      joinedAt = this.joinedAt,
+      finishedAt = this.finishedAt,
     )
   }
 }

@@ -21,12 +21,10 @@ class EventGamePreviewProvider : ViewModelPreviewProvider<EventGameVM, EventGame
             state = EventGameVM.State.Active(
               visitedWaypoints = listOf(
                 SessionWaypointDetail(
-                  id = 1,
                   waypointId = 1,
                   visitedAt = LocalDateTime.of(2024, 6, 1, 12, 0),
                 ),
                 SessionWaypointDetail(
-                  id = 2,
                   waypointId = 2,
                   visitedAt = LocalDateTime.of(2024, 6, 1, 12, 0),
                 ),

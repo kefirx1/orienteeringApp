@@ -9,6 +9,9 @@ import pl.dev.bkwiatkowski.common.core.viewmodel.ContractViewModel
 import pl.dev.bkwiatkowski.feature.event.presentation.main.EventMainScreen
 import pl.dev.bkwiatkowski.feature.event.presentation.main.EventMainVM
 import pl.dev.bkwiatkowski.feature.event.presentation.main.EventMainVMImpl
+import pl.dev.bkwiatkowski.feature.event.presentation.success.SuccessEventScreen
+import pl.dev.bkwiatkowski.feature.event.presentation.success.SuccessEventVM
+import pl.dev.bkwiatkowski.feature.event.presentation.success.SuccessEventVMImpl
 
 fun NavGraphBuilder.eventNavGraph(
   appContractVM: ContractViewModel,
@@ -40,6 +43,31 @@ fun NavGraphBuilder.eventNavGraph(
       navActionHandler = { action, contractViewModel ->
         when (action) {
           is EventMainVM.Action.Navigation.Back -> onResult(EventResult.Back)
+          is EventMainVM.Action.Navigation.Completed -> {
+            contractViewModel.setContractData(
+              destination = EventDestination.Success,
+              data = SuccessEventVM.SetupData(
+                finishSessionResponse = action.response,
+              ),
+            )
+            navController.navigate(
+              destination = EventDestination.Success,
+            )
+          }
+        }
+      }
+    )
+
+    createDestination<SuccessEventVM.SetupData, EventContractVM, SuccessEventVMImpl, SuccessEventVM.Action.Navigation>(
+      destination = EventDestination.Success,
+      graphInitContract = appContractVM,
+      navController = navController,
+      content = { viewModel ->
+        SuccessEventScreen(viewModel = viewModel)
+      },
+      navActionHandler = { action, contractViewModel ->
+        when (action) {
+          is SuccessEventVM.Action.Navigation.Back -> onResult(EventResult.Back)
         }
       }
     )

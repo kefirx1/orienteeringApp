@@ -25,6 +25,8 @@ import pl.dev.bkwiatkowski.common.ui.snackbar.SnackbarHostImpl
 import pl.dev.bkwiatkowski.feature.maps.domain.interactor.MapsBackendInteractor
 import pl.dev.bkwiatkowski.feature.maps.domain.model.EventSession
 import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileEventDetails
+import pl.dev.bkwiatkowski.feature.maps.domain.model.SessionParticipant
+import pl.dev.bkwiatkowski.feature.maps.domain.model.UserSessionStatus
 
 interface EventDetailsVM {
   sealed interface State {
@@ -44,6 +46,12 @@ interface EventDetailsVM {
       data class InitializedAlreadyJoined(
         val event: MobileEventDetails,
         val session: EventSession,
+      ) : Initialized
+
+      data class InitializedFinished(
+        val event: MobileEventDetails,
+        val session: EventSession,
+        val sessionParticipant: SessionParticipant,
       ) : Initialized
     }
   }
@@ -85,6 +93,21 @@ interface EventDetailsVM {
       val map: Bitmap?,
     ) : ScreenData
 
+    data class MainFinished(
+      override val onBackClick: () -> Unit,
+      val event: MobileEventDetails,
+      val topAppBarData: TopAppBarData,
+      val startDateTime: String,
+      val map: Bitmap?,
+      val userSessionSection: UserSessionSection
+    ) : ScreenData {
+      data class UserSessionSection(
+        val sectionLabel: String,
+        val joinTime: String,
+        val finishTime: String,
+      )
+    }
+
     data class Loading(
       override val onBackClick: () -> Unit,
     ) : ScreenData
@@ -123,6 +146,12 @@ class EventDetailsVMImpl @AssistedInject constructor(
     viewModelScope.launch {
       when (val currentState = state.value) {
         is EventDetailsVM.State.Loading -> when (action) {
+          is EventDetailsVM.Action.Back -> {
+            EventDetailsVM.Action.Navigation.Back.emit()
+          }
+          else -> {}
+        }
+        is EventDetailsVM.State.Initialized.InitializedFinished -> when (action) {
           is EventDetailsVM.Action.Back -> {
             EventDetailsVM.Action.Navigation.Back.emit()
           }
@@ -199,21 +228,33 @@ class EventDetailsVMImpl @AssistedInject constructor(
               ).override()
             }
             else -> {
-              val userHasAlreadyJoined = mapsBackendInteractor.checkUserInEventSession(
+              val userSessionStatus = mapsBackendInteractor.checkUserInEventSession(
                 sessionUuid = details.session.id,
               ).getRight()
 
-              if (userHasAlreadyJoined) {
-                EventDetailsVM.State.Initialized.InitializedAlreadyJoined(
+              when (userSessionStatus) {
+                UserSessionStatus.JOINED -> EventDetailsVM.State.Initialized.InitializedAlreadyJoined(
                   event = details,
                   session = details.session,
                 ).override()
-              } else {
-                EventDetailsVM.State.Initialized.InitializedNotJoined(
+
+                UserSessionStatus.NOT_JOINED -> EventDetailsVM.State.Initialized.InitializedNotJoined(
                   event = details,
                   session = details.session,
                   deniedForever = false,
                 ).override()
+
+                UserSessionStatus.FINISHED -> {
+                  val sessionParticipant = mapsBackendInteractor.getSessionParticipantForUser(
+                    sessionUuid = details.session.id,
+                  ).getRight()
+
+                  EventDetailsVM.State.Initialized.InitializedFinished(
+                    event = details,
+                    session = details.session,
+                    sessionParticipant = sessionParticipant,
+                  ).override()
+                }
               }
             }
           }

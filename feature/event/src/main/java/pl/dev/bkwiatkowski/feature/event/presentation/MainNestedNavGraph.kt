@@ -52,6 +52,7 @@ fun MainNestedNavGraph(
       navActionHandler = { action, contractViewModel ->
         when (action) {
           is EventMapVM.Action.Navigation.Back -> mainVM.onBackClick()
+          is EventMapVM.Action.Navigation.Completed -> mainVM.onCompleted(response = action.response)
         }
       }
     )

@@ -31,6 +31,7 @@ import pl.dev.bkwiatkowski.common.ui.component.permissions.PermissionRequesterDa
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
+import pl.dev.bkwiatkowski.feature.event.domain.model.FinishSessionResponse
 import pl.dev.bkwiatkowski.feature.event.domain.model.SessionWaypointDetail
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.FindWaypointFromUserLocationUC
 
@@ -58,6 +59,9 @@ interface EventMainVM {
   sealed interface Action {
     sealed interface Navigation : Action {
       data object Back : Navigation
+      data class Completed(
+        val response: FinishSessionResponse,
+      ) : Navigation
     }
 
     sealed interface NestedNavigation : Action {
@@ -65,6 +69,7 @@ interface EventMainVM {
       data class GoToGame(val details: MobileEventDetails) : NestedNavigation
     }
 
+    data class OnCompleted(val response: FinishSessionResponse) : Action
     data class SetWaypointVisited(
       val lastWaypoint: SessionWaypointDetail,
     ) : Action
@@ -114,6 +119,7 @@ interface EventMainVM {
   fun onMapClick()
   fun onGameClick()
   fun onBackClick()
+  fun onCompleted(response: FinishSessionResponse)
   fun setupContract(contract: EventMainContract)
 
   val nestedNavAction: SharedFlow<Action.NestedNavigation>
@@ -236,6 +242,10 @@ class EventMainVMImpl @AssistedInject constructor(
           is EventMainVM.Action.SetWaypointVisited -> {
             contract.setWaypointVisited(waypoint = action.lastWaypoint)
           }
+          is EventMainVM.Action.OnCompleted -> {
+            eventBackendInteractor.closeSession()
+            EventMainVM.Action.Navigation.Completed(response = action.response).emit()
+          }
           else -> {}
         }
       }
@@ -317,6 +327,10 @@ class EventMainVMImpl @AssistedInject constructor(
 
   override fun onBackClick() {
     dispatchAction(EventMainVM.Action.Back)
+  }
+
+  override fun onCompleted(response: FinishSessionResponse) {
+    dispatchAction(EventMainVM.Action.OnCompleted(response = response))
   }
 
   override fun mapScreenData(): EventMainVM.ScreenData = mapper(

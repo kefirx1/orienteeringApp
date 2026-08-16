@@ -19,6 +19,7 @@ import pl.dev.bkwiatkowski.common.ui.component.icon.ZoomImageData
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
 import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
+import pl.dev.bkwiatkowski.feature.event.domain.model.FinishSessionResponse
 import java.time.LocalDateTime
 
 interface EventMapVM {
@@ -36,6 +37,9 @@ interface EventMapVM {
   sealed interface Action {
     sealed interface Navigation : Action {
       data object Back : Navigation
+      data class Completed(
+        val response: FinishSessionResponse,
+      ) : Navigation
     }
 
     data object Back : Action
@@ -46,6 +50,7 @@ interface EventMapVM {
     data class UpdateNextWaypoint(
       val nextWaypoint: MapWaypoint?,
     ) : Action
+    data object CompleteEvent : Action
     data object CheckWaypoint : Action
   }
 
@@ -143,6 +148,18 @@ class EventMapVMImpl @AssistedInject constructor(
               }
             }
           }
+          is EventMapVM.Action.CompleteEvent -> {
+            eventBackendInteractor.finishEventSession(
+              sessionUuid = currentState.eventDetails.session.id,
+            ).fold(
+              onRight = { response ->
+                EventMapVM.Action.Navigation.Completed(response = response).emit()
+              },
+              onLeft = { error ->
+                // TODO: handle error
+              }
+            )
+          }
           else -> {}
         }
       }
@@ -169,7 +186,7 @@ class EventMapVMImpl @AssistedInject constructor(
 
             when {
               nextWaypoint == null -> {
-                // event completed?
+                dispatchAction(EventMapVM.Action.CompleteEvent)
               }
               waypoint == null -> {
                 dispatchAction(
