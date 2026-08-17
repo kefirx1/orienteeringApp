@@ -9,11 +9,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
+import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
+import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.feature.event.domain.model.FinishSessionResponse
+import pl.dev.bkwiatkowski.feature.event.presentation.game.EventGameVM
 
 interface SuccessEventVM {
   sealed interface State {
     data class Active(
+      val eventName: String,
       val finishResponse: FinishSessionResponse,
     ) : State
   }
@@ -31,10 +35,17 @@ interface SuccessEventVM {
 
     data class Main(
       override val onBackClick: () -> Unit,
+      val topAppBarData: TopAppBarData,
+      val description: String,
+      val startDateTime: String,
+      val finishDateTime: String,
+      val waypoints: List<EventGameVM.WaypointData>,
+      val closButtonData: LargeButtonData.Primary,
     ) : ScreenData
   }
 
   data class SetupData(
+    val eventName: String,
     val finishSessionResponse: FinishSessionResponse,
   )
 
@@ -48,6 +59,7 @@ class SuccessEventVMImpl @AssistedInject constructor(
 ) : CustomViewModel<SuccessEventVM.State, SuccessEventVM.ScreenData, SuccessEventVM.Action.Navigation>(
   initialStateValue = SuccessEventVM.State.Active(
     finishResponse = setupData.finishSessionResponse,
+    eventName = setupData.eventName,
   ),
 ), SuccessEventVM {
 

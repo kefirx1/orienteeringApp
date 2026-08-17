@@ -43,4 +43,46 @@ data class AppNavController(
     }
   }
 
+  fun pop(
+    destination: Destination,
+    included: Boolean = true,
+  ) {
+    Log.i(tag = Tag(this), message = "before pop $destination (included: $included)")
+
+    navController.currentBackStack.value.forEachIndexed { index, entry ->
+      Log.i(tag = Tag(this), message = "- $index: ${entry.destination.route}")
+    }
+
+    var destinationToNavigate: String? = null
+
+    navController.currentBackStack.value.forEachIndexed { index, entry ->
+      if (included) {
+        if (entry.destination.route == destination.route && index > 0) {
+          destinationToNavigate = navController.currentBackStack.value[index - 1].destination.route
+        }
+      } else {
+        destinationToNavigate = destination.route
+      }
+    }
+
+    if (destinationToNavigate == null) {
+      Log.i(tag = Tag(this), message = "$destination is not in backStack")
+      return
+    }
+
+    navController.navigate(destinationToNavigate) {
+      popUpTo(destinationToNavigate) {
+        saveState = false
+      }
+      launchSingleTop = true
+      restoreState = true
+    }
+
+    Log.i(tag = Tag(this), message = "after pop $destination (included: $included)")
+
+    navController.currentBackStack.value.forEachIndexed { index, entry ->
+      Log.i(tag = Tag(this), message = "- $index: ${entry.destination.route}")
+    }
+  }
+
 }

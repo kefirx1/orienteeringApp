@@ -48,6 +48,7 @@ fun NavGraphBuilder.eventNavGraph(
               destination = EventDestination.Success,
               data = SuccessEventVM.SetupData(
                 finishSessionResponse = action.response,
+                eventName = action.eventName,
               ),
             )
             navController.navigate(
@@ -67,7 +68,9 @@ fun NavGraphBuilder.eventNavGraph(
       },
       navActionHandler = { action, contractViewModel ->
         when (action) {
-          is SuccessEventVM.Action.Navigation.Back -> onResult(EventResult.Back)
+          is SuccessEventVM.Action.Navigation.Back -> {
+            onResult(EventResult.Back)
+          }
         }
       }
     )

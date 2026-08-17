@@ -38,5 +38,9 @@ object EventModule {
   fun provideCompareUserLocationUC(): FindWaypointFromUserLocationUC = FindWaypointFromUserLocationUCImpl()
 
   @Provides
-  fun provideSuccessEventMapper(): SuccessEventMapper = SuccessEventMapperImpl()
+  fun provideSuccessEventMapper(
+    dateFormatter: DateFormatter,
+  ): SuccessEventMapper = SuccessEventMapperImpl(
+    dateFormatter = dateFormatter,
+  )
 }

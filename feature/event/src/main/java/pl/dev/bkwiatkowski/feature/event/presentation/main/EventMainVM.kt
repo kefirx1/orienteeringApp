@@ -61,6 +61,7 @@ interface EventMainVM {
       data object Back : Navigation
       data class Completed(
         val response: FinishSessionResponse,
+        val eventName: String,
       ) : Navigation
     }
 
@@ -244,7 +245,10 @@ class EventMainVMImpl @AssistedInject constructor(
           }
           is EventMainVM.Action.OnCompleted -> {
             eventBackendInteractor.closeSession()
-            EventMainVM.Action.Navigation.Completed(response = action.response).emit()
+            EventMainVM.Action.Navigation.Completed(
+              response = action.response,
+              eventName = currentState.stateData.details.name,
+            ).emit()
           }
           else -> {}
         }

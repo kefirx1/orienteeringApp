@@ -77,7 +77,7 @@ fun MainAppNavGraph(
       navController = appNavController,
       onResult = { result ->
         when (result) {
-          is EventResult.Back -> appNavController.popBackStack()
+          is EventResult.Back -> appNavController.navigate(destination = DashboardDestination.DashboardGraph)
         }
       },
     )

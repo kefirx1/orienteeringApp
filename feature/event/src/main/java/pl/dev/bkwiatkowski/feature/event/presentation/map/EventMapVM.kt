@@ -217,15 +217,14 @@ class EventMapVMImpl @AssistedInject constructor(
         }
         viewModelScope.launch {
           contract.nextWaypointMonitor().collect { nextWaypoint ->
-            when (val current = state.value) {
-              is EventMapVM.State.Active -> {
-                dispatchAction(
-                  EventMapVM.Action.UpdateNextWaypoint(
-                    nextWaypoint = nextWaypoint,
-                  ),
-                )
-              }
-              else -> {}
+            if (nextWaypoint == null) {
+              dispatchAction(EventMapVM.Action.CompleteEvent)
+            } else {
+              dispatchAction(
+                EventMapVM.Action.UpdateNextWaypoint(
+                  nextWaypoint = nextWaypoint,
+                ),
+              )
             }
           }
         }
