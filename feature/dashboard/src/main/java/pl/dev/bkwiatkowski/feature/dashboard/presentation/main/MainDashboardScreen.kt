@@ -73,7 +73,7 @@ fun MainDashboardScreenContent(
           friendsCardTitle = data.friendsCardTitle,
           friendsCardEmptyState = data.friendsCardEmptyState,
           friendsStatsData = data.friendsData,
-          addNewFriendsButtonData = data.addNewFriendsButton,
+          addNewFriendsButtonData = data.goToFriendsButton,
         )
         Spacer(modifier = Modifier.height(32.dp))
 

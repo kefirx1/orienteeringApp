@@ -21,6 +21,9 @@ import pl.dev.bkwiatkowski.feature.dashboard.presentation.settings.SettingsDashb
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.userprofile.UserProfileDashboardScreen
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.userprofile.UserProfileDashboardVM
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.userprofile.UserProfileDashboardVMImpl
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.friends.FriendsDashboardScreen
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.friends.FriendsDashboardVM
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.friends.FriendsDashboardVMImpl
 
 fun NavGraphBuilder.dashboardNavGraph(
   navController: AppNavController,
@@ -43,6 +46,7 @@ fun NavGraphBuilder.dashboardNavGraph(
           is MainDashboardVM.Action.Navigation.GoToNewRuns -> {}
           is MainDashboardVM.Action.Navigation.GoToMyProfile -> navController.navigate(destination = DashboardDestination.UserProfile)
           is MainDashboardVM.Action.Navigation.GoToMap -> onResult(DashboardResult.ToMaps)
+          is MainDashboardVM.Action.Navigation.GoToFriends -> navController.navigate(destination = DashboardDestination.Friends)
         }
       }
     )
@@ -100,6 +104,19 @@ fun NavGraphBuilder.dashboardNavGraph(
             navController.popBackStack()
             action.dialogAction()
           }
+        }
+      }
+    )
+
+    createDestination<Nothing, DashboardContractVM, FriendsDashboardVMImpl, FriendsDashboardVM.Action.Navigation>(
+      destination = DashboardDestination.Friends,
+      navController = navController,
+      content = { viewModel ->
+        FriendsDashboardScreen(viewModel = viewModel)
+      },
+      navActionHandler = { action, contractViewModel ->
+        when (action) {
+          is FriendsDashboardVM.Action.Navigation.Back -> navController.popBackStack()
         }
       }
     )

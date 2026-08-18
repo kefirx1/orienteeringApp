@@ -14,7 +14,7 @@ interface MainDashboardMapper : Mapper<MainDashboardMapper.Params, MainDashboard
     val onNotificationsClick: () -> Unit,
     val onSettingsClick: () -> Unit,
     val onNewRunClick: () -> Unit,
-    val onAddNewFriendsClick: () -> Unit,
+    val onGoToFriendsClick: () -> Unit,
     val onCheckNewRunsClick: () -> Unit,
     val onMyProfileClick: () -> Unit,
   )
@@ -49,9 +49,12 @@ class MainDashboardMapperImpl : MainDashboardMapper {
           onClick = params.onMyProfileClick,
           text = "Mój profil",
         ),
-        addNewFriendsButton = SmallButtonData.Secondary(
-          text = "Dodaj znajomych",
-          onClick = params.onAddNewFriendsClick,
+        goToFriendsButton = SmallButtonData.Secondary(
+          text = when {
+            params.state.friendsData.friends.isEmpty() -> "Dodaj znajomych"
+            else -> "Sprawdź znajomych"
+          },
+          onClick = params.onGoToFriendsClick,
         ),
         checkNewRunsButton = SmallButtonData.Secondary(
           text = "Sprawdź",

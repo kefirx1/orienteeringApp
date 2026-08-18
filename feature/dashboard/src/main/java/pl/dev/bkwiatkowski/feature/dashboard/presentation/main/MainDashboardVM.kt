@@ -40,11 +40,12 @@ interface MainDashboardVM {
       data object GoToMap : Navigation
       data object GoToNewRuns: Navigation
       data object GoToMyProfile: Navigation
+      data object GoToFriends: Navigation
     }
 
     data object NewRun : Action
     data object ToSettings : Action
-    data object AddNewFriends : Action
+    data object GoToFriends : Action
     data object CheckNewRuns : Action
     data object ToMyProfile : Action
     data object LoadData : Action
@@ -69,7 +70,7 @@ interface MainDashboardVM {
       val myProfileCard: ActionCardData,
       val settingsCard: ActionCardData,
       val newRunFab: FabData,
-      val addNewFriendsButton: SmallButtonData,
+      val goToFriendsButton: SmallButtonData,
       val checkNewRunsButton: SmallButtonData,
     ) : ScreenData
 
@@ -152,8 +153,8 @@ class MainDashboardVMImpl @Inject constructor(
             is MainDashboardVM.Action.NewRun -> {
               MainDashboardVM.Action.Navigation.GoToMap.emit()
             }
-            is MainDashboardVM.Action.AddNewFriends -> {
-              //todo implement add new friends
+            is MainDashboardVM.Action.GoToFriends -> {
+              MainDashboardVM.Action.Navigation.GoToFriends.emit()
             }
             is MainDashboardVM.Action.CheckNewRuns -> {
               MainDashboardVM.Action.Navigation.GoToNewRuns.emit()
@@ -195,8 +196,8 @@ class MainDashboardVMImpl @Inject constructor(
       onCheckNewRunsClick = {
         dispatchAction(MainDashboardVM.Action.CheckNewRuns)
       },
-      onAddNewFriendsClick = {
-        dispatchAction(MainDashboardVM.Action.AddNewFriends)
+      onGoToFriendsClick = {
+        dispatchAction(MainDashboardVM.Action.GoToFriends)
       },
       onMyProfileClick = {
         dispatchAction(MainDashboardVM.Action.ToMyProfile)

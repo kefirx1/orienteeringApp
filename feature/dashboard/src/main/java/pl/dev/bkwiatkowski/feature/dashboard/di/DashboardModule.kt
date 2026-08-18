@@ -16,6 +16,8 @@ import pl.dev.bkwiatkowski.feature.dashboard.presentation.userprofile.UserProfil
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.userprofile.UserProfileDashboardMapperImpl
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.changepassword.ChangePasswordMapper
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.changepassword.ChangePasswordMapperImpl
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.friends.FriendsDashboardMapper
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.friends.FriendsDashboardMapperImpl
 import pl.dev.bkwiatkowski.common.core.validators.TextValidator
 import pl.dev.bkwiatkowski.feature.dashboard.domain.usecase.ValidatePasswordUC
 import pl.dev.bkwiatkowski.feature.dashboard.domain.usecase.ValidatePasswordUCImpl
@@ -34,6 +36,9 @@ object DashboardModule {
 
   @Provides
   fun provideUserProfileDashboardMapper(): UserProfileDashboardMapper = UserProfileDashboardMapperImpl()
+
+  @Provides
+  fun provideFriendsDashboardMapper(): FriendsDashboardMapper = FriendsDashboardMapperImpl()
 
   @Provides
   fun provideChangePasswordMapper(): ChangePasswordMapper = ChangePasswordMapperImpl()

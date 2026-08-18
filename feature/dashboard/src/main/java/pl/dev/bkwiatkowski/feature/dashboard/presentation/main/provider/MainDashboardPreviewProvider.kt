@@ -63,7 +63,7 @@ class MainDashboardPreviewProvider : ViewModelPreviewProvider<MainDashboardVM, M
       onNotificationsClick = {},
       onSettingsClick = {},
       onNewRunClick = {},
-      onAddNewFriendsClick = {},
+      onGoToFriendsClick = {},
       onCheckNewRunsClick = {},
       onMyProfileClick = {},
     )
