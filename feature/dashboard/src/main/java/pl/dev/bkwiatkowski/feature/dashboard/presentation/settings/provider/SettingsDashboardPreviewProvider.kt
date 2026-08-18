@@ -21,5 +21,6 @@ class SettingsDashboardPreviewProvider : ViewModelPreviewProvider<SettingsDashbo
     SettingsDashboardMapper.Params(
       state = state,
       onBackClick = {},
+      onLogoutClick = {},
     )
 }

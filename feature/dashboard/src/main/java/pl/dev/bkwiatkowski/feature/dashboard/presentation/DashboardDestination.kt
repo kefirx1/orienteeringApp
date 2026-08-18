@@ -16,9 +16,13 @@ sealed interface DashboardDestination : Destination {
 
   @Serializable
   data object UserProfile : DashboardDestination
+
+  @Serializable
+  data object DashboardDialog : DashboardDestination
 }
 
 sealed interface DashboardResult {
   data object ExitApp : DashboardResult
   data object ToMaps : DashboardResult
+  data object Logout : DashboardResult
 }

@@ -29,4 +29,9 @@ class UserRepositoryImpl(
       type = UserSettingsDto::class.java,
       dataStoreKeyProvider = DataStoreProvider.DataStoreKeyProvider.AppSecretKey,
     ).mapRight { it.toDomain() }
+
+  override suspend fun clearUserSettings(): Either<DomainError, Unit> =
+    dataStoreProvider.clearDataStoreData(
+      dataStoreKey = USER_SETTINGS_STORE_NAME,
+    )
 }

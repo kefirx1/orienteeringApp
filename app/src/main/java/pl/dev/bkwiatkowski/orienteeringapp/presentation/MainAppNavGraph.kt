@@ -49,6 +49,7 @@ fun MainAppNavGraph(
         when (result) {
           DashboardResult.ExitApp -> onAppExit()
           DashboardResult.ToMaps -> appNavController.navigate(destination = MapsDestination.MapsGraph)
+          DashboardResult.Logout -> appNavController.navigate(destination = LoginDestinations.LoginGraph)
         }
       },
     )

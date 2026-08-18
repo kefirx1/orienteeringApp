@@ -2,12 +2,14 @@ package pl.dev.bkwiatkowski.feature.dashboard.presentation.settings
 
 import pl.dev.bkwiatkowski.common.core.usecase.Mapper
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
+import pl.dev.bkwiatkowski.common.ui.component.card.ActionCardData
 import javax.inject.Inject
 
 interface SettingsDashboardMapper : Mapper<SettingsDashboardMapper.Params, SettingsDashboardVM.ScreenData> {
   data class Params(
     val state: SettingsDashboardVM.State,
     val onBackClick: () -> Unit,
+    val onLogoutClick: () -> Unit,
   )
 }
 
@@ -19,6 +21,10 @@ class SettingsDashboardMapperImpl @Inject constructor() : SettingsDashboardMappe
         topBarData = TopAppBarData.BackAndTitle(
           title = "Ustawienia",
           onNavigationIconClick = params.onBackClick,
+        ),
+        logoutCard = ActionCardData(
+          onClick = params.onLogoutClick,
+          text = "Wyloguj się",
         ),
       )
     }

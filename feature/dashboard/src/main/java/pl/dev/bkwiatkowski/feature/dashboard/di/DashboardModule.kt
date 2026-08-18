@@ -10,6 +10,8 @@ import pl.dev.bkwiatkowski.feature.dashboard.presentation.main.MainDashboardMapp
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.main.MainDashboardMapperImpl
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.settings.SettingsDashboardMapper
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.settings.SettingsDashboardMapperImpl
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.settings.SettingsDialogMapper
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.settings.SettingsDialogMapperImpl
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.userprofile.UserProfileDashboardMapper
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.userprofile.UserProfileDashboardMapperImpl
 
@@ -28,4 +30,7 @@ object DashboardModule {
 
   @Provides
   fun provideGetFriendsStatsDataUC(): GetFriendsStatsDataUC = GetFriendsStatsDataUCImpl()
+
+  @Provides
+  fun provideSettingsDialogMapper(): SettingsDialogMapper = SettingsDialogMapperImpl()
 }

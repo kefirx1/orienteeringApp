@@ -31,6 +31,8 @@ import pl.dev.bkwiatkowski.technical.user.domain.usecase.LoginUserRemoteUC
 import pl.dev.bkwiatkowski.technical.user.domain.usecase.LoginUserRemoteUCImpl
 import pl.dev.bkwiatkowski.technical.user.domain.usecase.LoginUserToAppUC
 import pl.dev.bkwiatkowski.technical.user.domain.usecase.LoginUserToAppUCImpl
+import pl.dev.bkwiatkowski.technical.user.domain.usecase.LogoutUC
+import pl.dev.bkwiatkowski.technical.user.domain.usecase.LogoutUCImpl
 import javax.inject.Singleton
 
 @Module
@@ -129,6 +131,15 @@ object UserModule {
   fun provideHasValidRefreshTokenUC(
     sessionRepository: SessionRepository,
   ): HasValidRefreshTokenUC = HasValidRefreshTokenUCImpl(
+    sessionRepository = sessionRepository,
+  )
+
+  @Provides
+  fun provideLogoutUC(
+    userRepository: UserRepository,
+    sessionRepository: SessionRepository,
+  ): LogoutUC = LogoutUCImpl(
+    userRepository = userRepository,
     sessionRepository = sessionRepository,
   )
 }

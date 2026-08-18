@@ -3,7 +3,12 @@ package pl.dev.bkwiatkowski.feature.dashboard.presentation
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.navigation
 import pl.dev.bkwiatkowski.common.core.navigation.AppNavController
+import pl.dev.bkwiatkowski.common.core.navigation.DestinationType
 import pl.dev.bkwiatkowski.common.core.navigation.createDestination
+import pl.dev.bkwiatkowski.common.ui.component.dialog.DialogData
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.dialog.DashboardDialogScreen
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.dialog.DashboardDialogVM
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.dialog.DashboardDialogVMImpl
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.main.MainDashboardScreen
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.main.MainDashboardVM
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.main.MainDashboardVMImpl
@@ -48,6 +53,32 @@ fun NavGraphBuilder.dashboardNavGraph(
       navActionHandler = { action, contractViewModel ->
         when (action) {
           is SettingsDashboardVM.Action.Navigation.Back -> navController.popBackStack()
+          is SettingsDashboardVM.Action.Navigation.OpenLogoutDialog -> {
+            contractViewModel.setContractData(
+              destination = DashboardDestination.DashboardDialog,
+              data = action.dialogData,
+            )
+
+            navController.navigate(destination = DashboardDestination.DashboardDialog)
+          }
+          is SettingsDashboardVM.Action.Navigation.Logout -> onResult(DashboardResult.Logout)
+        }
+      }
+    )
+
+    createDestination<DialogData, DashboardContractVM, DashboardDialogVMImpl, DashboardDialogVM.Action.Navigation>(
+      destination = DashboardDestination.DashboardDialog,
+      destinationType = DestinationType.Dialog,
+      navController = navController,
+      content = { viewModel ->
+        DashboardDialogScreen(viewModel = viewModel)
+      },
+      navActionHandler = { action, contractViewModel ->
+        when (action) {
+          is DashboardDialogVM.Action.Navigation.OnDialogAction -> {
+            navController.popBackStack()
+            action.dialogAction()
+          }
         }
       }
     )

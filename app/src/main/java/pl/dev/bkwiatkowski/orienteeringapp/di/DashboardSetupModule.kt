@@ -10,6 +10,7 @@ import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.feature.dashboard.domain.interactor.DashboardInteractor
 import pl.dev.bkwiatkowski.technical.mobile.domain.usecase.FetchMobileSettingsUC
 import pl.dev.bkwiatkowski.technical.user.domain.usecase.GetUserNameUC
+import pl.dev.bkwiatkowski.technical.user.domain.usecase.LogoutUC
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -19,6 +20,7 @@ object DashboardSetupModule {
   fun provideDashboardMobileInteractor(
     fetchMobileSettingsUC: FetchMobileSettingsUC,
     getUserNameUC: GetUserNameUC,
+    logoutUC: LogoutUC,
   ): DashboardInteractor =
     object : DashboardInteractor {
       override suspend fun fetchMobileSettings(): Either<DomainError, Unit> =
@@ -27,5 +29,7 @@ object DashboardSetupModule {
       override suspend fun getUserName(): Either<DomainError, String> =
         getUserNameUC(UseCase.Params.Empty)
 
+      override suspend fun logout(): Either<DomainError, Unit> =
+        logoutUC(params = UseCase.Params.Empty)
     }
 }
