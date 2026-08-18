@@ -33,6 +33,7 @@ import pl.dev.bkwiatkowski.common.ui.component.icon.CustomImage
 import pl.dev.bkwiatkowski.common.ui.component.icon.ImageSize
 import pl.dev.bkwiatkowski.common.ui.component.icon.ZoomImage
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
+import pl.dev.bkwiatkowski.common.ui.error.ErrorScreen
 import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 import pl.dev.bkwiatkowski.feature.event.presentation.map.provider.EventMapPreviewProvider
 
@@ -48,6 +49,7 @@ fun EventMapScreen(
   when (val screenData = state) {
     is EventMapVM.ScreenData.Loading -> EmptyScreen()
     is EventMapVM.ScreenData.Main -> EventMapScreenContent(data = screenData)
+    is EventMapVM.ScreenData.ErrorScreen -> ErrorScreen(data = screenData.errorData)
   }
 
   BackHandler {

@@ -35,7 +35,7 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
       override val screenData = MutableStateFlow(
         value = mapper(
           params = getMapperParams(
-            state = EventMainVM.State.Active(
+            state = EventMainVM.State.Active.Content(
               stateData = EventMainVM.StateData(
                 currentTab = EventMainVM.StateData.CurrentTab.MAP,
                 details = MobileEventDetails(

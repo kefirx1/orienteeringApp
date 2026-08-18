@@ -23,6 +23,10 @@ interface MainDashboardMapper : Mapper<MainDashboardMapper.Params, MainDashboard
 class MainDashboardMapperImpl : MainDashboardMapper {
   override fun invoke(params: MainDashboardMapper.Params): MainDashboardVM.ScreenData =
     when (params.state) {
+      is MainDashboardVM.State.Error -> MainDashboardVM.ScreenData.ErrorScreen(
+        onBackClick = params.onBackClick,
+        errorData = params.state.errorScreenData,
+      )
       MainDashboardVM.State.Initial -> MainDashboardVM.ScreenData.Initial(
         onBackClick = params.onBackClick,
       )

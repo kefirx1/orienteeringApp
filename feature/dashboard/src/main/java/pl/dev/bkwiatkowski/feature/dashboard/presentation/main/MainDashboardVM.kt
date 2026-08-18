@@ -5,6 +5,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
+import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
+import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
@@ -20,6 +22,11 @@ import javax.inject.Inject
 interface MainDashboardVM {
   sealed interface State {
     data object Initial : State
+
+    data class Error(
+      val errorScreenData: ErrorScreenData,
+    ) : State
+
     data class Active(
       val userName: String,
       val friendsData: FriendsStatsData,
@@ -65,6 +72,11 @@ interface MainDashboardVM {
       val addNewFriendsButton: SmallButtonData,
       val checkNewRunsButton: SmallButtonData,
     ) : ScreenData
+
+    data class ErrorScreen(
+      override val onBackClick: () -> Unit,
+      val errorData: ErrorScreenData,
+    ) : ScreenData
   }
 
   val screenData: StateFlow<ScreenData>
@@ -74,6 +86,7 @@ interface MainDashboardVM {
 class MainDashboardVMImpl @Inject constructor(
   private val mapper: MainDashboardMapper,
   private val runWithLoaderUC: RunWithLoaderUC,
+  private val errorDataMapper: ErrorDataMapper,
   private val getFriendsStatsDataUC: GetFriendsStatsDataUC,
   private val dashboardInteractor: DashboardInteractor,
 ) : CustomViewModel<MainDashboardVM.State, MainDashboardVM.ScreenData, MainDashboardVM.Action.Navigation>(
@@ -107,14 +120,25 @@ class MainDashboardVMImpl @Inject constructor(
                     userName = userName,
                     friendsData = friendsData,
                   ).override()
-                }.onLeft {
-                  //todo handle error
+                }.onLeft { error ->
+                  MainDashboardVM.State.Error(
+                    errorScreenData = errorDataMapper(
+                      params = ErrorDataMapper.Params(
+                        error = error,
+                        onCloseClick = { dispatchAction(MainDashboardVM.Action.Back) },
+                      )
+                    ),
+                  ).override()
                 }
               }
 
             }
             else -> {}
           }
+        }
+        is MainDashboardVM.State.Error -> when (action) {
+          is MainDashboardVM.Action.Back -> MainDashboardVM.State.Initial.override()
+          else -> {}
         }
 
         is MainDashboardVM.State.Active -> {
@@ -151,6 +175,7 @@ class MainDashboardVMImpl @Inject constructor(
       }
 
       is MainDashboardVM.State.Active -> {}
+      is MainDashboardVM.State.Error -> {}
     }
   }
 

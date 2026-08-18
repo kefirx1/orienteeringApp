@@ -4,6 +4,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
+import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.ui.component.map.MapComponentData
@@ -15,6 +17,11 @@ import javax.inject.Inject
 interface EventsMapVM {
   sealed interface State {
     data object Loading : State
+
+    data class Error(
+      val errorScreenData: ErrorScreenData,
+    ) : State
+
     data class Initialized(
       val events: MobileEvents?,
     ) : State
@@ -46,6 +53,11 @@ interface EventsMapVM {
     data class Loading(
       override val onBackClick: () -> Unit,
     ) : ScreenData
+
+    data class ErrorScreen(
+      override val onBackClick: () -> Unit,
+      val errorData: ErrorScreenData,
+    ) : ScreenData
   }
 
   val screenData: StateFlow<ScreenData>
@@ -56,6 +68,7 @@ class EventsMapVMImpl @Inject constructor(
   private val mapper: EventsMapMapper,
   private val mapsBackendInteractor: MapsBackendInteractor,
   private val runWithLoaderUC: RunWithLoaderUC,
+  private val errorDataMapper: ErrorDataMapper,
 ) : CustomViewModel<EventsMapVM.State, EventsMapVM.ScreenData, EventsMapVM.Action.Navigation>(
   initialStateValue = EventsMapVM.State.Loading,
 ), EventsMapVM {
@@ -80,6 +93,10 @@ class EventsMapVMImpl @Inject constructor(
 
           else -> {}
         }
+        is EventsMapVM.State.Error -> when (action) {
+          is EventsMapVM.Action.Back -> EventsMapVM.State.Loading.override()
+          else -> {}
+        }
       }
     }
   }
@@ -92,10 +109,18 @@ class EventsMapVMImpl @Inject constructor(
             EventsMapVM.State.Initialized(events = events).override()
           },
           onLeft = { error ->
-            // Handle error if needed
+            EventsMapVM.State.Error(
+              errorScreenData = errorDataMapper(
+                params = ErrorDataMapper.Params(
+                  error = error,
+                  onCloseClick = { dispatchAction(EventsMapVM.Action.Back) },
+                )
+              ),
+            ).override()
           }
         )
       }
+        is EventsMapVM.State.Error -> {}
       is EventsMapVM.State.Initialized -> {}
     }
   }

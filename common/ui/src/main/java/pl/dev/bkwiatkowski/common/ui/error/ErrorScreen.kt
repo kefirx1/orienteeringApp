@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
 import pl.dev.bkwiatkowski.common.ui.R
 import pl.dev.bkwiatkowski.common.ui.component.addDefaultPadding
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
@@ -21,12 +22,6 @@ import pl.dev.bkwiatkowski.common.ui.component.icon.CustomImage
 import pl.dev.bkwiatkowski.common.ui.component.icon.ImageSize
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
 import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
-
-data class ErrorScreenData(
-  val customMessage: String?,
-  val onCloseButtonClick: () -> Unit,
-  val onRetryButtonClick: (() -> Unit)?,
-)
 
 @Composable
 fun ErrorScreen(
@@ -67,7 +62,7 @@ fun ErrorScreen(
           LargeButton(
             buttonData = LargeButtonData.Primary(
               text = "Spróbuj ponownie",
-              onClick = data.onRetryButtonClick,
+              onClick = data.onRetryButtonClick!!,
             ),
           )
           Spacer(modifier = Modifier.height(12.dp))

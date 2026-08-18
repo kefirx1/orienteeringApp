@@ -18,10 +18,18 @@ class EventMapMapperImpl(
 ) : EventMapMapper {
   override fun invoke(params: EventMapMapper.Params): EventMapVM.ScreenData =
     when (params.state) {
-      is EventMapVM.State.Loading -> EventMapVM.ScreenData.Loading(
+      is EventMapVM.State.Loading.Error -> EventMapVM.ScreenData.ErrorScreen(
+        onBackClick = params.onBackClick,
+        errorData = params.state.errorScreenData,
+      )
+      is EventMapVM.State.Loading.Content -> EventMapVM.ScreenData.Loading(
         onBackClick = params.onBackClick,
       )
-      is EventMapVM.State.Active -> {
+      is EventMapVM.State.Active.Error -> EventMapVM.ScreenData.ErrorScreen(
+        onBackClick = params.onBackClick,
+        errorData = params.state.errorScreenData,
+      )
+      is EventMapVM.State.Active.Content -> {
         val details = params.state.eventDetails
 
         EventMapVM.ScreenData.Main(

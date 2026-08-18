@@ -18,6 +18,10 @@ interface EventsMapMapper : Mapper<EventsMapMapper.Params, EventsMapVM.ScreenDat
 class EventsMapMapperImpl : EventsMapMapper {
   override fun invoke(params: EventsMapMapper.Params): EventsMapVM.ScreenData =
     when (params.state) {
+      is EventsMapVM.State.Error -> EventsMapVM.ScreenData.ErrorScreen(
+        onBackClick = params.onBackClick,
+        errorData = params.state.errorScreenData,
+      )
       is EventsMapVM.State.Loading ->
         EventsMapVM.ScreenData.Loading(
           onBackClick = params.onBackClick,

@@ -1,5 +1,6 @@
 package pl.dev.bkwiatkowski.feature.login.presentation.login.mapper
 
+import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
 import pl.dev.bkwiatkowski.common.core.usecase.Mapper
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.input.TextFieldData
@@ -22,11 +23,15 @@ interface LoginScreenMapper : Mapper<Params, LoginVM.ScreenData> {
 
 class LoginScreenMapperImpl : LoginScreenMapper {
   override fun invoke(params: Params): LoginVM.ScreenData =
-    when (params.state) {
+    when (val state = params.state) {
       LoginVM.State.Initial -> LoginVM.ScreenData.Initial(
         onBackClick = params.onBackClick,
       )
-      is LoginVM.State.NewLogin -> LoginVM.ScreenData.NewLoginScreen(
+      is LoginVM.State.NewLogin.Error -> LoginVM.ScreenData.ErrorScreen(
+        onBackClick = params.onBackClick,
+        errorData = state.errorScreenData,
+      )
+      is LoginVM.State.NewLogin.Content -> LoginVM.ScreenData.NewLoginScreen(
         appName = "OrienteeringApp",
         infoLabel = "Zaloguj się do swojego konta!",
         usernameInput = TextFieldData(

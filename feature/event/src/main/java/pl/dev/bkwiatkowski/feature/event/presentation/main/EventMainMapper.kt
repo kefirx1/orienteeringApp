@@ -19,7 +19,11 @@ interface EventMainMapper : Mapper<EventMainMapper.Params, EventMainVM.ScreenDat
 class EventMainMapperImpl : EventMainMapper {
   override fun invoke(params: EventMainMapper.Params): EventMainVM.ScreenData =
     when (val state = params.state) {
-      is EventMainVM.State.Initial -> EventMainVM.ScreenData.Loading(
+      is EventMainVM.State.Initial.Error -> EventMainVM.ScreenData.ErrorScreen(
+        onBackClick = params.onBackClick,
+        errorData = state.errorScreenData,
+      )
+      is EventMainVM.State.Initial.Content -> EventMainVM.ScreenData.Loading(
         onBackClick = params.onBackClick,
       )
       is EventMainVM.State.PermissionDenied -> EventMainVM.ScreenData.PermissionDenied(
@@ -37,7 +41,11 @@ class EventMainMapperImpl : EventMainMapper {
           isDeniedForever = state.isDeniedForever,
         )
       )
-      is EventMainVM.State.Active -> EventMainVM.ScreenData.Main(
+      is EventMainVM.State.Active.Error -> EventMainVM.ScreenData.ErrorScreen(
+        onBackClick = params.onBackClick,
+        errorData = state.errorScreenData,
+      )
+      is EventMainVM.State.Active.Content -> EventMainVM.ScreenData.Main(
         onBackClick = params.onBackClick,
         onOpenMapClick = params.onOpenMapClick,
         onOpenGameClick = params.onOpenGameClick,

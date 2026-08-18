@@ -9,6 +9,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
 import pl.dev.bkwiatkowski.common.ui.component.emptyscreen.EmptyScreen
 import pl.dev.bkwiatkowski.common.ui.component.map.MapComponent
+import pl.dev.bkwiatkowski.common.ui.error.ErrorScreen
 import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 import pl.dev.bkwiatkowski.feature.maps.presentation.eventsmap.provider.EventsMapPreviewProvider
 
@@ -18,6 +19,7 @@ fun EventsMapScreen(viewModel: EventsMapVM) {
 
   when (val screenData = state) {
     is EventsMapVM.ScreenData.Loading -> EmptyScreen()
+    is EventsMapVM.ScreenData.ErrorScreen -> ErrorScreen(data = screenData.errorData)
     is EventsMapVM.ScreenData.Main -> EventsMapsScreenContent(data = screenData)
   }
 

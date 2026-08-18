@@ -4,6 +4,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
+import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
@@ -19,12 +21,20 @@ import javax.inject.Inject
 interface LoginVM {
   sealed interface State {
     data object Initial : State
-    data class NewLogin(
-      val typedUserName: String = "",
-      val userNameState: ValidationState = ValidationState.UnVerified,
-      val typedPassword: String = "",
-      val passwordState: ValidationState = ValidationState.UnVerified,
-    ) : State
+
+    sealed interface NewLogin : State {
+      data class Content(
+        val typedUserName: String = "",
+        val userNameState: ValidationState = ValidationState.UnVerified,
+        val typedPassword: String = "",
+        val passwordState: ValidationState = ValidationState.UnVerified,
+      ) : NewLogin
+
+      data class Error(
+        val errorScreenData: ErrorScreenData,
+      ) : NewLogin
+    }
+
     data object Registration : State
   }
 
@@ -47,6 +57,11 @@ interface LoginVM {
 
   sealed interface ScreenData {
     val onBackClick: () -> Unit
+
+    data class ErrorScreen(
+      override val onBackClick: () -> Unit,
+      val errorData: ErrorScreenData,
+    ) : ScreenData
 
     data class NewLoginScreen(
       val appName: String,
@@ -80,6 +95,7 @@ class LoginVMImpl @Inject constructor(
   private val loginScreenMapper: LoginScreenMapper,
   private val runWithLoaderUC: RunWithLoaderUC,
   private val loginUserInteractor: LoginUserInteractor,
+  private val errorDataMapper: ErrorDataMapper,
 ) : CustomViewModel<State, ScreenData, Action.Navigation>(
   initialStateValue = State.Initial,
 ), LoginVM {
@@ -99,7 +115,7 @@ class LoginVMImpl @Inject constructor(
           is Action.Back -> Action.Navigation.Back.emit()
           else ->  {}
         }
-        is State.NewLogin -> when (action) {
+        is State.NewLogin.Content -> when (action) {
           is Action.Back -> Action.Navigation.Back.emit()
           is Action.ToOtherScreen -> {
             State.Registration.override()
@@ -110,27 +126,53 @@ class LoginVMImpl @Inject constructor(
             Action.Navigation.ToDashboard.emit()
           }
           is Action.CheckPassword -> {
-            runWithLoaderUC {
-              loginUserInteractor.createNewLocalUser(
-                username = currentState.typedUserName,
-              ).fold(
-                onRight = {
-                  loginUserInteractor.loginUserRemote(
-                    username = currentState.typedUserName,
-                    password = currentState.typedPassword,
-                  ).fold(
-                    onRight = {
-                      dispatchAction(Action.SuccessLogin)
-                    },
-                    onLeft = {
-                      //todo error handling
-                    }
-                  )
-                },
-                onLeft = {
-                  //todo error handling
-                }
-              )
+            val isUserNameEmpty = currentState.typedUserName.isBlank()
+            val isPasswordEmpty = currentState.typedPassword.isBlank()
+
+            if (isUserNameEmpty || isPasswordEmpty) {
+              currentState.copy(
+                userNameState = if (isUserNameEmpty)
+                  ValidationState.Invalid(message = "To pole nie może być puste") else ValidationState.Valid,
+                passwordState = if (isPasswordEmpty)
+                  ValidationState.Invalid(message = "To pole nie może być puste") else ValidationState.Valid,
+              ).mutate()
+            } else {
+              runWithLoaderUC {
+                loginUserInteractor.createNewLocalUser(
+                  username = currentState.typedUserName,
+                ).fold(
+                  onRight = {
+                    loginUserInteractor.loginUserRemote(
+                      username = currentState.typedUserName,
+                      password = currentState.typedPassword,
+                    ).fold(
+                      onRight = {
+                        dispatchAction(Action.SuccessLogin)
+                      },
+                      onLeft = { error ->
+                        State.NewLogin.Error(
+                          errorScreenData = errorDataMapper(
+                            params = ErrorDataMapper.Params(
+                              error = error,
+                              onCloseClick = { dispatchAction(Action.Back) },
+                            )
+                          )
+                        ).override()
+                      }
+                    )
+                  },
+                  onLeft = { error ->
+                    State.NewLogin.Error(
+                      errorScreenData = errorDataMapper(
+                        params = ErrorDataMapper.Params(
+                          error = error,
+                          onCloseClick = { dispatchAction(Action.Back) },
+                        )
+                      )
+                    ).override()
+                  }
+                )
+              }
             }
           }
           is Action.UpdatePassword -> {
@@ -147,13 +189,17 @@ class LoginVMImpl @Inject constructor(
           }
           else -> {}
         }
+        is State.NewLogin.Error -> when (action) {
+          is Action.Back -> State.NewLogin.Content().override()
+          else -> {}
+        }
         State.Registration -> when (action) {
           is Action.Back -> Action.Navigation.Back.emit()
           is Action.ToOnboarding -> {
             Action.Navigation.ToOnboarding.emit()
           }
           is Action.ToLoginScreen -> {
-            State.NewLogin().override()
+            State.NewLogin.Content().override()
           }
           else -> {}
         }
@@ -171,11 +217,11 @@ class LoginVMImpl @Inject constructor(
                 if (hasValid) {
                   dispatchAction(Action.SuccessLogin)
                 } else {
-                  State.NewLogin().override()
+                  State.NewLogin.Content().override()
                 }
               },
               onLeft = {
-                State.NewLogin().override()
+                State.NewLogin.Content().override()
               }
             )
           },

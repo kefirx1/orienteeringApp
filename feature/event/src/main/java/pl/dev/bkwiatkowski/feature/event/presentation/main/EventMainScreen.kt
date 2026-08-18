@@ -24,6 +24,7 @@ import pl.dev.bkwiatkowski.common.ui.component.emptyscreen.EmptyScreen
 import pl.dev.bkwiatkowski.common.ui.component.permissions.PermissionRequester
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
 import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
+import pl.dev.bkwiatkowski.common.ui.error.ErrorScreen
 import pl.dev.bkwiatkowski.feature.event.presentation.main.provider.EventMainPreviewProvider
 
 @Composable
@@ -44,6 +45,7 @@ fun EventMainScreen(
     is EventMainVM.ScreenData.PermissionDenied -> EventMainPermissionDeniedScreen(
       data = screenData,
     )
+    is EventMainVM.ScreenData.ErrorScreen -> ErrorScreen(data = screenData.errorData)
     is EventMainVM.ScreenData.Main -> EventMainScreenContent(
       data = screenData,
       nestedContent = nestedContent,

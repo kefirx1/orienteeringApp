@@ -5,6 +5,8 @@ sealed interface DomainError {
     val e: Throwable? = null,
   ) : DomainError
 
+  data object NoNetwork : DomainError
+
   data class Network(
     val code: Code,
     val message: String? = null,

@@ -8,6 +8,9 @@ import pl.dev.bkwiatkowski.common.core.storage.JsonSerializer
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.network.model.ErrorResponsePayload
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 interface CallMediator {
   suspend operator fun <T> invoke(
@@ -30,6 +33,12 @@ class CallMediatorImpl(
       response
     } catch (e: ResponseException) {
       raise(error = handleError(e = e))
+    } catch (_: UnknownHostException) {
+      raise(error = DomainError.NoNetwork)
+    } catch (_: ConnectException) {
+      raise(error = DomainError.NoNetwork)
+    } catch (_: SocketTimeoutException) {
+      raise(error = DomainError.NoNetwork)
     } catch (e: Exception) {
       raise(error = DomainError.Custom(e))
     }

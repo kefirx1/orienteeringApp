@@ -24,7 +24,11 @@ class EventDetailsMapperImpl(
 ) : EventDetailsMapper {
   override fun invoke(params: EventDetailsMapper.Params): EventDetailsVM.ScreenData =
     when (params.state) {
-      is EventDetailsVM.State.Loading -> EventDetailsVM.ScreenData.Loading(
+      is EventDetailsVM.State.Loading.Error -> EventDetailsVM.ScreenData.ErrorScreen(
+        onBackClick = params.onBackClick,
+        errorData = params.state.errorScreenData,
+      )
+      is EventDetailsVM.State.Loading.Content -> EventDetailsVM.ScreenData.Loading(
         onBackClick = params.onBackClick,
       )
       is EventDetailsVM.State.Initialized.InitializedAlreadyJoined -> EventDetailsVM.ScreenData.MainWithSession(
@@ -49,7 +53,11 @@ class EventDetailsMapperImpl(
         }.takeIf { params.state.event.session?.userCanJoin == true },
         snackbarHostState = params.snackbarHostState,
       )
-      is EventDetailsVM.State.Initialized.InitializedNotJoined -> EventDetailsVM.ScreenData.MainWithSession(
+      is EventDetailsVM.State.Initialized.NotJoined.Error -> EventDetailsVM.ScreenData.ErrorScreen(
+        onBackClick = params.onBackClick,
+        errorData = params.state.errorScreenData,
+      )
+      is EventDetailsVM.State.Initialized.NotJoined.Content -> EventDetailsVM.ScreenData.MainWithSession(
         onBackClick = params.onBackClick,
         event = params.state.event,
         topAppBarData = TopAppBarData.Back(onNavigationIconClick = params.onBackClick),

@@ -8,6 +8,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.camera.domain.usecase.TakePictureAndCompressUC
+import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
+import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.storage.Base64Coder
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
@@ -17,21 +19,34 @@ import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.icon.ZoomImageData
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
+import pl.dev.bkwiatkowski.feature.event.domain.model.FinishSessionResponse
 import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
-import pl.dev.bkwiatkowski.feature.event.domain.model.FinishSessionResponse
 import java.time.LocalDateTime
 
 interface EventMapVM {
   sealed interface State {
-    data object Loading : State
-    data class Active(
-      val eventDetails: MobileEventDetails,
-      val currentWaypoint: MapWaypoint?,
-      val alreadyConfirmedWaypointId: Int? = null,
-      val visitedWrongWaypoint: Boolean = false,
-      val nextWaypoint: MapWaypoint?,
-    ) : State
+    sealed interface Loading : State {
+      data object Content : Loading
+      data class Error(
+        val errorScreenData: ErrorScreenData,
+      ) : Loading
+    }
+
+    sealed interface Active : State {
+      data class Content(
+        val eventDetails: MobileEventDetails,
+        val currentWaypoint: MapWaypoint?,
+        val alreadyConfirmedWaypointId: Int? = null,
+        val visitedWrongWaypoint: Boolean = false,
+        val nextWaypoint: MapWaypoint?,
+      ) : Active
+
+      data class Error(
+        val errorScreenData: ErrorScreenData,
+        val content: Content,
+      ) : Active
+    }
   }
 
   sealed interface Action {
@@ -69,6 +84,11 @@ interface EventMapVM {
       val wrongWaypointInfo: String?,
       val checkWaypointButton: LargeButtonData.Primary?,
     ) : ScreenData
+
+    data class ErrorScreen(
+      override val onBackClick: () -> Unit,
+      val errorData: ErrorScreenData,
+    ) : ScreenData
   }
 
   val screenData: StateFlow<ScreenData>
@@ -80,10 +100,11 @@ class EventMapVMImpl @AssistedInject constructor(
   private val mapper: EventMapMapper,
   private val takePictureAndCompressUC: TakePictureAndCompressUC,
   private val runWithLoaderUC: RunWithLoaderUC,
+  private val errorDataMapper: ErrorDataMapper,
   private val eventBackendInteractor: EventBackendInteractor,
   private val base64Coder: Base64Coder,
 ) : CustomViewModel<EventMapVM.State, EventMapVM.ScreenData, EventMapVM.Action.Navigation>(
-  initialStateValue = EventMapVM.State.Loading,
+  initialStateValue = EventMapVM.State.Loading.Content,
 ), EventMapVM {
 
   @AssistedFactory
@@ -98,11 +119,17 @@ class EventMapVMImpl @AssistedInject constructor(
   fun dispatchAction(action: EventMapVM.Action) {
     viewModelScope.launch {
       when (val currentState = state.value) {
-        is EventMapVM.State.Loading -> when (action) {
+        is EventMapVM.State.Loading.Content -> when (action) {
           is EventMapVM.Action.Back -> EventMapVM.Action.Navigation.Back.emit()
           else -> {}
         }
-        is EventMapVM.State.Active -> when (action) {
+
+        is EventMapVM.State.Loading.Error -> when (action) {
+          is EventMapVM.Action.Back -> EventMapVM.State.Loading.Content.override()
+          else -> {}
+        }
+
+        is EventMapVM.State.Active.Content -> when (action) {
           is EventMapVM.Action.Back -> EventMapVM.Action.Navigation.Back.emit()
           is EventMapVM.Action.UpdateCurrentWaypoint -> {
             val visitedWrongWaypoint = if (currentState.alreadyConfirmedWaypointId == action.waypoint?.id) {
@@ -143,8 +170,16 @@ class EventMapVMImpl @AssistedInject constructor(
                 currentState.copy(
                   alreadyConfirmedWaypointId = currentState.currentWaypoint.id,
                 ).mutate()
-              }.onLeft {
-                // TODO: handle error
+              }.onLeft { error ->
+                EventMapVM.State.Active.Error(
+                  errorScreenData = errorDataMapper(
+                    params = ErrorDataMapper.Params(
+                      error = error,
+                      onCloseClick = { dispatchAction(EventMapVM.Action.Back) },
+                    )
+                  ),
+                  content = currentState,
+                ).override()
               }
             }
           }
@@ -156,10 +191,28 @@ class EventMapVMImpl @AssistedInject constructor(
                 EventMapVM.Action.Navigation.Completed(response = response).emit()
               },
               onLeft = { error ->
-                // TODO: handle error
+                EventMapVM.State.Active.Error(
+                  errorScreenData = errorDataMapper(
+                    params = ErrorDataMapper.Params(
+                      error = error,
+                      onCloseClick = { dispatchAction(EventMapVM.Action.Back) },
+                    )
+                  ),
+                  content = currentState,
+                ).override()
               }
             )
           }
+          else -> {}
+        }
+        is EventMapVM.State.Active.Error -> when (action) {
+          is EventMapVM.Action.Back -> EventMapVM.State.Active.Content(
+            eventDetails = currentState.content.eventDetails,
+            currentWaypoint = currentState.content.currentWaypoint,
+            alreadyConfirmedWaypointId = currentState.content.alreadyConfirmedWaypointId,
+            visitedWrongWaypoint = currentState.content.visitedWrongWaypoint,
+            nextWaypoint = currentState.content.nextWaypoint,
+          ).override()
           else -> {}
         }
       }
@@ -168,18 +221,25 @@ class EventMapVMImpl @AssistedInject constructor(
 
   override suspend fun onStateEnter(newState: EventMapVM.State) {
     when (newState) {
-      is EventMapVM.State.Loading -> either {
+      is EventMapVM.State.Loading.Content -> either {
         val details = contract.getEventDetails().getRight()
 
-        EventMapVM.State.Active(
+        EventMapVM.State.Active.Content(
           eventDetails = details,
           currentWaypoint = null,
           nextWaypoint = contract.getNextWaypoint(),
         ).override()
-      }.onLeft {
-        // Handle error
+      }.onLeft { error ->
+        EventMapVM.State.Loading.Error(
+          errorScreenData = errorDataMapper(
+            params = ErrorDataMapper.Params(
+              error = error,
+              onCloseClick = { dispatchAction(EventMapVM.Action.Back) },
+            )
+          ),
+        ).override()
       }
-      is EventMapVM.State.Active -> {
+      is EventMapVM.State.Active.Content -> {
         viewModelScope.launch {
           contract.currentWaypointMonitor().collect { waypoint ->
             val nextWaypoint = contract.getNextWaypoint()
@@ -229,6 +289,8 @@ class EventMapVMImpl @AssistedInject constructor(
           }
         }
       }
+      is EventMapVM.State.Loading.Error -> {}
+      is EventMapVM.State.Active.Error -> {}
     }
   }
 

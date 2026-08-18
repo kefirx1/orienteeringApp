@@ -26,6 +26,7 @@ import pl.dev.bkwiatkowski.common.ui.component.button.LargeButton
 import pl.dev.bkwiatkowski.common.ui.component.emptyscreen.EmptyScreen
 import pl.dev.bkwiatkowski.common.ui.component.input.TextField
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
+import pl.dev.bkwiatkowski.common.ui.error.ErrorScreen
 import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 import pl.dev.bkwiatkowski.feature.login.presentation.login.provider.LoginPreviewProvider
 
@@ -41,6 +42,7 @@ fun LoginScreen(viewModel: LoginVM) {
     is LoginVM.ScreenData.RegistrationScreen -> RegistrationScreenContent(
       data = screenData,
     )
+    is LoginVM.ScreenData.ErrorScreen -> ErrorScreen(data = screenData.errorData)
   }
 
   BackHandler {

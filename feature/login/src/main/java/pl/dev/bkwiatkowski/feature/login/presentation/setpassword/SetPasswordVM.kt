@@ -7,9 +7,9 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
+import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
-import pl.dev.bkwiatkowski.common.core.logger.Log
-import pl.dev.bkwiatkowski.common.core.logger.Tag
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
@@ -41,6 +41,10 @@ interface SetPasswordVM {
     data class SetPassword(
       override val content: StateContent,
     ) : State
+    data class Error(
+      override val content: StateContent,
+      val errorScreenData: ErrorScreenData,
+    ) : State
   }
 
   sealed interface Action {
@@ -67,6 +71,10 @@ interface SetPasswordVM {
       val continueButton: LargeButtonData,
       override val onBackClick: () -> Unit,
     ) : ScreenData
+    data class ErrorScreen(
+      override val onBackClick: () -> Unit,
+      val errorData: ErrorScreenData,
+    ) : ScreenData
   }
 
   data class SetupData(
@@ -86,6 +94,7 @@ class SetPasswordVMImpl @AssistedInject constructor(
   private val validatePasswordUC: ValidatePasswordUC,
   private val validateConfirmPasswordUC: ValidateConfirmPasswordUC,
   private val runWithLoaderUC: RunWithLoaderUC,
+  private val errorDataMapper: ErrorDataMapper,
   private val loginUserInteractor: LoginUserInteractor,
 ) : CustomViewModel<State, ScreenData, Action.Navigation>(
   initialStateValue = State.SetPassword(
@@ -145,11 +154,16 @@ class SetPasswordVMImpl @AssistedInject constructor(
                 ).onRight {
                   Action.Navigation.RegistrationSuccess.emit()
                 }.onLeft { error ->
-                  Log.e(
-                    tag = Tag(this@SetPasswordVMImpl),
-                    message = "Error creating new user: $error",
-                  )
-                }
+                   State.Error(
+                     errorScreenData = errorDataMapper(
+                       params = ErrorDataMapper.Params(
+                         error = error,
+                         onCloseClick = { dispatchAction(Action.OnBackClick) },
+                       )
+                     ),
+                     content = currentState.content,
+                   ).override()
+                 }
               }
 
               currentState.copy(
@@ -162,6 +176,12 @@ class SetPasswordVMImpl @AssistedInject constructor(
           }
           is Action.OnBackClick -> {
             Action.Navigation.Back.emit()
+          }
+          else -> {}
+        }
+        is State.Error -> when (action) {
+          is Action.OnBackClick -> {
+            State.SetPassword(content = currentState.content).override()
           }
           else -> {}
         }

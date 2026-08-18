@@ -27,6 +27,7 @@ import pl.dev.bkwiatkowski.common.ui.component.card.BaseCard
 import pl.dev.bkwiatkowski.common.ui.component.emptyscreen.EmptyScreen
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
 import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
+import pl.dev.bkwiatkowski.common.ui.error.ErrorScreen
 import pl.dev.bkwiatkowski.feature.dashboard.domain.model.FriendsStatsData
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.main.provider.MainDashboardPreviewProvider
 
@@ -36,6 +37,7 @@ fun MainDashboardScreen(viewModel: MainDashboardVM) {
 
   when (val screenData = state) {
     is MainDashboardVM.ScreenData.Initial -> EmptyScreen()
+    is MainDashboardVM.ScreenData.ErrorScreen -> ErrorScreen(data = screenData.errorData)
     is MainDashboardVM.ScreenData.Main -> MainDashboardScreenContent(data = screenData)
   }
 

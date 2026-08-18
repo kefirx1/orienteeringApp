@@ -18,7 +18,7 @@ class LoginPreviewProvider : ViewModelPreviewProvider<LoginVM, LoginVM.ScreenDat
 
     object : LoginVM {
       override val screenData = MutableStateFlow(
-        value = mapper(params = getMapperParams(state = LoginVM.State.NewLogin()))
+        value = mapper(params = getMapperParams(state = LoginVM.State.NewLogin.Content()))
       )
     }
   )

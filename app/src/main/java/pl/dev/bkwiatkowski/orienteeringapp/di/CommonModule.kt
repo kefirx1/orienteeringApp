@@ -11,7 +11,12 @@ import pl.dev.bkwiatkowski.common.activityconnector.ActivityConnector
 import pl.dev.bkwiatkowski.common.camera.CameraActivityConnector
 import pl.dev.bkwiatkowski.common.camera.CameraManager
 import pl.dev.bkwiatkowski.common.camera.CameraManagerImpl
+import pl.dev.bkwiatkowski.common.camera.domain.usecase.TakePictureAndCompressUC
+import pl.dev.bkwiatkowski.common.camera.domain.usecase.TakePictureAndCompressUCImpl
+import pl.dev.bkwiatkowski.common.camera.image.ImageCompressorImpl
 import pl.dev.bkwiatkowski.common.core.config.EnvironmentConfig
+import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
+import pl.dev.bkwiatkowski.common.core.image.ImageCompressor
 import pl.dev.bkwiatkowski.common.core.intents.OpenAppSettingsIntentUC
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.localization.GpsManager
@@ -23,6 +28,7 @@ import pl.dev.bkwiatkowski.common.core.security.provider.AppSecretKeyProvider
 import pl.dev.bkwiatkowski.common.core.security.provider.MasterKeyProvider
 import pl.dev.bkwiatkowski.common.core.storage.Base64Coder
 import pl.dev.bkwiatkowski.common.core.storage.JsonSerializer
+import pl.dev.bkwiatkowski.common.core.storage.file.LocalFileManager
 import pl.dev.bkwiatkowski.common.core.storage.provider.DataStoreProvider
 import pl.dev.bkwiatkowski.common.core.storage.provider.DatabaseProvider
 import pl.dev.bkwiatkowski.common.core.time.DateFormatter
@@ -58,6 +64,7 @@ import pl.dev.bkwiatkowski.common.security.provider.AppSecretKeyProviderImpl
 import pl.dev.bkwiatkowski.common.security.provider.MasterKeyProviderImpl
 import pl.dev.bkwiatkowski.common.security.provider.SecureRandomGeneratorImpl
 import pl.dev.bkwiatkowski.common.storage.coder.Base64CoderImpl
+import pl.dev.bkwiatkowski.common.storage.local.LocalFileManagerImpl
 import pl.dev.bkwiatkowski.common.storage.provider.DataStoreProviderImpl
 import pl.dev.bkwiatkowski.common.storage.provider.DatabaseProviderImpl
 import pl.dev.bkwiatkowski.common.storage.serializer.JsonSerializerImpl
@@ -65,15 +72,10 @@ import pl.dev.bkwiatkowski.common.time.DateFormatterImpl
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReader
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReaderImpl
 import pl.dev.bkwiatkowski.common.ui.snackbar.SnackbarHostImpl
-import pl.dev.bkwiatkowski.common.core.image.ImageCompressor
-import pl.dev.bkwiatkowski.common.camera.image.ImageCompressorImpl
-import pl.dev.bkwiatkowski.common.camera.domain.usecase.TakePictureAndCompressUC
-import pl.dev.bkwiatkowski.common.camera.domain.usecase.TakePictureAndCompressUCImpl
-import pl.dev.bkwiatkowski.common.core.storage.file.LocalFileManager
-import pl.dev.bkwiatkowski.common.storage.local.LocalFileManagerImpl
 import pl.dev.bkwiatkowski.common.validators.DateValidatorImpl
 import pl.dev.bkwiatkowski.common.validators.TextValidatorImpl
 import pl.dev.bkwiatkowski.orienteeringapp.config.EnvironmentConfigImpl
+import pl.dev.bkwiatkowski.orienteeringapp.core.error.ErrorDataMapperImpl
 import pl.dev.bkwiatkowski.orienteeringapp.core.lifecycle.ActivityConnectorImpl
 import pl.dev.bkwiatkowski.orienteeringapp.core.network.RefreshTokenHandlerImpl
 import pl.dev.bkwiatkowski.orienteeringapp.core.network.SessionManagerImpl
@@ -305,6 +307,9 @@ object CommonModule {
   @Provides
   @Singleton
   fun provideLifecycleMonitor() = LifecycleMonitorImpl()
+
+  @Provides
+  fun provideErrorDataMapper(): ErrorDataMapper = ErrorDataMapperImpl()
 }
 
 @Module

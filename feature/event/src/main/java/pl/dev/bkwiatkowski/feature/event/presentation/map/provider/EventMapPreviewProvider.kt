@@ -22,7 +22,7 @@ class EventMapPreviewProvider : ViewModelPreviewProvider<EventMapVM, EventMapVM.
       override val screenData = MutableStateFlow(
         value = mapper(
           params = getMapperParams(
-            state = EventMapVM.State.Active(
+            state = EventMapVM.State.Active.Content(
               eventDetails = getEventDetails(),
               visitedWrongWaypoint = false,
               currentWaypoint = null,
@@ -36,7 +36,7 @@ class EventMapPreviewProvider : ViewModelPreviewProvider<EventMapVM, EventMapVM.
       override val screenData = MutableStateFlow(
         value = mapper(
           params = getMapperParams(
-            state = EventMapVM.State.Active(
+            state = EventMapVM.State.Active.Content(
               eventDetails = getEventDetails(),
               visitedWrongWaypoint = true,
               currentWaypoint = null,

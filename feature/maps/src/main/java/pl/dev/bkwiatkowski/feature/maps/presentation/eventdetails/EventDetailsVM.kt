@@ -9,6 +9,8 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
+import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
 import pl.dev.bkwiatkowski.common.core.intents.OpenAppSettingsIntentUC
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
@@ -30,18 +32,30 @@ import pl.dev.bkwiatkowski.feature.maps.domain.model.UserSessionStatus
 
 interface EventDetailsVM {
   sealed interface State {
-    data object Loading : State
+    sealed interface Loading : State {
+      data object Content : Loading
+      data class Error(
+        val errorScreenData: ErrorScreenData,
+      ) : Loading
+    }
 
     sealed interface Initialized : State {
       data class InitializedNoSession(
         val event: MobileEventDetails,
       ) : Initialized
 
-      data class InitializedNotJoined(
-        val event: MobileEventDetails,
-        val session: EventSession,
-        val deniedForever: Boolean,
-      ) : Initialized
+      sealed interface NotJoined : Initialized {
+        data class Content(
+          val event: MobileEventDetails,
+          val session: EventSession,
+          val deniedForever: Boolean,
+        ) : NotJoined
+
+        data class Error(
+          val errorScreenData: ErrorScreenData,
+          val content: Content,
+        ) : NotJoined
+      }
 
       data class InitializedAlreadyJoined(
         val event: MobileEventDetails,
@@ -111,6 +125,11 @@ interface EventDetailsVM {
     data class Loading(
       override val onBackClick: () -> Unit,
     ) : ScreenData
+
+    data class ErrorScreen(
+      override val onBackClick: () -> Unit,
+      val errorData: ErrorScreenData,
+    ) : ScreenData
   }
 
   data class SetupData(
@@ -127,11 +146,12 @@ class EventDetailsVMImpl @AssistedInject constructor(
   private val mapsBackendInteractor: MapsBackendInteractor,
   private val permissionsManager: PermissionsManager,
   private val runWithLoaderUC: RunWithLoaderUC,
+  private val errorDataMapper: ErrorDataMapper,
   private val openAppSettingsIntentUC: OpenAppSettingsIntentUC,
   snackbarHost: SnackbarHostImpl,
-) : CustomViewModel<EventDetailsVM.State, EventDetailsVM.ScreenData, EventDetailsVM.Action.Navigation>(
-  initialStateValue = EventDetailsVM.State.Loading,
-), EventDetailsVM, SnackbarHost by snackbarHost {
+  ) : CustomViewModel<EventDetailsVM.State, EventDetailsVM.ScreenData, EventDetailsVM.Action.Navigation>(
+    initialStateValue = EventDetailsVM.State.Loading.Content,
+  ), EventDetailsVM, SnackbarHost by snackbarHost {
 
   override val screenData: StateFlow<EventDetailsVM.ScreenData> = _screenData
 
@@ -145,10 +165,14 @@ class EventDetailsVMImpl @AssistedInject constructor(
   fun dispatchAction(action: EventDetailsVM.Action) {
     viewModelScope.launch {
       when (val currentState = state.value) {
-        is EventDetailsVM.State.Loading -> when (action) {
+        is EventDetailsVM.State.Loading.Content -> when (action) {
           is EventDetailsVM.Action.Back -> {
             EventDetailsVM.Action.Navigation.Back.emit()
           }
+          else -> {}
+        }
+        is EventDetailsVM.State.Loading.Error -> when (action) {
+          is EventDetailsVM.Action.Back -> EventDetailsVM.State.Loading.Content.override()
           else -> {}
         }
         is EventDetailsVM.State.Initialized.InitializedFinished -> when (action) {
@@ -169,7 +193,7 @@ class EventDetailsVMImpl @AssistedInject constructor(
           }
           else -> {}
         }
-        is EventDetailsVM.State.Initialized.InitializedNotJoined -> when (action) {
+        is EventDetailsVM.State.Initialized.NotJoined.Content -> when (action) {
           is EventDetailsVM.Action.Back -> {
             EventDetailsVM.Action.Navigation.Back.emit()
           }
@@ -186,7 +210,15 @@ class EventDetailsVMImpl @AssistedInject constructor(
                 ).emit()
               },
               onLeft = { error ->
-                //TODO handle error
+                EventDetailsVM.State.Initialized.NotJoined.Error(
+                  errorScreenData = errorDataMapper(
+                    params = ErrorDataMapper.Params(
+                      error = error,
+                      onCloseClick = { dispatchAction(EventDetailsVM.Action.Back) },
+                    )
+                  ),
+                  content = currentState,
+                ).override()
               }
             )
           }
@@ -203,6 +235,14 @@ class EventDetailsVMImpl @AssistedInject constructor(
           }
           else -> {}
         }
+        is EventDetailsVM.State.Initialized.NotJoined.Error -> when (action) {
+          is EventDetailsVM.Action.Back -> EventDetailsVM.State.Initialized.NotJoined.Content(
+            event = currentState.content.event,
+            session = currentState.content.session,
+            deniedForever = currentState.content.deniedForever,
+          ).override()
+          else -> {}
+        }
         is EventDetailsVM.State.Initialized.InitializedNoSession -> when (action) {
           is EventDetailsVM.Action.Back -> {
             EventDetailsVM.Action.Navigation.Back.emit()
@@ -215,7 +255,7 @@ class EventDetailsVMImpl @AssistedInject constructor(
 
   override suspend fun onStateEnter(newState: EventDetailsVM.State) {
     when (newState) {
-      is EventDetailsVM.State.Loading -> either {
+      is EventDetailsVM.State.Loading.Content -> either {
         runWithLoaderUC {
           val details = mapsBackendInteractor.getMobileEventDetails(
             eventId = setupData.eventId,
@@ -238,7 +278,7 @@ class EventDetailsVMImpl @AssistedInject constructor(
                   session = details.session,
                 ).override()
 
-                UserSessionStatus.NOT_JOINED -> EventDetailsVM.State.Initialized.InitializedNotJoined(
+                UserSessionStatus.NOT_JOINED -> EventDetailsVM.State.Initialized.NotJoined.Content(
                   event = details,
                   session = details.session,
                   deniedForever = false,
@@ -260,8 +300,16 @@ class EventDetailsVMImpl @AssistedInject constructor(
           }
         }
       }.onLeft { error ->
-        // TODO handle error
+        EventDetailsVM.State.Loading.Error(
+          errorScreenData = errorDataMapper(
+            params = ErrorDataMapper.Params(
+              error = error,
+              onCloseClick = { dispatchAction(EventDetailsVM.Action.Back) },
+            )
+          ),
+        ).override()
       }
+      is EventDetailsVM.State.Loading.Error -> {}
       is EventDetailsVM.State.Initialized -> {}
     }
   }

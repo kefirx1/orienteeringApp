@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.intents.OpenAppSettingsIntentUC
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
+import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
+import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
 import pl.dev.bkwiatkowski.common.core.localization.GpsManager
 import pl.dev.bkwiatkowski.common.core.location.Position
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
@@ -47,13 +49,25 @@ interface EventMainVM {
   }
 
   sealed interface State {
-    data object Initial : State
-    data class PermissionDenied(
-      val isDeniedForever: Boolean,
-    ) : State
-    data class Active(
-      val stateData: StateData,
-    ) : State
+    sealed interface Initial : State {
+      data object Content : Initial
+      data class Error(
+        val errorScreenData: ErrorScreenData,
+      ) : Initial
+    }
+
+    data class PermissionDenied(val isDeniedForever: Boolean) : State
+
+    sealed interface Active : State {
+      data class Content(
+        val stateData: StateData,
+      ) : Active
+
+      data class Error(
+        val errorScreenData: ErrorScreenData,
+        val content: Content,
+      ) : Active
+    }
   }
 
   sealed interface Action {
@@ -110,6 +124,11 @@ interface EventMainVM {
         val onClick: () -> Unit,
       )
     }
+
+    data class ErrorScreen(
+      override val onBackClick: () -> Unit,
+      val errorData: ErrorScreenData,
+    ) : ScreenData
   }
 
   data class SetupData(
@@ -133,6 +152,7 @@ class EventMainVMImpl @AssistedInject constructor(
   @Assisted private val setupData: EventMainVM.SetupData,
   private val mapper: EventMainMapper,
   private val runWithLoaderUC: RunWithLoaderUC,
+  private val errorDataMapper: ErrorDataMapper,
   private val eventBackendInteractor: EventBackendInteractor,
   private val gpsManager: GpsManager,
   private val permissionsManager: PermissionsManager,
@@ -141,7 +161,7 @@ class EventMainVMImpl @AssistedInject constructor(
   private val findWaypointFromUserLocationUC: FindWaypointFromUserLocationUC,
   lifecycleMonitorImpl: LifecycleMonitorImpl,
   ) : CustomViewModel<EventMainVM.State, EventMainVM.ScreenData, EventMainVM.Action.Navigation>(
-  initialStateValue = EventMainVM.State.Initial,
+  initialStateValue = EventMainVM.State.Initial.Content,
 ), EventMainVM, LifecycleEventObserver by lifecycleMonitorImpl {
 
   override lateinit var lifecycleOwner: LifecycleOwner
@@ -164,10 +184,22 @@ class EventMainVMImpl @AssistedInject constructor(
   fun dispatchAction(action: EventMainVM.Action) {
     viewModelScope.launch {
       when (val currentState = state.value) {
-        is EventMainVM.State.Initial -> when (action) {
+        is EventMainVM.State.Initial.Content -> when (action) {
           is EventMainVM.Action.Back -> {
             EventMainVM.Action.Navigation.Back.emit()
           }
+          else -> {}
+        }
+
+        is EventMainVM.State.Initial.Error -> when (action) {
+          is EventMainVM.Action.Back -> EventMainVM.State.Initial.Content.override()
+          else -> {}
+        }
+
+        is EventMainVM.State.Active.Error -> when (action) {
+          is EventMainVM.Action.Back -> EventMainVM.State.Active.Content(
+            stateData = currentState.content.stateData,
+          ).override()
           else -> {}
         }
 
@@ -181,9 +213,7 @@ class EventMainVMImpl @AssistedInject constructor(
             )
 
             when (result) {
-              is PermissionResult.Granted -> {
-                EventMainVM.State.Initial.override()
-              }
+              is PermissionResult.Granted -> EventMainVM.State.Initial.Content.override()
               is PermissionResult.Denied -> {}
               is PermissionResult.DeniedForever -> {
                 EventMainVM.State.PermissionDenied(isDeniedForever = true).mutate()
@@ -196,14 +226,14 @@ class EventMainVMImpl @AssistedInject constructor(
           else -> {}
         }
 
-        is EventMainVM.State.Active -> when (action) {
+        is EventMainVM.State.Active.Content -> when (action) {
           is EventMainVM.Action.Back -> {
             eventBackendInteractor.closeSession()
             EventMainVM.Action.Navigation.Back.emit()
           }
           is EventMainVM.Action.GoToMap -> {
             if (currentState.stateData.currentTab == EventMainVM.StateData.CurrentTab.MAP) return@launch
-            EventMainVM.State.Active(
+            EventMainVM.State.Active.Content(
               stateData = currentState.stateData.copy(
                 currentTab = EventMainVM.StateData.CurrentTab.MAP,
               )
@@ -214,7 +244,7 @@ class EventMainVMImpl @AssistedInject constructor(
           }
           is EventMainVM.Action.GoToGame -> {
             if (currentState.stateData.currentTab == EventMainVM.StateData.CurrentTab.GAME) return@launch
-            EventMainVM.State.Active(
+            EventMainVM.State.Active.Content(
               stateData = currentState.stateData.copy(
                 currentTab = EventMainVM.StateData.CurrentTab.GAME,
               )
@@ -258,7 +288,7 @@ class EventMainVMImpl @AssistedInject constructor(
 
   override suspend fun onStateEnter(newState: EventMainVM.State) {
     when (newState) {
-      is EventMainVM.State.Initial -> {
+      is EventMainVM.State.Initial.Content -> {
         either {
           runWithLoaderUC {
             if (!ensureLocationPermission()) return@runWithLoaderUC
@@ -274,7 +304,7 @@ class EventMainVMImpl @AssistedInject constructor(
             contract.setInitialVisitedWaypoints(waypoints = currentSessionWaypoints.waypoints)
 
             eventBackendInteractor.openSession(sessionUuid = setupData.sessionUuid).getRight()
-            EventMainVM.State.Active(
+            EventMainVM.State.Active.Content(
               stateData = EventMainVM.StateData(
                 currentTab = EventMainVM.StateData.CurrentTab.MAP,
                 details = details,
@@ -282,7 +312,14 @@ class EventMainVMImpl @AssistedInject constructor(
             ).override()
           }
         }.onLeft { error ->
-          // todo handle error
+          EventMainVM.State.Initial.Error(
+            errorScreenData = errorDataMapper(
+              params = ErrorDataMapper.Params(
+                error = error,
+                onCloseClick = { dispatchAction(EventMainVM.Action.Back) },
+              )
+            ),
+          ).override()
         }
       }
       is EventMainVM.State.PermissionDenied -> {
@@ -290,13 +327,17 @@ class EventMainVMImpl @AssistedInject constructor(
           lifecycleMonitor.monitor().collect { lifecycleState ->
             if (lifecycleState == Lifecycle.Event.ON_RESUME) {
               if (ensureLocationPermission()) {
-                EventMainVM.State.Initial.override()
+                EventMainVM.State.Initial.Content.override()
               }
             }
           }
         }
       }
-      is EventMainVM.State.Active -> {
+      is EventMainVM.State.Initial.Error -> {}
+
+      is EventMainVM.State.Active.Error -> {}
+
+      is EventMainVM.State.Active.Content -> {
         viewModelScope.launch {
           gpsManager.getLocationFlow().distinctUntilChanged().collect { location ->
             dispatchAction(

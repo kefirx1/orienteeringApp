@@ -61,7 +61,7 @@ class EventDetailsPreviewProvider : ViewModelPreviewProvider<EventDetailsVM, Eve
     },
     object : EventDetailsVM {
       override val screenData = MutableStateFlow(
-        value = mapper(params = getMapperParams(state = EventDetailsVM.State.Initialized.InitializedNotJoined(
+        value = mapper(params = getMapperParams(state = EventDetailsVM.State.Initialized.NotJoined.Content(
           session = EventSession(
             id = "1",
             startedAt = LocalDateTime.of(2026, 4, 30, 10, 0),

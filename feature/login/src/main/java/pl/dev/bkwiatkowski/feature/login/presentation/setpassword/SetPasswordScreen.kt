@@ -22,6 +22,7 @@ import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButton
 import pl.dev.bkwiatkowski.common.ui.component.input.TextField
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
+import pl.dev.bkwiatkowski.common.ui.error.ErrorScreen
 import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 import pl.dev.bkwiatkowski.feature.login.presentation.setpassword.provider.SetPasswordPreviewProvider
 
@@ -31,6 +32,7 @@ fun SetPasswordScreen(viewModel: SetPasswordVM) {
 
   when (val data = screenData) {
     is SetPasswordVM.ScreenData.SetPasswordScreen -> SetPasswordScreenContent(data = data)
+    is SetPasswordVM.ScreenData.ErrorScreen -> ErrorScreen(data = data.errorData)
   }
 
   BackHandler {

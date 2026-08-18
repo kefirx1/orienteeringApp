@@ -26,6 +26,7 @@ import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButton
 import pl.dev.bkwiatkowski.common.ui.component.divider.Divider
 import pl.dev.bkwiatkowski.common.ui.component.emptyscreen.EmptyScreen
+import pl.dev.bkwiatkowski.common.ui.error.ErrorScreen
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
 import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 import pl.dev.bkwiatkowski.feature.maps.presentation.eventdetails.provider.EventDetailsPreviewProvider
@@ -36,6 +37,7 @@ fun EventDetailsScreen(viewModel: EventDetailsVM) {
 
   when (val screenData = state) {
     is EventDetailsVM.ScreenData.Loading -> EmptyScreen()
+    is EventDetailsVM.ScreenData.ErrorScreen -> ErrorScreen(data = screenData.errorData)
     is EventDetailsVM.ScreenData.MainNoSession -> EventDetailsNoSessionScreenContent(data = screenData)
     is EventDetailsVM.ScreenData.MainWithSession -> EventDetailsWithSessionScreenContent(data = screenData)
     is EventDetailsVM.ScreenData.MainFinished -> EventDetailsFinishedScreenContent(data = screenData)
