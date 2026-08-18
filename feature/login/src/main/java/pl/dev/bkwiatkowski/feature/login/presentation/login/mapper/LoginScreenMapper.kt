@@ -14,7 +14,6 @@ interface LoginScreenMapper : Mapper<Params, LoginVM.ScreenData> {
     val onGoToLoginClick: () -> Unit,
     val onGoToOtherClick: () -> Unit,
     val onGoToRegistrationClick: () -> Unit,
-    val onPlayAsGuestClick: () -> Unit,
     val onUserNameValueChanged: (String) -> Unit,
     val onPasswordValueChanged: (String) -> Unit,
     val onBackClick: () -> Unit,
@@ -71,12 +70,6 @@ class LoginScreenMapperImpl : LoginScreenMapper {
           text = "Utwórz konto",
           onClick = {
             params.onGoToRegistrationClick()
-          },
-        ),
-        guestButton = LargeButtonData.Tertiary(
-          text = "Graj jako gość",
-          onClick = {
-            params.onPlayAsGuestClick()
           },
         ),
         onBackClick = params.onBackClick,

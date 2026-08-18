@@ -31,7 +31,6 @@ class LoginPreviewProvider : ViewModelPreviewProvider<LoginVM, LoginVM.ScreenDat
       onGoToLoginClick = {},
       onGoToOtherClick = {},
       onGoToRegistrationClick = {},
-      onPlayAsGuestClick = {},
       onPasswordValueChanged = {},
       onBackClick = {},
       onUserNameValueChanged = {},

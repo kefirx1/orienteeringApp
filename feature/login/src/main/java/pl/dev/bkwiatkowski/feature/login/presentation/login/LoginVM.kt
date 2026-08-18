@@ -41,7 +41,6 @@ interface LoginVM {
     data object CheckPassword : Action
     data object ToOnboarding : Action
     data object ToLoginScreen : Action
-    data object PlayAsAGuest : Action
     data class UpdatePassword(val password: String) : Action
     data class UpdateUserName(val userName: String) : Action
   }
@@ -64,7 +63,6 @@ interface LoginVM {
       val description: String,
       val loginButton: LargeButtonData,
       val registerButton: LargeButtonData,
-      val guestButton: LargeButtonData,
       override val onBackClick: () -> Unit,
     ) : ScreenData
 
@@ -151,9 +149,6 @@ class LoginVMImpl @Inject constructor(
         }
         State.Registration -> when (action) {
           is Action.Back -> Action.Navigation.Back.emit()
-          is Action.PlayAsAGuest -> {
-            //TODO play as a guest logic
-          }
           is Action.ToOnboarding -> {
             Action.Navigation.ToOnboarding.emit()
           }
@@ -205,9 +200,6 @@ class LoginVMImpl @Inject constructor(
       },
       onGoToLoginClick = {
         dispatchAction(Action.ToLoginScreen)
-      },
-      onPlayAsGuestClick = {
-        dispatchAction(Action.PlayAsAGuest)
       },
       onPasswordValueChanged = { password ->
         dispatchAction(Action.UpdatePassword(password = password))

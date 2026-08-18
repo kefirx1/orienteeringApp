@@ -101,7 +101,7 @@ class EventDetailsMapperImpl(
         },
         map = bitmapReader.decode(encoded = params.state.event.map.imageData),
         userSessionSection = EventDetailsVM.ScreenData.MainFinished.UserSessionSection(
-          sectionLabel = "Uskończono już to wydarzenie z wynikiem:",
+          sectionLabel = "Ukończono już to wydarzenie z wynikiem:",
           joinTime = dateFormatter.format(
             dateTime = params.state.sessionParticipant.joinedAt,
             format = DateFormatter.Format.DATE_TIME,

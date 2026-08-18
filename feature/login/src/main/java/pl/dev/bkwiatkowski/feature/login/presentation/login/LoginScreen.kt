@@ -155,9 +155,6 @@ fun RegistrationScreenContent(
         Spacer(modifier = Modifier.height(12.dp))
 
         LargeButton(buttonData = data.registerButton)
-        Spacer(modifier = Modifier.height(12.dp))
-
-        LargeButton(buttonData = data.guestButton)
       }
     }
   )
