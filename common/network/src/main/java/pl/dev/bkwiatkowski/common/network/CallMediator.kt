@@ -68,13 +68,7 @@ class CallMediatorImpl(
       .fold(
         onLeft = { null },
         onRight = { errorResponse ->
-          val businessCode = ErrorResponsePayload.BusinessCode.fromValue(value = errorResponse.businessCode.value)
-
-          if (businessCode == ErrorResponsePayload.BusinessCode.UNKNOWN) {
-            errorResponse.message.takeIf { it.isNotBlank() }
-          } else {
-            "${businessCode.value}: ${errorResponse.message}"
-          }
+          "${errorResponse.businessCode}: ${errorResponse.message}"
         },
       )
   }.getOrElse {

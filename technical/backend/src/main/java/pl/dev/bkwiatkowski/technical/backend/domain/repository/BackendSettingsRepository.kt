@@ -6,4 +6,8 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSettingsResponse
 
 interface BackendSettingsRepository {
   suspend fun getMobileSettings(): Either<DomainError, MobileSettingsResponse>
+  suspend fun changePassword(
+    oldPassword: String,
+    newPassword: String,
+  ): Either<DomainError, Unit>
 }

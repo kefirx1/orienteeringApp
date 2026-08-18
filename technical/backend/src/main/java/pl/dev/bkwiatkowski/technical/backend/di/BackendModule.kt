@@ -22,6 +22,8 @@ import pl.dev.bkwiatkowski.technical.backend.domain.usecase.RegisterUserUC
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.RegisterUserUCImpl
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.RemoteLoginUserUC
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.RemoteLoginUserUCImpl
+import pl.dev.bkwiatkowski.technical.backend.domain.usecase.ChangePasswordUC
+import pl.dev.bkwiatkowski.technical.backend.domain.usecase.ChangePasswordUCImpl
 import javax.inject.Singleton
 
 @Module
@@ -76,6 +78,13 @@ object BackendModule {
   fun provideGetMobileSettingsUC(
     backendSettingsRepository: BackendSettingsRepository,
   ): GetMobileSettingsUC = GetMobileSettingsUCImpl(
+    backendSettingsRepository = backendSettingsRepository,
+  )
+
+  @Provides
+  fun provideChangePasswordUC(
+    backendSettingsRepository: BackendSettingsRepository,
+  ): ChangePasswordUC = ChangePasswordUCImpl(
     backendSettingsRepository = backendSettingsRepository,
   )
 

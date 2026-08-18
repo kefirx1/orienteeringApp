@@ -10,6 +10,7 @@ interface SettingsDashboardMapper : Mapper<SettingsDashboardMapper.Params, Setti
     val state: SettingsDashboardVM.State,
     val onBackClick: () -> Unit,
     val onLogoutClick: () -> Unit,
+    val onChangePasswordClick: () -> Unit,
   )
 }
 
@@ -21,6 +22,10 @@ class SettingsDashboardMapperImpl @Inject constructor() : SettingsDashboardMappe
         topBarData = TopAppBarData.BackAndTitle(
           title = "Ustawienia",
           onNavigationIconClick = params.onBackClick,
+        ),
+        changePasswordCard = ActionCardData(
+          onClick = params.onChangePasswordClick,
+          text = "Zmień hasło",
         ),
         logoutCard = ActionCardData(
           onClick = params.onLogoutClick,

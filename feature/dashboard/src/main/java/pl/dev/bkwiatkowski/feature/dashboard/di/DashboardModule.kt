@@ -14,6 +14,13 @@ import pl.dev.bkwiatkowski.feature.dashboard.presentation.settings.SettingsDialo
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.settings.SettingsDialogMapperImpl
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.userprofile.UserProfileDashboardMapper
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.userprofile.UserProfileDashboardMapperImpl
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.changepassword.ChangePasswordMapper
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.changepassword.ChangePasswordMapperImpl
+import pl.dev.bkwiatkowski.common.core.validators.TextValidator
+import pl.dev.bkwiatkowski.feature.dashboard.domain.usecase.ValidatePasswordUC
+import pl.dev.bkwiatkowski.feature.dashboard.domain.usecase.ValidatePasswordUCImpl
+import pl.dev.bkwiatkowski.feature.dashboard.domain.usecase.ValidateConfirmPasswordUC
+import pl.dev.bkwiatkowski.feature.dashboard.domain.usecase.ValidateConfirmPasswordUCImpl
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -29,8 +36,25 @@ object DashboardModule {
   fun provideUserProfileDashboardMapper(): UserProfileDashboardMapper = UserProfileDashboardMapperImpl()
 
   @Provides
+  fun provideChangePasswordMapper(): ChangePasswordMapper = ChangePasswordMapperImpl()
+
+  @Provides
   fun provideGetFriendsStatsDataUC(): GetFriendsStatsDataUC = GetFriendsStatsDataUCImpl()
 
   @Provides
   fun provideSettingsDialogMapper(): SettingsDialogMapper = SettingsDialogMapperImpl()
+
+  @Provides
+  fun provideValidatePasswordUC(
+    textValidator: TextValidator,
+  ): ValidatePasswordUC = ValidatePasswordUCImpl(
+    textValidator = textValidator,
+  )
+
+  @Provides
+  fun provideValidateConfirmPasswordUC(
+    textValidator: TextValidator,
+  ): ValidateConfirmPasswordUC = ValidateConfirmPasswordUCImpl(
+    textValidator = textValidator,
+  )
 }

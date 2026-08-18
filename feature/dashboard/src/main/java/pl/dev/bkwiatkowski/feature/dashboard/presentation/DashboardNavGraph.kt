@@ -6,6 +6,9 @@ import pl.dev.bkwiatkowski.common.core.navigation.AppNavController
 import pl.dev.bkwiatkowski.common.core.navigation.DestinationType
 import pl.dev.bkwiatkowski.common.core.navigation.createDestination
 import pl.dev.bkwiatkowski.common.ui.component.dialog.DialogData
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.changepassword.ChangePasswordScreen
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.changepassword.ChangePasswordVM
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.changepassword.ChangePasswordVMImpl
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.dialog.DashboardDialogScreen
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.dialog.DashboardDialogVM
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.dialog.DashboardDialogVMImpl
@@ -61,7 +64,25 @@ fun NavGraphBuilder.dashboardNavGraph(
 
             navController.navigate(destination = DashboardDestination.DashboardDialog)
           }
+
           is SettingsDashboardVM.Action.Navigation.Logout -> onResult(DashboardResult.Logout)
+          is SettingsDashboardVM.Action.Navigation.OpenChangePassword -> navController.navigate(
+            destination = DashboardDestination.ChangePassword,
+          )
+        }
+      }
+    )
+
+    createDestination<Nothing, DashboardContractVM, ChangePasswordVMImpl, ChangePasswordVM.Action.Navigation>(
+      destination = DashboardDestination.ChangePassword,
+      navController = navController,
+      content = { viewModel ->
+        ChangePasswordScreen(viewModel = viewModel)
+      },
+      navActionHandler = { action, contractViewModel ->
+        when (action) {
+          is ChangePasswordVM.Action.Navigation.Back -> navController.popBackStack()
+          is ChangePasswordVM.Action.Navigation.Logout -> onResult(DashboardResult.Logout)
         }
       }
     )

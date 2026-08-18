@@ -7,4 +7,8 @@ interface DashboardInteractor {
   suspend fun fetchMobileSettings(): Either<DomainError, Unit>
   suspend fun getUserName(): Either<DomainError, String>
   suspend fun logout(): Either<DomainError, Unit>
+  suspend fun changePassword(
+    oldPassword: String,
+    newPassword: String,
+  ): Either<DomainError, Unit>
 }

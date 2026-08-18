@@ -15,6 +15,9 @@ sealed interface DashboardDestination : Destination {
   data object Settings : DashboardDestination
 
   @Serializable
+  data object ChangePassword : DashboardDestination
+
+  @Serializable
   data object UserProfile : DashboardDestination
 
   @Serializable

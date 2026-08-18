@@ -21,6 +21,7 @@ interface SettingsDashboardVM {
   sealed interface Action {
     sealed interface Navigation : Action {
       data object Back : Navigation
+      data object OpenChangePassword : Navigation
       data class OpenLogoutDialog(
         val dialogData: DialogData,
       ) : Navigation
@@ -28,6 +29,7 @@ interface SettingsDashboardVM {
     }
 
     data object Logout : Action
+    data object OpenChangePassword : Action
     data object Back : Action
     data object OpenLogout : Action
   }
@@ -38,6 +40,7 @@ interface SettingsDashboardVM {
     data class Main(
       override val onBackClick: () -> Unit,
       val topBarData: TopAppBarData,
+      val changePasswordCard: ActionCardData,
       val logoutCard: ActionCardData,
     ) : ScreenData
   }
@@ -74,10 +77,11 @@ class SettingsDashboardVMImpl @Inject constructor(
                 tag = Tag(this@SettingsDashboardVMImpl),
                 message = "Logout failed",
               )
-            }.onRight {
-              SettingsDashboardVM.Action.Navigation.Logout.emit()
             }
+            SettingsDashboardVM.Action.Navigation.Logout.emit()
           }
+          is SettingsDashboardVM.Action.OpenChangePassword ->
+            SettingsDashboardVM.Action.Navigation.OpenChangePassword.emit()
           else -> {}
         }
       }
@@ -95,6 +99,7 @@ class SettingsDashboardVMImpl @Inject constructor(
       state = state.value,
       onBackClick = { dispatchAction(SettingsDashboardVM.Action.Back) },
       onLogoutClick = { dispatchAction(SettingsDashboardVM.Action.OpenLogout) },
+      onChangePasswordClick = { dispatchAction(SettingsDashboardVM.Action.OpenChangePassword) },
     ),
   )
 

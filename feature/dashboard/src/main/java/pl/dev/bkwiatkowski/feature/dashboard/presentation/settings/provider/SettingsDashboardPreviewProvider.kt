@@ -22,5 +22,6 @@ class SettingsDashboardPreviewProvider : ViewModelPreviewProvider<SettingsDashbo
       state = state,
       onBackClick = {},
       onLogoutClick = {},
+      onChangePasswordClick = {},
     )
 }
