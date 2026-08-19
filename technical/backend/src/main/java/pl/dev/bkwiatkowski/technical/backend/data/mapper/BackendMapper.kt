@@ -19,6 +19,8 @@ import pl.dev.bkwiatkowski.technical.backend.data.UploadImageResponse
 import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitDto
 import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.IsUserInSessionResponseDto
+import pl.dev.bkwiatkowski.technical.backend.data.UserSessionDto
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUserSession
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEFinishSessionResponse
@@ -67,6 +69,7 @@ object BackendMapper {
   fun MobileSettingsResponseDto.toDomain(): MobileSettingsResponse =
     MobileSettingsResponse(
       serverLocalDateTime = serverLocalDateTime,
+      userId = userId,
     )
 
   fun MobileMapDto.toDomain(): BEMobileMap =
@@ -180,6 +183,15 @@ object BackendMapper {
   fun SessionParticipantResponseDto.toDomain() = BESessionParticipant(
     sessionUuid = this.sessionUuid,
     joinedAt = this.joinedAt,
+    finishedAt = this.finishedAt,
+  )
+
+  fun UserSessionDto.toDomain() = BEUserSession(
+    sessionUuid = this.sessionUuid,
+    startedAt = this.startedAt,
+    visitedWaypointsCount = this.visitedWaypointsCount,
+    mapName = this.mapName,
+    eventName = this.eventName,
     finishedAt = this.finishedAt,
   )
 

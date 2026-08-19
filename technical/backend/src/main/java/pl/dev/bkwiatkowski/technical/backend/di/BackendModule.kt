@@ -11,10 +11,12 @@ import pl.dev.bkwiatkowski.common.core.storage.JsonSerializer
 import pl.dev.bkwiatkowski.technical.backend.data.repository.BackendAuthenticationRepositoryImpl
 import pl.dev.bkwiatkowski.technical.backend.data.repository.BackendSettingsRepositoryImpl
 import pl.dev.bkwiatkowski.technical.backend.data.repository.BackendEventsRepositoryImpl
+import pl.dev.bkwiatkowski.technical.backend.data.repository.BackendUserRepositoryImpl
 import pl.dev.bkwiatkowski.technical.backend.data.repository.SessionWebSocketRepositoryImpl
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendAuthenticationRepository
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendSettingsRepository
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepository
+import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendUserRepository
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.SessionWebSocketRepository
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetMobileSettingsUC
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetMobileSettingsUCImpl
@@ -24,6 +26,8 @@ import pl.dev.bkwiatkowski.technical.backend.domain.usecase.RemoteLoginUserUC
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.RemoteLoginUserUCImpl
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.ChangePasswordUC
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.ChangePasswordUCImpl
+import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetUserSessionsUC
+import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetUserSessionsUCImpl
 import javax.inject.Singleton
 
 @Module
@@ -96,5 +100,22 @@ object BackendModule {
   ): SessionWebSocketRepository = SessionWebSocketRepositoryImpl(
     webSocketManager = webSocketManager,
     jsonSerializer = jsonSerializer,
+  )
+
+  @Provides
+  @Singleton
+  fun provideBackendUserRepository(
+    callMediator: CallMediator,
+    httpClientFactory: HttpClientFactory,
+  ): BackendUserRepository = BackendUserRepositoryImpl(
+    callMediator = callMediator,
+    clientFactory = httpClientFactory,
+  )
+
+  @Provides
+  fun provideGetUserSessionsUC(
+    backendUserRepository: BackendUserRepository,
+  ): GetUserSessionsUC = GetUserSessionsUCImpl(
+    backendUserRepository = backendUserRepository,
   )
 }

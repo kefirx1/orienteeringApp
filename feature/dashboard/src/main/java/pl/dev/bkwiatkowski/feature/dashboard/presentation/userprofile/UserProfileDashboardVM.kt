@@ -4,13 +4,32 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
+import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
+import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
+import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
+import pl.dev.bkwiatkowski.feature.dashboard.domain.interactor.DashboardInteractor
+import pl.dev.bkwiatkowski.feature.dashboard.domain.model.SessionsData
+import pl.dev.bkwiatkowski.feature.dashboard.domain.model.UserSessionData
+import java.time.LocalDate
 import javax.inject.Inject
 
 interface UserProfileDashboardVM {
   sealed interface State {
-    data object Initialized : State
+
+    sealed interface Initial : State {
+      data object Content : Initial
+      data class Error(
+        val errorScreenData: ErrorScreenData,
+      ) : Initial
+    }
+
+    data class Initialized(
+      val sessionsData: SessionsData,
+      val userName: String,
+    ) : State
   }
 
   sealed interface Action {
@@ -24,10 +43,30 @@ interface UserProfileDashboardVM {
   sealed interface ScreenData {
     val onBackClick: () -> Unit
 
+    data class Error(
+      override val onBackClick: () -> Unit,
+      val errorScreenData: ErrorScreenData,
+    ) : ScreenData
+
+    data class Empty(
+      override val onBackClick: () -> Unit,
+    ) : ScreenData
+
     data class Main(
       override val onBackClick: () -> Unit,
       val topBarData: TopAppBarData,
-    ) : ScreenData
+      val sessionsLabel: String,
+      val groupedSessions: Map<String, List<UserSessionScreenData>>,
+      val userName: String,
+    ) : ScreenData {
+      data class UserSessionScreenData(
+        val eventName: String,
+        val mapName: String,
+        val startDate: String,
+        val finishDate: String,
+        val visitedWaypoints: String,
+      )
+    }
   }
 
   val screenData: StateFlow<ScreenData>
@@ -36,8 +75,11 @@ interface UserProfileDashboardVM {
 @HiltViewModel
 class UserProfileDashboardVMImpl @Inject constructor(
   private val mapper: UserProfileDashboardMapper,
+  private val runWithLoaderUC: RunWithLoaderUC,
+  private val dashboardInteractor: DashboardInteractor,
+  private val errorDataMapper: ErrorDataMapper,
 ) : CustomViewModel<UserProfileDashboardVM.State, UserProfileDashboardVM.ScreenData, UserProfileDashboardVM.Action.Navigation>(
-  initialStateValue = UserProfileDashboardVM.State.Initialized,
+  initialStateValue = UserProfileDashboardVM.State.Initial.Content,
 ), UserProfileDashboardVM {
 
   override val screenData: StateFlow<UserProfileDashboardVM.ScreenData> = _screenData
@@ -53,12 +95,43 @@ class UserProfileDashboardVMImpl @Inject constructor(
           is UserProfileDashboardVM.Action.Back -> UserProfileDashboardVM.Action.Navigation.Back.emit()
           else -> {}
         }
+        is UserProfileDashboardVM.State.Initial.Content -> when (action) {
+          is UserProfileDashboardVM.Action.Back -> UserProfileDashboardVM.Action.Navigation.Back.emit()
+          else -> {}
+        }
+        is UserProfileDashboardVM.State.Initial.Error -> when (action) {
+          is UserProfileDashboardVM.Action.Back -> UserProfileDashboardVM.Action.Navigation.Back.emit()
+          else -> {}
+        }
       }
     }
   }
 
   override suspend fun onStateEnter(newState: UserProfileDashboardVM.State) {
     when (newState) {
+      is UserProfileDashboardVM.State.Initial.Content -> {
+        either {
+          runWithLoaderUC {
+            val userName = dashboardInteractor.getUserName().getRight()
+            val sessionsData = dashboardInteractor.getUserSessions().getRight()
+
+            UserProfileDashboardVM.State.Initialized(
+              sessionsData = sessionsData,
+              userName = userName,
+            ).override()
+          }
+        }.onLeft { error ->
+          UserProfileDashboardVM.State.Initial.Error(
+            errorScreenData = errorDataMapper(
+              params = ErrorDataMapper.Params(
+                error = error,
+                onCloseClick = { dispatchAction(UserProfileDashboardVM.Action.Back) },
+              ),
+            ),
+          ).override()
+        }
+      }
+      is UserProfileDashboardVM.State.Initial.Error -> {}
       is UserProfileDashboardVM.State.Initialized -> {}
     }
   }

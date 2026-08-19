@@ -192,7 +192,7 @@ class EventMainVMImpl @AssistedInject constructor(
         }
 
         is EventMainVM.State.Initial.Error -> when (action) {
-          is EventMainVM.Action.Back -> EventMainVM.State.Initial.Content.override()
+          is EventMainVM.Action.Back -> EventMainVM.Action.Navigation.Back.emit()
           else -> {}
         }
 

@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import pl.dev.bkwiatkowski.common.core.time.DateFormatter
 import pl.dev.bkwiatkowski.feature.dashboard.domain.usecase.GetFriendsStatsDataUC
 import pl.dev.bkwiatkowski.feature.dashboard.domain.usecase.GetFriendsStatsDataUCImpl
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.main.MainDashboardMapper
@@ -35,7 +36,11 @@ object DashboardModule {
   fun provideSettingsDashboardMapper(): SettingsDashboardMapper = SettingsDashboardMapperImpl()
 
   @Provides
-  fun provideUserProfileDashboardMapper(): UserProfileDashboardMapper = UserProfileDashboardMapperImpl()
+  fun provideUserProfileDashboardMapper(
+    dateFormatter: DateFormatter,
+  ): UserProfileDashboardMapper = UserProfileDashboardMapperImpl(
+    dateFormatter = dateFormatter,
+  )
 
   @Provides
   fun provideFriendsDashboardMapper(): FriendsDashboardMapper = FriendsDashboardMapperImpl()

@@ -24,6 +24,7 @@ object MobileSetupModule {
         getMobileSettingsUC(UseCase.Params.Empty).mapRight { response ->
           MobileSettings(
             serverLocalDateTime = response.serverLocalDateTime,
+            userId = response.userId,
           )
         }
     }
