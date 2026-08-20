@@ -27,22 +27,25 @@ class EventsMapMapperImpl : EventsMapMapper {
           onBackClick = params.onBackClick,
         )
       is EventsMapVM.State.Initialized -> {
+        val events = params.state.events?.events ?: emptyList()
+
         EventsMapVM.ScreenData.Main(
           onBackClick = params.onBackClick,
-          barData = TopAppBarData.Back(
+          barData = TopAppBarData.BackAndTitle(
+            title = "Wybierz bieg",
             onNavigationIconClick = params.onBackClick,
           ),
           mapComponentData = MapComponentData(
-            markers = params.state.events?.events?.map { event ->
+            markers = events.map { event ->
               event.getMarkerData(onEventClick = params.onEventDetailsClick)
-            } ?: emptyList(),
+            }
           )
         )
       }
     }
 
   private fun MobileEventListDetails.getMarkerData(onEventClick: (Int) -> Unit) = MarkerData(
-    position = Position(
+    location = Position(
       latitude = this.startLocationY.toDouble(),
       longitude = this.startLocationX.toDouble(),
     ),

@@ -34,6 +34,7 @@ dependencies {
   implementation(libs.coil)
   implementation(libs.maps.compose)
   implementation(libs.play.services.maps)
+  implementation(libs.android.maps.compose.utils)
   implementation(libs.zoomimage.compose)
 
   testImplementation(libs.junit)
