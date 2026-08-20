@@ -65,7 +65,7 @@ interface EventDetailsVM {
       data class InitializedFinished(
         val event: MobileEventDetails,
         val session: EventSession,
-        val sessionParticipant: SessionParticipant,
+        val sessionParticipants: List<SessionParticipant>,
       ) : Initialized
     }
   }
@@ -113,10 +113,10 @@ interface EventDetailsVM {
       val topAppBarData: TopAppBarData,
       val startDateTime: String,
       val map: Bitmap?,
-      val userSessionSection: UserSessionSection
+      val userSessionSectionLabel: String,
+      val userSessionSection: List<UserSessionSection>,
     ) : ScreenData {
       data class UserSessionSection(
-        val sectionLabel: String,
         val joinTime: String,
         val finishTime: String,
       )
@@ -285,14 +285,14 @@ class EventDetailsVMImpl @AssistedInject constructor(
                 ).override()
 
                 UserSessionStatus.FINISHED -> {
-                  val sessionParticipant = mapsBackendInteractor.getSessionParticipantForUser(
+                  val sessionParticipants = mapsBackendInteractor.getFinishedSessionParticipantsForUser(
                     sessionUuid = details.session.id,
                   ).getRight()
 
                   EventDetailsVM.State.Initialized.InitializedFinished(
                     event = details,
                     session = details.session,
-                    sessionParticipant = sessionParticipant,
+                    sessionParticipants = sessionParticipants,
                   ).override()
                 }
               }

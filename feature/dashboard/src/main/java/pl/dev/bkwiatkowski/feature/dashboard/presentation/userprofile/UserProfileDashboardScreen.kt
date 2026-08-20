@@ -9,8 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -57,8 +56,7 @@ fun UserProfileDashboardScreenContent(
       Column(
         modifier = Modifier
           .fillMaxSize()
-          .addDefaultPadding()
-          .verticalScroll(rememberScrollState()),
+          .addDefaultPadding(),
       ) {
         Row(
           modifier = Modifier.fillMaxWidth(),
@@ -85,16 +83,20 @@ fun UserProfileDashboardScreenContent(
         )
         Spacer(modifier = Modifier.height(24.dp))
 
-        data.groupedSessions.forEach { (date, data) ->
-          CustomText(
-            text = date,
-            style = MaterialTheme.typography.titleMedium,
-          )
-          Spacer(modifier = Modifier.height(12.dp))
+        LazyColumn {
+          items(count = data.groupedSessions.size) { index ->
+            val entry = data.groupedSessions.entries.elementAt(index)
 
-          data.forEach { sessionData ->
-            UserSessionCard(sessionData = sessionData)
-            Spacer(modifier = Modifier.height(8.dp))
+            CustomText(
+              text = entry.key,
+              style = MaterialTheme.typography.titleMedium,
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            entry.value.forEach { sessionData ->
+              UserSessionCard(sessionData = sessionData)
+              Spacer(modifier = Modifier.height(8.dp))
+            }
           }
         }
       }

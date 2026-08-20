@@ -13,8 +13,6 @@ data class MobileEventDetailResponse(
   val startLocationY: Float,
   val eventStatus: BEEventStatus,
   val eventType: BEEventType,
-  val finishedAt: LocalDateTime? = null,
-  val allowOfflineTracking: Boolean? = null,
   val eventWaypoints: List<BEMapWaypoint>,
   val session: EventSessionResponse? = null,
 )

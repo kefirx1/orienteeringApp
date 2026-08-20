@@ -10,9 +10,9 @@ import pl.dev.bkwiatkowski.common.network.CallMediator
 import pl.dev.bkwiatkowski.common.network.HttpClientFactory
 import pl.dev.bkwiatkowski.technical.backend.api.CheckUserInEventSession
 import pl.dev.bkwiatkowski.technical.backend.api.FinishEventSession
+import pl.dev.bkwiatkowski.technical.backend.api.GetFinishedSessionParticipants
 import pl.dev.bkwiatkowski.technical.backend.api.GetMobileEventById
 import pl.dev.bkwiatkowski.technical.backend.api.GetMobileEvents
-import pl.dev.bkwiatkowski.technical.backend.api.GetSessionParticipantForUser
 import pl.dev.bkwiatkowski.technical.backend.api.GetSessionWaypointDetails
 import pl.dev.bkwiatkowski.technical.backend.api.JoinEventSession
 import pl.dev.bkwiatkowski.technical.backend.api.UploadSessionImage
@@ -99,10 +99,10 @@ class BackendEventsRepositoryImpl(
       response.body<FinishSessionResponseDto>().toDomain()
     }
 
-  override suspend fun getSessionParticipantForUser(sessionUuid: String): Either<DomainError, BESessionParticipant> =
-    callMediator<GetSessionParticipantForUser> {
-      client.get(resource = GetSessionParticipantForUser(sessionUuid = sessionUuid)).body()
+  override suspend fun getFinishedSessionParticipantsForUser(sessionUuid: String): Either<DomainError, List<BESessionParticipant>> =
+    callMediator<GetFinishedSessionParticipants> {
+      client.get(resource = GetFinishedSessionParticipants(sessionUuid = sessionUuid)).body()
     }.mapRight { response ->
-      response.body<SessionParticipantResponseDto>().toDomain()
+      response.body<List<SessionParticipantResponseDto>>().toDomain()
     }
 }

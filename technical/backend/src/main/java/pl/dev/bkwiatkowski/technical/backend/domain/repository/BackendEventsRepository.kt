@@ -18,5 +18,5 @@ interface BackendEventsRepository {
   suspend fun uploadSessionImage(sessionUuid: String, imageBase64: String): Either<DomainError, BEUploadImageResponse>
   suspend fun getWaypointsVisited(sessionUuid: String): Either<DomainError, BESessionWaypointDetailsResponse>
   suspend fun finishEventSession(sessionUuid: String): Either<DomainError, BEFinishSessionResponse>
-  suspend fun getSessionParticipantForUser(sessionUuid: String): Either<DomainError, BESessionParticipant>
+  suspend fun getFinishedSessionParticipantsForUser(sessionUuid: String): Either<DomainError, List<BESessionParticipant>>
 }

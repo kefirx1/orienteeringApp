@@ -14,8 +14,6 @@ data class MobileEventDetails(
   val startLocationY: Float,
   val eventStatus: EventStatus,
   val eventType: EventType,
-  val finishedAt: LocalDateTime?,
-  val allowOfflineTracking: Boolean?,
   val session: EventSession?,
   val eventWaypoints: List<MapWaypoint>,
 )

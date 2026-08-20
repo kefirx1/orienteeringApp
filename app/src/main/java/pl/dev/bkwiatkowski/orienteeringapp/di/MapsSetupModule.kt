@@ -61,8 +61,8 @@ object MapsSetupModule {
         }
       }
 
-    override suspend fun getSessionParticipantForUser(sessionUuid: String) =
-      backendEventsRepository.getSessionParticipantForUser(sessionUuid = sessionUuid).mapRight { response ->
+    override suspend fun getFinishedSessionParticipantsForUser(sessionUuid: String) =
+      backendEventsRepository.getFinishedSessionParticipantsForUser(sessionUuid = sessionUuid).mapRight { response ->
         response.toFeature()
       }
 
@@ -110,8 +110,6 @@ object MapsSetupModule {
       startLocationY = startLocationY,
       eventStatus = eventStatus.toFeature(),
       eventType = eventType.toFeature(),
-      finishedAt = finishedAt,
-      allowOfflineTracking = allowOfflineTracking,
       session = session?.toFeature(),
       eventWaypoints = eventWaypoints.map { it.toFeature() },
     )
@@ -129,6 +127,8 @@ object MapsSetupModule {
       userCanJoin = userCanJoin,
       finishedAt = finishedAt
     )
+
+    fun List<BESessionParticipant>.toFeature(): List<SessionParticipant> = this.map { it.toFeature() }
 
     fun BESessionParticipant.toFeature(): SessionParticipant = SessionParticipant(
       sessionUuid = this.sessionUuid,

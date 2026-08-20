@@ -46,8 +46,6 @@ class EventDetailsPreviewProvider : ViewModelPreviewProvider<EventDetailsVM, Eve
             startLocationY = 21.0122f,
             eventStatus = EventStatus.IN_PROGRESS,
             eventType = EventType.ONLINE,
-            finishedAt = null,
-            allowOfflineTracking = true,
             session = EventSession(
               id = "1",
               startedAt = LocalDateTime.of(2026, 4, 30, 10, 0),
@@ -85,8 +83,6 @@ class EventDetailsPreviewProvider : ViewModelPreviewProvider<EventDetailsVM, Eve
             startLocationY = 21.0122f,
             eventStatus = EventStatus.IN_PROGRESS,
             eventType = EventType.ONLINE,
-            finishedAt = null,
-            allowOfflineTracking = true,
             session = EventSession(
               id = "1",
               startedAt = LocalDateTime.of(2026, 4, 30, 10, 0),
@@ -119,8 +115,6 @@ class EventDetailsPreviewProvider : ViewModelPreviewProvider<EventDetailsVM, Eve
             startLocationY = 21.0122f,
             eventStatus = EventStatus.IN_PROGRESS,
             eventType = EventType.ONLINE,
-            finishedAt = null,
-            allowOfflineTracking = true,
             session = null,
             eventWaypoints = emptyList(),
           ),
@@ -147,8 +141,6 @@ class EventDetailsPreviewProvider : ViewModelPreviewProvider<EventDetailsVM, Eve
             startLocationY = 21.0122f,
             eventStatus = EventStatus.IN_PROGRESS,
             eventType = EventType.ONLINE,
-            finishedAt = null,
-            allowOfflineTracking = true,
             session = null,
             eventWaypoints = emptyList(),
           ),
@@ -158,11 +150,23 @@ class EventDetailsPreviewProvider : ViewModelPreviewProvider<EventDetailsVM, Eve
             userCanJoin = true,
             finishedAt = null
           ),
-          sessionParticipant = SessionParticipant(
-            sessionUuid = "",
-            joinedAt = LocalDateTime.of(2026, 4, 30, 10, 0),
-            finishedAt = LocalDateTime.of(2026, 4, 30, 11, 0),
-          )
+          sessionParticipants = listOf(
+            SessionParticipant(
+              sessionUuid = "",
+              joinedAt = LocalDateTime.of(2026, 4, 30, 10, 0),
+              finishedAt = LocalDateTime.of(2026, 4, 30, 11, 0),
+            ),
+            SessionParticipant(
+              sessionUuid = "",
+              joinedAt = LocalDateTime.of(2026, 4, 30, 12, 0),
+              finishedAt = LocalDateTime.of(2026, 4, 30, 13, 0),
+            ),
+            SessionParticipant(
+              sessionUuid = "",
+              joinedAt = LocalDateTime.of(2026, 5, 30, 10, 0),
+              finishedAt = LocalDateTime.of(2026, 5, 30, 11, 0),
+            ),
+          ),
         ))),
       )
     },

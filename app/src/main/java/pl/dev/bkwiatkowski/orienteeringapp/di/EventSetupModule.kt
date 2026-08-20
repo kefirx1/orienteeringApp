@@ -113,8 +113,6 @@ object EventSetupModule {
         startLocationY = startLocationY,
         eventStatus = eventStatus.toFeature(),
         eventType = eventType.toFeature(),
-        finishedAt = finishedAt,
-        allowOfflineTracking = allowOfflineTracking,
         session = session?.toFeature()
           ?: raise(error = DomainError.Custom(IllegalStateException("Session is null"))),
         eventWaypoints = eventWaypoints.map { it.toFeature() },

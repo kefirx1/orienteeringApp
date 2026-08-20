@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -165,8 +166,7 @@ fun EventDetailsFinishedScreenContent(
       Column(
         modifier = Modifier
           .fillMaxSize()
-          .addDefaultPadding()
-          .verticalScroll(rememberScrollState()),
+          .addDefaultPadding(),
         horizontalAlignment = Alignment.Start,
       ) {
         data.map?.let { bmp ->
@@ -200,21 +200,30 @@ fun EventDetailsFinishedScreenContent(
         Divider(spacer = 24.dp)
 
         CustomText(
-          text = data.userSessionSection.sectionLabel,
+          text = data.userSessionSectionLabel,
           style = MaterialTheme.typography.titleMedium,
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        CustomText(
-          text = data.userSessionSection.joinTime,
-          style = MaterialTheme.typography.bodyMedium,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
+        LazyColumn {
+          items(count = data.userSessionSection.size) { index ->
+            val session = data.userSessionSection[index]
+            CustomText(
+              text = session.joinTime,
+              style = MaterialTheme.typography.bodyMedium,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
 
-        CustomText(
-          text = data.userSessionSection.finishTime,
-          style = MaterialTheme.typography.bodyMedium,
-        )
+            CustomText(
+              text = session.finishTime,
+              style = MaterialTheme.typography.bodyMedium,
+            )
+
+            if (index < data.userSessionSection.size - 1) {
+              Divider(spacer = 8.dp)
+            }
+          }
+        }
       }
     },
   )

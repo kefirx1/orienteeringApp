@@ -12,5 +12,5 @@ interface MapsBackendInteractor {
   suspend fun getMobileEventDetails(eventId: Int): Either<DomainError, MobileEventDetails>
   suspend fun joinEventSession(sessionUuid: String): Either<DomainError, Unit>
   suspend fun checkUserInEventSession(sessionUuid: String): Either<DomainError, UserSessionStatus>
-  suspend fun getSessionParticipantForUser(sessionUuid: String): Either<DomainError, SessionParticipant>
+  suspend fun getFinishedSessionParticipantsForUser(sessionUuid: String): Either<DomainError, List<SessionParticipant>>
 }

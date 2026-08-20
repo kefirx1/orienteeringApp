@@ -118,8 +118,6 @@ object BackendMapper {
         MobileEventDetailResponseDto.EventType.ONLINE -> BEEventType.ONLINE
         MobileEventDetailResponseDto.EventType.OFFLINE -> BEEventType.OFFLINE
       },
-      finishedAt = finishedAt,
-      allowOfflineTracking = allowOfflineTracking,
       session = session?.toDomain(),
       eventWaypoints = eventWaypoints?.map { it.toDomain() } ?: emptyList()
     )
@@ -179,6 +177,8 @@ object BackendMapper {
     joinedAt = this.joinedAt,
     finishedAt = this.finishedAt,
   )
+
+  fun List<SessionParticipantResponseDto>.toDomain() = this.map { it.toDomain() }
 
   fun SessionParticipantResponseDto.toDomain() = BESessionParticipant(
     sessionUuid = this.sessionUuid,

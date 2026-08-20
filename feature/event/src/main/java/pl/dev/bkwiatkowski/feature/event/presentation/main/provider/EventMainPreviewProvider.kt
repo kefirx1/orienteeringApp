@@ -55,8 +55,6 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
                   startLocationY = 21.0122f,
                   eventStatus = EventStatus.IN_PROGRESS,
                   eventType = EventType.ONLINE,
-                  finishedAt = null,
-                  allowOfflineTracking = true,
                   session = EventSession(
                     id = "1",
                     startedAt = LocalDateTime.of(2026, 4, 30, 10, 0),

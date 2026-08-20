@@ -23,7 +23,7 @@ class EventDetailsMapperImpl(
   private val bitmapReader: BitmapReader,
 ) : EventDetailsMapper {
   override fun invoke(params: EventDetailsMapper.Params): EventDetailsVM.ScreenData =
-    when (params.state) {
+    when (val state = params.state) {
       is EventDetailsVM.State.Loading.Error -> EventDetailsVM.ScreenData.ErrorScreen(
         onBackClick = params.onBackClick,
         errorData = params.state.errorScreenData,
@@ -108,21 +108,27 @@ class EventDetailsMapperImpl(
           "Rozpoczęto: $time"
         },
         map = bitmapReader.decode(encoded = params.state.event.map.imageData),
-        userSessionSection = EventDetailsVM.ScreenData.MainFinished.UserSessionSection(
-          sectionLabel = "Ukończono już to wydarzenie z wynikiem:",
-          joinTime = dateFormatter.format(
-            dateTime = params.state.sessionParticipant.joinedAt,
-            format = DateFormatter.Format.DATE_TIME,
-          ).let { time ->
-            "Czas rozpoczęcia: $time"
-          },
-          finishTime = dateFormatter.format(
-            dateTime = params.state.sessionParticipant.finishedAt,
-            format = DateFormatter.Format.DATE_TIME,
-          ).let { time ->
-            "Czas zakończenia: $time"
-          },
-        )
+        userSessionSectionLabel = if (params.state.sessionParticipants.size > 1) {
+          "Ukończono już to wydarzenie z wynikami:"
+        } else {
+          "Ukończono już to wydarzenie z wynikiem:"
+        },
+        userSessionSection = state.sessionParticipants.map { session ->
+          EventDetailsVM.ScreenData.MainFinished.UserSessionSection(
+            joinTime = dateFormatter.format(
+              dateTime = session.joinedAt,
+              format = DateFormatter.Format.DATE_TIME,
+            ).let { time ->
+              "Czas rozpoczęcia: $time"
+            },
+            finishTime = dateFormatter.format(
+              dateTime = session.finishedAt,
+              format = DateFormatter.Format.DATE_TIME,
+            ).let { time ->
+              "Czas zakończenia: $time"
+            },
+          )
+        },
       )
     }
 }
