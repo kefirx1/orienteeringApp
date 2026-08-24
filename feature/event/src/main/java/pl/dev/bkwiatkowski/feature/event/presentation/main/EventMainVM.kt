@@ -289,8 +289,8 @@ class EventMainVMImpl @AssistedInject constructor(
   override suspend fun onStateEnter(newState: EventMainVM.State) {
     when (newState) {
       is EventMainVM.State.Initial.Content -> {
-        either {
-          runWithLoaderUC {
+        runWithLoaderUC {
+          either {
             if (!ensureLocationPermission()) return@runWithLoaderUC
 
             val details = eventBackendInteractor.getMobileEventDetails(
@@ -310,16 +310,16 @@ class EventMainVMImpl @AssistedInject constructor(
                 details = details,
               )
             ).override()
+          }.onLeft { error ->
+            EventMainVM.State.Initial.Error(
+              errorScreenData = errorDataMapper(
+                params = ErrorDataMapper.Params(
+                  error = error,
+                  onCloseClick = { dispatchAction(EventMainVM.Action.Back) },
+                )
+              ),
+            ).override()
           }
-        }.onLeft { error ->
-          EventMainVM.State.Initial.Error(
-            errorScreenData = errorDataMapper(
-              params = ErrorDataMapper.Params(
-                error = error,
-                onCloseClick = { dispatchAction(EventMainVM.Action.Back) },
-              )
-            ),
-          ).override()
         }
       }
       is EventMainVM.State.PermissionDenied -> {

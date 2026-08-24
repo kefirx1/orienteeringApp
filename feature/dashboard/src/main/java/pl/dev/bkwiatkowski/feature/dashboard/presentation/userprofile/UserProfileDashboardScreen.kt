@@ -97,6 +97,7 @@ fun UserProfileDashboardScreenContent(
               UserSessionCard(sessionData = sessionData)
               Spacer(modifier = Modifier.height(8.dp))
             }
+            Spacer(modifier = Modifier.height(12.dp))
           }
         }
       }

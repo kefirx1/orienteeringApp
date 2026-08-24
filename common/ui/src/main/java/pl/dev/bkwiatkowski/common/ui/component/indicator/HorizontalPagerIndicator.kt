@@ -35,7 +35,7 @@ fun HorizontalPagerIndicator(
       Box(
         modifier = Modifier
           .padding(horizontal = 4.dp)
-          .size(8.dp, 8.dp)
+          .size(8.dp)
           .background(
             color = if (isActive) MaterialTheme.colorScheme.primary else Color.LightGray,
             shape = CircleShape,

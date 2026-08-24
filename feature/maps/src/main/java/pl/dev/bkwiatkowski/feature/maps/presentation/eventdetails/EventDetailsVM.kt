@@ -255,8 +255,8 @@ class EventDetailsVMImpl @AssistedInject constructor(
 
   override suspend fun onStateEnter(newState: EventDetailsVM.State) {
     when (newState) {
-      is EventDetailsVM.State.Loading.Content -> either {
-        runWithLoaderUC {
+      is EventDetailsVM.State.Loading.Content -> runWithLoaderUC {
+        either {
           val details = mapsBackendInteractor.getMobileEventDetails(
             eventId = setupData.eventId,
           ).getRight()
@@ -298,16 +298,16 @@ class EventDetailsVMImpl @AssistedInject constructor(
               }
             }
           }
+        }.onLeft { error ->
+          EventDetailsVM.State.Loading.Error(
+            errorScreenData = errorDataMapper(
+              params = ErrorDataMapper.Params(
+                error = error,
+                onCloseClick = { dispatchAction(EventDetailsVM.Action.Back) },
+              )
+            ),
+          ).override()
         }
-      }.onLeft { error ->
-        EventDetailsVM.State.Loading.Error(
-          errorScreenData = errorDataMapper(
-            params = ErrorDataMapper.Params(
-              error = error,
-              onCloseClick = { dispatchAction(EventDetailsVM.Action.Back) },
-            )
-          ),
-        ).override()
       }
       is EventDetailsVM.State.Loading.Error -> {}
       is EventDetailsVM.State.Initialized -> {}

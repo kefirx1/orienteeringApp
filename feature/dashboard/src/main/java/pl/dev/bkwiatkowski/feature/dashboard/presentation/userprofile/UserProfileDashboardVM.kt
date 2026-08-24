@@ -110,8 +110,8 @@ class UserProfileDashboardVMImpl @Inject constructor(
   override suspend fun onStateEnter(newState: UserProfileDashboardVM.State) {
     when (newState) {
       is UserProfileDashboardVM.State.Initial.Content -> {
-        either {
-          runWithLoaderUC {
+        runWithLoaderUC {
+          either {
             val userName = dashboardInteractor.getUserName().getRight()
             val sessionsData = dashboardInteractor.getUserSessions().getRight()
 
@@ -119,16 +119,16 @@ class UserProfileDashboardVMImpl @Inject constructor(
               sessionsData = sessionsData,
               userName = userName,
             ).override()
-          }
-        }.onLeft { error ->
-          UserProfileDashboardVM.State.Initial.Error(
-            errorScreenData = errorDataMapper(
-              params = ErrorDataMapper.Params(
-                error = error,
-                onCloseClick = { dispatchAction(UserProfileDashboardVM.Action.Back) },
+          }.onLeft { error ->
+            UserProfileDashboardVM.State.Initial.Error(
+              errorScreenData = errorDataMapper(
+                params = ErrorDataMapper.Params(
+                  error = error,
+                  onCloseClick = { dispatchAction(UserProfileDashboardVM.Action.Back) },
+                ),
               ),
-            ),
-          ).override()
+            ).override()
+          }
         }
       }
       is UserProfileDashboardVM.State.Initial.Error -> {}
