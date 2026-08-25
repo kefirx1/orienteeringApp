@@ -26,6 +26,8 @@ import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
 import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitor
 import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitorImpl
+import pl.dev.bkwiatkowski.common.core.network.NetworkMonitor
+import pl.dev.bkwiatkowski.common.core.network.NetworkStatus
 import pl.dev.bkwiatkowski.common.permission.AppPermission
 import pl.dev.bkwiatkowski.common.permission.PermissionResult
 import pl.dev.bkwiatkowski.common.permission.PermissionsManager
@@ -158,6 +160,7 @@ class EventMainVMImpl @AssistedInject constructor(
   private val permissionsManager: PermissionsManager,
   private val openAppSettingsIntentUC: OpenAppSettingsIntentUC,
   private val lifecycleMonitor: LifecycleMonitor,
+  private val networkMonitor: NetworkMonitor,
   private val findWaypointFromUserLocationUC: FindWaypointFromUserLocationUC,
   lifecycleMonitorImpl: LifecycleMonitorImpl,
   ) : CustomViewModel<EventMainVM.State, EventMainVM.ScreenData, EventMainVM.Action.Navigation>(
@@ -354,6 +357,13 @@ class EventMainVMImpl @AssistedInject constructor(
             )
           }
         }
+        viewModelScope.launch {
+          networkMonitor.monitor().collect { status ->
+            if (status == NetworkStatus.CONNECTED) {
+              eventBackendInteractor.openSession(sessionUuid = setupData.sessionUuid).getRightOrNull()
+            }
+          }
+        }
       }
     }
   }
@@ -390,8 +400,6 @@ class EventMainVMImpl @AssistedInject constructor(
   )
 
   override fun onCleared() {
-    super.onCleared()
-
     viewModelScope.launch {
       eventBackendInteractor.closeSession()
     }

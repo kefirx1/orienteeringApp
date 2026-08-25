@@ -41,6 +41,8 @@ import pl.dev.bkwiatkowski.common.intents.usecase.OpenAppSettingsIntentUCImpl
 import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitor
 import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitorActivityConnector
 import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitorImpl
+import pl.dev.bkwiatkowski.common.core.network.NetworkMonitor
+import pl.dev.bkwiatkowski.common.network.NetworkMonitorImpl
 import pl.dev.bkwiatkowski.common.loader.LoaderManager
 import pl.dev.bkwiatkowski.common.loader.LoaderManagerImpl
 import pl.dev.bkwiatkowski.common.loader.domain.RunWithLoaderUCImpl
@@ -110,10 +112,10 @@ object CommonModule {
     intentsActivityConnector: IntentsActivityConnector,
     lifecycleMonitorActivityConnector: LifecycleMonitorActivityConnector,
   ): ActivityConnector = ActivityConnectorImpl(
-    permissionsActivityConnector = permissionsActivityConnector,
-    cameraActivityConnector = cameraActivityConnector,
-    intentsActivityConnector = intentsActivityConnector,
-    lifecycleMonitorActivityConnector = lifecycleMonitorActivityConnector,
+    permissionsActivityConnector,
+    cameraActivityConnector,
+    intentsActivityConnector,
+    lifecycleMonitorActivityConnector,
   )
 
   @Provides
@@ -307,6 +309,12 @@ object CommonModule {
   @Provides
   @Singleton
   fun provideLifecycleMonitor() = LifecycleMonitorImpl()
+
+  @Provides
+  @Singleton
+  fun provideNetworkMonitor(
+    context: Context,
+  ): NetworkMonitor = NetworkMonitorImpl(context = context)
 
   @Provides
   fun provideErrorDataMapper(): ErrorDataMapper = ErrorDataMapperImpl()

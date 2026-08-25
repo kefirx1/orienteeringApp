@@ -14,13 +14,9 @@ class ActivityConnectorImpl(
   private val lifecycleMonitorActivityConnector: LifecycleMonitorActivityConnector,
 ) : ActivityConnector {
   override fun connect(activity: AppCompatActivity) {
-    listOf<ActivityConnector>(
-      permissionsActivityConnector,
-      cameraActivityConnector,
-      intentsActivityConnector,
-      lifecycleMonitorActivityConnector,
-    ).forEach { activityResultLauncher ->
-      activityResultLauncher.connect(activity = activity)
-    }
+    permissionsActivityConnector.connect(activity = activity)
+    cameraActivityConnector.connect(activity = activity)
+    intentsActivityConnector.connect(activity = activity)
+    lifecycleMonitorActivityConnector.connect(activity = activity)
   }
 }

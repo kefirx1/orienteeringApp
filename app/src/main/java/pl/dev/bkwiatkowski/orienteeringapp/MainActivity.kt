@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.activityconnector.ActivityConnector
+import pl.dev.bkwiatkowski.common.core.network.NetworkMonitor
 import pl.dev.bkwiatkowski.common.loader.Loader
 import pl.dev.bkwiatkowski.common.loader.LoaderManager
 import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
@@ -24,17 +25,17 @@ class MainActivity : AppCompatActivity() {
   @Inject
   lateinit var loaderManager: LoaderManager
 
+  @Inject
+  lateinit var networkMonitor: NetworkMonitor
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
     lifecycleScope.launch {
       activityConnector.connect(this@MainActivity)
-
+      networkMonitor.register()
     }
-    enableEdgeToEdge(
-
-    )
+    enableEdgeToEdge()
 
     setContent {
       OrienteeringAppTheme {
@@ -46,6 +47,13 @@ class MainActivity : AppCompatActivity() {
           )
         }
       }
+    }
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    lifecycleScope.launch {
+      networkMonitor.unregister()
     }
   }
 }
