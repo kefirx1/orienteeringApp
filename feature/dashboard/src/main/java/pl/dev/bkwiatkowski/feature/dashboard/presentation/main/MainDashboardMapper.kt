@@ -3,6 +3,7 @@ package pl.dev.bkwiatkowski.feature.dashboard.presentation.main
 import pl.dev.bkwiatkowski.common.core.usecase.Mapper
 import pl.dev.bkwiatkowski.common.ui.R
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.FabData
+import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.button.SmallButtonData
 import pl.dev.bkwiatkowski.common.ui.component.card.ActionCardData
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
@@ -17,6 +18,8 @@ interface MainDashboardMapper : Mapper<MainDashboardMapper.Params, MainDashboard
     val onGoToFriendsClick: () -> Unit,
     val onCheckNewRunsClick: () -> Unit,
     val onMyProfileClick: () -> Unit,
+    val onContinueLastRunClick: (() -> Unit)? = null,
+    val onRefreshState: () -> Unit,
   )
 }
 
@@ -65,6 +68,20 @@ class MainDashboardMapperImpl : MainDashboardMapper {
           onFabClick = params.onNewRunClick,
           fabIconResId = R.drawable.outline_directions_run_24
         )
+      )
+      is MainDashboardVM.State.Offline -> MainDashboardVM.ScreenData.Offline(
+        onBackClick = params.onBackClick,
+        topBarData = TopAppBarData.Empty,
+        welcomeLabel = "Witaj ${params.state.userName}!",
+        welcomeDescription = "Nie masz połączenia z internetem, niektóre funkcje mogą być niedostępne",
+        refreshStateButton = SmallButtonData.Secondary(
+          text = "Odśwież",
+          onClick = params.onRefreshState,
+        ),
+        continueLastRunButton = LargeButtonData.Primary(
+          text = "Kontynuuj ostatni bieg",
+          onClick = params.onContinueLastRunClick ?: {},
+        ),
       )
     }
 }

@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
 import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
@@ -11,6 +12,7 @@ import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.FabData
+import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.button.SmallButtonData
 import pl.dev.bkwiatkowski.common.ui.component.card.ActionCardData
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
@@ -30,6 +32,10 @@ interface MainDashboardVM {
     data class Active(
       val userName: String,
       val friendsData: FriendsStatsData,
+    ) : State
+
+    data class Offline(
+      val userName: String,
     ) : State
   }
 
@@ -72,6 +78,15 @@ interface MainDashboardVM {
       val newRunFab: FabData,
       val goToFriendsButton: SmallButtonData,
       val checkNewRunsButton: SmallButtonData,
+    ) : ScreenData
+
+    data class Offline(
+      override val onBackClick: () -> Unit,
+      val topBarData: TopAppBarData,
+      val welcomeLabel: String,
+      val welcomeDescription: String,
+      val refreshStateButton: SmallButtonData,
+      val continueLastRunButton: LargeButtonData.Primary?,
     ) : ScreenData
 
     data class ErrorScreen(
@@ -122,15 +137,22 @@ class MainDashboardVMImpl @Inject constructor(
                     friendsData = friendsData,
                   ).override()
                 }.onLeft { error ->
-                  MainDashboardVM.State.Error(
-                    errorScreenData = errorDataMapper(
-                      params = ErrorDataMapper.Params(
-                        error = error,
-                        onCloseClick = { dispatchAction(MainDashboardVM.Action.Back) },
-                        onRetryClick = { dispatchAction(MainDashboardVM.Action.LoadData) },
-                      )
-                    ),
-                  ).override()
+                  when (error) {
+                    is DomainError.NoNetwork -> MainDashboardVM.State.Offline(
+                      userName = dashboardInteractor.getUserName().getRightOr(default = ""),
+                    ).override()
+                    else -> {
+                      MainDashboardVM.State.Error(
+                        errorScreenData = errorDataMapper(
+                          params = ErrorDataMapper.Params(
+                            error = error,
+                            onCloseClick = { dispatchAction(MainDashboardVM.Action.Back) },
+                            onRetryClick = { dispatchAction(MainDashboardVM.Action.LoadData) },
+                          )
+                        ),
+                      ).override()
+                    }
+                  }
                 }
               }
 
@@ -167,6 +189,20 @@ class MainDashboardVMImpl @Inject constructor(
             else -> {}
           }
         }
+        is MainDashboardVM.State.Offline -> {
+          when (action) {
+            is MainDashboardVM.Action.Back -> {
+              MainDashboardVM.Action.Navigation.ExitApp.emit()
+            }
+            is MainDashboardVM.Action.NewRun -> {
+              MainDashboardVM.Action.Navigation.GoToMap.emit()
+            }
+            is MainDashboardVM.Action.LoadData -> {
+              MainDashboardVM.State.Initial.override()
+            }
+            else -> {}
+          }
+        }
       }
     }
   }
@@ -179,6 +215,7 @@ class MainDashboardVMImpl @Inject constructor(
 
       is MainDashboardVM.State.Active -> {}
       is MainDashboardVM.State.Error -> {}
+      is MainDashboardVM.State.Offline -> {}
     }
   }
 
@@ -203,6 +240,12 @@ class MainDashboardVMImpl @Inject constructor(
       },
       onMyProfileClick = {
         dispatchAction(MainDashboardVM.Action.ToMyProfile)
+      },
+      onContinueLastRunClick = {
+        dispatchAction(MainDashboardVM.Action.NewRun)
+      },
+      onRefreshState = {
+        dispatchAction(MainDashboardVM.Action.LoadData)
       }
     ),
   )

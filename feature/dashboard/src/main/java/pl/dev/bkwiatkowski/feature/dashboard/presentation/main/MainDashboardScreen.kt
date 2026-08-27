@@ -20,14 +20,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.dev.bkwiatkowski.common.ui.component.addDefaultPadding
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
+import pl.dev.bkwiatkowski.common.ui.component.button.LargeButton
 import pl.dev.bkwiatkowski.common.ui.component.button.SmallButton
 import pl.dev.bkwiatkowski.common.ui.component.button.SmallButtonData
 import pl.dev.bkwiatkowski.common.ui.component.card.ActionCard
 import pl.dev.bkwiatkowski.common.ui.component.card.BaseCard
 import pl.dev.bkwiatkowski.common.ui.component.emptyscreen.EmptyScreen
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
-import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 import pl.dev.bkwiatkowski.common.ui.error.ErrorScreen
+import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 import pl.dev.bkwiatkowski.feature.dashboard.domain.model.FriendsStatsData
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.main.provider.MainDashboardPreviewProvider
 
@@ -39,6 +40,7 @@ fun MainDashboardScreen(viewModel: MainDashboardVM) {
     is MainDashboardVM.ScreenData.Initial -> EmptyScreen()
     is MainDashboardVM.ScreenData.ErrorScreen -> ErrorScreen(data = screenData.errorData)
     is MainDashboardVM.ScreenData.Main -> MainDashboardScreenContent(data = screenData)
+    is MainDashboardVM.ScreenData.Offline -> MainDashboardOfflineContent(data = screenData)
   }
 
   BackHandler {
@@ -86,6 +88,45 @@ fun MainDashboardScreenContent(
     },
     fabData = data.newRunFab,
     bottomBar = {}
+  )
+}
+
+@Composable
+fun MainDashboardOfflineContent(
+  data: MainDashboardVM.ScreenData.Offline,
+) {
+  BaseScaffold(
+    topBarData = data.topBarData,
+    content = {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .addDefaultPadding()
+          .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+      ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        WelcomeCard(
+          welcomeLabel = data.welcomeLabel,
+          welcomeDescription = data.welcomeDescription,
+          checkNewRunsButtonData = data.refreshStateButton,
+        )
+      }
+    },
+    bottomBar = {
+      data.continueLastRunButton?.let { buttonData ->
+        Column(
+          modifier = Modifier.padding(
+            horizontal = 20.dp,
+            vertical = 10.dp
+          ),
+          horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+          LargeButton(buttonData = buttonData)
+        }
+      }
+    }
   )
 }
 
