@@ -127,6 +127,7 @@ class MainDashboardVMImpl @Inject constructor(
                       params = ErrorDataMapper.Params(
                         error = error,
                         onCloseClick = { dispatchAction(MainDashboardVM.Action.Back) },
+                        onRetryClick = { dispatchAction(MainDashboardVM.Action.LoadData) },
                       )
                     ),
                   ).override()
@@ -138,7 +139,8 @@ class MainDashboardVMImpl @Inject constructor(
           }
         }
         is MainDashboardVM.State.Error -> when (action) {
-          is MainDashboardVM.Action.Back -> MainDashboardVM.State.Initial.override()
+          is MainDashboardVM.Action.Back -> MainDashboardVM.Action.Navigation.ExitApp.emit()
+          is MainDashboardVM.Action.LoadData -> MainDashboardVM.State.Initial.override()
           else -> {}
         }
 

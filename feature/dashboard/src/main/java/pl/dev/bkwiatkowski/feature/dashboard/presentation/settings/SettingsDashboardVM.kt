@@ -88,11 +88,7 @@ class SettingsDashboardVMImpl @Inject constructor(
     }
   }
 
-  override suspend fun onStateEnter(newState: SettingsDashboardVM.State) {
-    when (newState) {
-      is SettingsDashboardVM.State.Initialized -> {}
-    }
-  }
+  override suspend fun onStateEnter(newState: SettingsDashboardVM.State) {}
 
   override fun mapScreenData(): SettingsDashboardVM.ScreenData = mapper(
     params = SettingsDashboardMapper.Params(

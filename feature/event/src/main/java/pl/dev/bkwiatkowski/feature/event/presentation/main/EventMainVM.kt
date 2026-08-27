@@ -14,28 +14,28 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import pl.dev.bkwiatkowski.common.core.intents.OpenAppSettingsIntentUC
-import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
 import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
+import pl.dev.bkwiatkowski.common.core.intents.OpenAppSettingsIntentUC
+import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.localization.GpsManager
 import pl.dev.bkwiatkowski.common.core.location.Position
+import pl.dev.bkwiatkowski.common.core.network.NetworkMonitor
+import pl.dev.bkwiatkowski.common.core.network.NetworkStatus
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
 import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitor
 import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitorImpl
-import pl.dev.bkwiatkowski.common.core.network.NetworkMonitor
-import pl.dev.bkwiatkowski.common.core.network.NetworkStatus
 import pl.dev.bkwiatkowski.common.permission.AppPermission
 import pl.dev.bkwiatkowski.common.permission.PermissionResult
 import pl.dev.bkwiatkowski.common.permission.PermissionsManager
 import pl.dev.bkwiatkowski.common.ui.component.permissions.PermissionRequesterData
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
-import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.FinishSessionResponse
+import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.SessionWaypointDetail
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.FindWaypointFromUserLocationUC
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.ObserveSessionUC
@@ -98,6 +98,7 @@ interface EventMainVM {
     data object CheckPermission : Action
     data object GoToMap : Action
     data object GoToGame : Action
+    data object RetryLoad : Action
     data object Back : Action
   }
 
@@ -190,9 +191,8 @@ class EventMainVMImpl @AssistedInject constructor(
     viewModelScope.launch {
       when (val currentState = state.value) {
         is EventMainVM.State.Initial.Content -> when (action) {
-          is EventMainVM.Action.Back -> {
-            EventMainVM.Action.Navigation.Back.emit()
-          }
+          is EventMainVM.Action.Back -> EventMainVM.Action.Navigation.Back.emit()
+          is EventMainVM.Action.RetryLoad -> EventMainVM.State.Initial.Content.override()
           else -> {}
         }
 
@@ -321,7 +321,8 @@ class EventMainVMImpl @AssistedInject constructor(
                 params = ErrorDataMapper.Params(
                   error = error,
                   onCloseClick = { dispatchAction(EventMainVM.Action.Back) },
-                )
+                  onRetryClick = { dispatchAction(EventMainVM.Action.RetryLoad) },
+                ),
               ),
             ).override()
           }

@@ -34,7 +34,7 @@ interface EventsMapVM {
         val eventId: Int,
       ) : Navigation
     }
-
+    data object RetryLoad : Action
     data object Back : Action
     data class ToEventDetails(
       val eventId: Int,
@@ -94,7 +94,8 @@ class EventsMapVMImpl @Inject constructor(
           else -> {}
         }
         is EventsMapVM.State.Error -> when (action) {
-          is EventsMapVM.Action.Back -> EventsMapVM.State.Loading.override()
+          is EventsMapVM.Action.Back -> EventsMapVM.Action.Navigation.Back.emit()
+          is EventsMapVM.Action.RetryLoad -> EventsMapVM.State.Loading.override()
           else -> {}
         }
       }
@@ -114,13 +115,14 @@ class EventsMapVMImpl @Inject constructor(
                 params = ErrorDataMapper.Params(
                   error = error,
                   onCloseClick = { dispatchAction(EventsMapVM.Action.Back) },
+                  onRetryClick = { dispatchAction(EventsMapVM.Action.RetryLoad) },
                 )
               ),
             ).override()
           }
         )
       }
-        is EventsMapVM.State.Error -> {}
+      is EventsMapVM.State.Error -> {}
       is EventsMapVM.State.Initialized -> {}
     }
   }

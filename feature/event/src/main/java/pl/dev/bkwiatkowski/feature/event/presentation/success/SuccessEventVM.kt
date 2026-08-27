@@ -85,11 +85,7 @@ class SuccessEventVMImpl @AssistedInject constructor(
     }
   }
 
-  override suspend fun onStateEnter(newState: SuccessEventVM.State) {
-    when (newState) {
-      is SuccessEventVM.State.Active -> {}
-    }
-  }
+  override suspend fun onStateEnter(newState: SuccessEventVM.State) {}
 
   override fun mapScreenData(): SuccessEventVM.ScreenData = mapper(
     params = SuccessEventMapper.Params(

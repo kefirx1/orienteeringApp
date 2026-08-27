@@ -12,8 +12,6 @@ import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.feature.dashboard.domain.interactor.DashboardInteractor
 import pl.dev.bkwiatkowski.feature.dashboard.domain.model.SessionsData
-import pl.dev.bkwiatkowski.feature.dashboard.domain.model.UserSessionData
-import java.time.LocalDate
 import javax.inject.Inject
 
 interface UserProfileDashboardVM {
@@ -37,6 +35,7 @@ interface UserProfileDashboardVM {
       data object Back : Navigation
     }
 
+    data object RetryLoad : Action
     data object Back : Action
   }
 
@@ -101,6 +100,7 @@ class UserProfileDashboardVMImpl @Inject constructor(
         }
         is UserProfileDashboardVM.State.Initial.Error -> when (action) {
           is UserProfileDashboardVM.Action.Back -> UserProfileDashboardVM.Action.Navigation.Back.emit()
+          is UserProfileDashboardVM.Action.RetryLoad -> UserProfileDashboardVM.State.Initial.Content.override()
           else -> {}
         }
       }
@@ -125,6 +125,7 @@ class UserProfileDashboardVMImpl @Inject constructor(
                 params = ErrorDataMapper.Params(
                   error = error,
                   onCloseClick = { dispatchAction(UserProfileDashboardVM.Action.Back) },
+                  onRetryClick = { dispatchAction(UserProfileDashboardVM.Action.RetryLoad) },
                 ),
               ),
             ).override()

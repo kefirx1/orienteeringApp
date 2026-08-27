@@ -80,6 +80,7 @@ interface EventDetailsVM {
     }
 
     data object Back : Action
+    data object RetryLoad : Action
     data object ShowLocationPermissionDeniedSnackbar : Action
     data object SetDeniedForeverLocationPermission : Action
     data object OpenAppSettings : Action
@@ -172,7 +173,8 @@ class EventDetailsVMImpl @AssistedInject constructor(
           else -> {}
         }
         is EventDetailsVM.State.Loading.Error -> when (action) {
-          is EventDetailsVM.Action.Back -> EventDetailsVM.State.Loading.Content.override()
+          is EventDetailsVM.Action.Back -> EventDetailsVM.Action.Navigation.Back.emit()
+          is EventDetailsVM.Action.RetryLoad -> EventDetailsVM.State.Loading.Content.override()
           else -> {}
         }
         is EventDetailsVM.State.Initialized.InitializedFinished -> when (action) {
@@ -304,6 +306,7 @@ class EventDetailsVMImpl @AssistedInject constructor(
               params = ErrorDataMapper.Params(
                 error = error,
                 onCloseClick = { dispatchAction(EventDetailsVM.Action.Back) },
+                onRetryClick = { dispatchAction(EventDetailsVM.Action.RetryLoad) },
               )
             ),
           ).override()
