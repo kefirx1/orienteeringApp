@@ -8,6 +8,7 @@ import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.UploadImageResponse
 import pl.dev.bkwiatkowski.feature.event.domain.model.WaypointVisitResponse
 import pl.dev.bkwiatkowski.feature.event.domain.model.WaypointsVisitedResponse
+import pl.dev.bkwiatkowski.feature.event.domain.model.WebsocketWaypointVisit
 import java.time.LocalDateTime
 
 interface EventBackendInteractor {
@@ -22,5 +23,6 @@ interface EventBackendInteractor {
   suspend fun uploadSessionImage(sessionUuid: String, imageBase64: String): Either<DomainError, UploadImageResponse>
   suspend fun getMobileEventDetails(eventId: Int): Either<DomainError, MobileEventDetails>
   suspend fun getSessionWaypoints(sessionUuid: String): Either<DomainError, WaypointsVisitedResponse>
+  suspend fun postSessionWaypointVisits(sessionUuid: String, visits: List<WebsocketWaypointVisit>): Either<DomainError, Unit>
   suspend fun finishEventSession(sessionUuid: String): Either<DomainError, FinishSessionResponse>
 }

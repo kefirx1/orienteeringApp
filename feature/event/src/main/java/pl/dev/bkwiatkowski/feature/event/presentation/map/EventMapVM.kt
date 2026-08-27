@@ -7,22 +7,20 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import pl.dev.bkwiatkowski.common.camera.domain.usecase.TakePictureAndCompressUC
 import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
 import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
-import pl.dev.bkwiatkowski.common.core.storage.Base64Coder
-import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.PublishWaypointVisitUC
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.icon.ZoomImageData
-import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
 import pl.dev.bkwiatkowski.feature.event.domain.model.FinishSessionResponse
 import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
-import java.time.LocalDateTime
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.ConfirmWaypointUC
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.FinishSessionUC
 
 interface EventMapVM {
   sealed interface State {
@@ -98,11 +96,11 @@ interface EventMapVM {
 class EventMapVMImpl @AssistedInject constructor(
   @Assisted private val contract: EventMapContract,
   private val mapper: EventMapMapper,
-  private val takePictureAndCompressUC: TakePictureAndCompressUC,
   private val runWithLoaderUC: RunWithLoaderUC,
   private val errorDataMapper: ErrorDataMapper,
-  private val eventBackendInteractor: EventBackendInteractor,
-  private val base64Coder: Base64Coder,
+  private val confirmWaypointUC: ConfirmWaypointUC,
+  private val finishSessionUC: FinishSessionUC,
+  private val publishWaypointVisitUC: PublishWaypointVisitUC,
 ) : CustomViewModel<EventMapVM.State, EventMapVM.ScreenData, EventMapVM.Action.Navigation>(
   initialStateValue = EventMapVM.State.Loading.Content,
 ), EventMapVM {
@@ -145,6 +143,7 @@ class EventMapVMImpl @AssistedInject constructor(
             ).mutate()
           }
           is EventMapVM.Action.UpdateNextWaypoint -> {
+            println("update next")
             currentState.copy(
               nextWaypoint = action.nextWaypoint,
             ).mutate()
@@ -154,22 +153,26 @@ class EventMapVMImpl @AssistedInject constructor(
               currentState.currentWaypoint ?: return@runWithLoaderUC
 
               either {
-                val bytes = takePictureAndCompressUC(params = UseCase.Params.Empty).getRight()
+                confirmWaypointUC(
+                  params = ConfirmWaypointUC.Params(
+                    sessionUuid = currentState.eventDetails.session.id,
+                    waypointId = currentState.currentWaypoint.id,
+                  ),
+                ).onRight { result ->
+                  currentState.copy(
+                    alreadyConfirmedWaypointId = currentState.currentWaypoint.id,
+                  ).mutate()
 
-                val imageResponse = eventBackendInteractor.uploadSessionImage(
-                  sessionUuid = currentState.eventDetails.session.id,
-                  imageBase64 = base64Coder.encode(data = bytes).getRight(),
-                ).getRight()
-
-                eventBackendInteractor.confirmWaypoint(
-                  waypointId = currentState.currentWaypoint.id,
-                  visitedAt = LocalDateTime.now(),
-                  imagePath = imageResponse.path,
-                ).getRight()
-
-                currentState.copy(
-                  alreadyConfirmedWaypointId = currentState.currentWaypoint.id,
-                ).mutate()
+                  when (result) {
+                    is ConfirmWaypointUC.Result.Success -> {}
+                    is ConfirmWaypointUC.Result.BackendFailed -> publishWaypointVisitUC(
+                      params = PublishWaypointVisitUC.Params(
+                        waypointId = currentState.currentWaypoint.id,
+                        visitedAt = result.visitedAt,
+                      ),
+                    ).getRight()
+                  }
+                }.getRight()
               }.onLeft { error ->
                 EventMapVM.State.Active.Error(
                   errorScreenData = errorDataMapper(
@@ -184,24 +187,25 @@ class EventMapVMImpl @AssistedInject constructor(
             }
           }
           is EventMapVM.Action.CompleteEvent -> {
-            eventBackendInteractor.finishEventSession(
-              sessionUuid = currentState.eventDetails.session.id,
-            ).fold(
-              onRight = { response ->
-                EventMapVM.Action.Navigation.Completed(response = response).emit()
-              },
-              onLeft = { error ->
-                EventMapVM.State.Active.Error(
-                  errorScreenData = errorDataMapper(
-                    params = ErrorDataMapper.Params(
-                      error = error,
-                      onCloseClick = { dispatchAction(EventMapVM.Action.Back) },
-                    )
-                  ),
-                  content = currentState,
-                ).override()
-              }
-            )
+            either {
+              val response = finishSessionUC(
+                params = FinishSessionUC.Params(
+                  sessionUuid = currentState.eventDetails.session.id,
+                ),
+              ).getRight()
+
+              EventMapVM.Action.Navigation.Completed(response = response).emit()
+            }.onLeft { error ->
+              EventMapVM.State.Active.Error(
+                errorScreenData = errorDataMapper(
+                  params = ErrorDataMapper.Params(
+                    error = error,
+                    onCloseClick = { dispatchAction(EventMapVM.Action.Back) },
+                  )
+                ),
+                content = currentState,
+              ).override()
+            }
           }
           else -> {}
         }
@@ -245,9 +249,7 @@ class EventMapVMImpl @AssistedInject constructor(
             val nextWaypoint = contract.getNextWaypoint()
 
             when {
-              nextWaypoint == null -> {
-                dispatchAction(EventMapVM.Action.CompleteEvent)
-              }
+              nextWaypoint == null -> {}
               waypoint == null -> {
                 dispatchAction(
                   EventMapVM.Action.UpdateCurrentWaypoint(

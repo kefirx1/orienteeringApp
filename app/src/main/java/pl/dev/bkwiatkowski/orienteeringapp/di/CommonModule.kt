@@ -20,6 +20,7 @@ import pl.dev.bkwiatkowski.common.core.image.ImageCompressor
 import pl.dev.bkwiatkowski.common.core.intents.OpenAppSettingsIntentUC
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.localization.GpsManager
+import pl.dev.bkwiatkowski.common.core.network.NetworkMonitor
 import pl.dev.bkwiatkowski.common.core.network.SessionManager
 import pl.dev.bkwiatkowski.common.core.security.CryptoManager
 import pl.dev.bkwiatkowski.common.core.security.generator.AesKeyGenerator
@@ -41,8 +42,6 @@ import pl.dev.bkwiatkowski.common.intents.usecase.OpenAppSettingsIntentUCImpl
 import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitor
 import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitorActivityConnector
 import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitorImpl
-import pl.dev.bkwiatkowski.common.core.network.NetworkMonitor
-import pl.dev.bkwiatkowski.common.network.NetworkMonitorImpl
 import pl.dev.bkwiatkowski.common.loader.LoaderManager
 import pl.dev.bkwiatkowski.common.loader.LoaderManagerImpl
 import pl.dev.bkwiatkowski.common.loader.domain.RunWithLoaderUCImpl
@@ -51,6 +50,7 @@ import pl.dev.bkwiatkowski.common.network.CallMediator
 import pl.dev.bkwiatkowski.common.network.CallMediatorImpl
 import pl.dev.bkwiatkowski.common.network.HttpClientFactory
 import pl.dev.bkwiatkowski.common.network.HttpClientFactoryImpl
+import pl.dev.bkwiatkowski.common.network.NetworkMonitorImpl
 import pl.dev.bkwiatkowski.common.network.RefreshTokenHandler
 import pl.dev.bkwiatkowski.common.network.WebSocketManager
 import pl.dev.bkwiatkowski.common.network.WebSocketManagerImpl
@@ -66,6 +66,7 @@ import pl.dev.bkwiatkowski.common.security.provider.AppSecretKeyProviderImpl
 import pl.dev.bkwiatkowski.common.security.provider.MasterKeyProviderImpl
 import pl.dev.bkwiatkowski.common.security.provider.SecureRandomGeneratorImpl
 import pl.dev.bkwiatkowski.common.storage.coder.Base64CoderImpl
+import pl.dev.bkwiatkowski.common.storage.converter.LocalDateTimeConverter
 import pl.dev.bkwiatkowski.common.storage.local.LocalFileManagerImpl
 import pl.dev.bkwiatkowski.common.storage.provider.DataStoreProviderImpl
 import pl.dev.bkwiatkowski.common.storage.provider.DatabaseProviderImpl
@@ -318,6 +319,10 @@ object CommonModule {
 
   @Provides
   fun provideErrorDataMapper(): ErrorDataMapper = ErrorDataMapperImpl()
+
+  @Singleton
+  @Provides
+  fun provideLocalDateTimeConverter(): LocalDateTimeConverter = LocalDateTimeConverter()
 }
 
 @Module

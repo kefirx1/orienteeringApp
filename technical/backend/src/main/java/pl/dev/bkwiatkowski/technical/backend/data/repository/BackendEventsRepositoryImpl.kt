@@ -24,6 +24,8 @@ import pl.dev.bkwiatkowski.technical.backend.data.MobileEventListResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.SessionWaypointDetailsResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.SessionParticipantResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.UploadImageRequest
+import pl.dev.bkwiatkowski.technical.backend.api.PostSessionWaypointVisits
+import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitDto
 import pl.dev.bkwiatkowski.technical.backend.data.UploadImageResponse
 import pl.dev.bkwiatkowski.technical.backend.data.mapper.BackendMapper.toDomain
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEFinishSessionResponse
@@ -33,6 +35,7 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUploadImageResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventListResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUserSessionStatus
+import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisit
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepository
 
 class BackendEventsRepositoryImpl(
@@ -98,6 +101,20 @@ class BackendEventsRepositoryImpl(
     }.mapRight { response ->
       response.body<FinishSessionResponseDto>().toDomain()
     }
+
+  override suspend fun postSessionWaypointVisits(sessionUuid: String, visits: List<WebsocketWaypointVisit>): Either<DomainError, Unit> =
+    callMediator<PostSessionWaypointVisits> {
+      client.post(resource = PostSessionWaypointVisits(sessionUuid = sessionUuid)) {
+        val dtos = visits.map { visit ->
+          WebsocketWaypointVisitDto(
+            waypointId = visit.waypointId,
+            imagePath = visit.imagePath,
+            visitedAt = visit.visitedAt,
+          )
+        }
+        setBody(dtos)
+      }
+    }.mapRight {  }
 
   override suspend fun getFinishedSessionParticipantsForUser(sessionUuid: String): Either<DomainError, List<BESessionParticipant>> =
     callMediator<GetFinishedSessionParticipants> {

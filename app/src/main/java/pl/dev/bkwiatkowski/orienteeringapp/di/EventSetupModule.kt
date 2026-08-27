@@ -35,6 +35,7 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisit
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepository
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.SessionWebSocketRepository
 import java.time.LocalDateTime
+import pl.dev.bkwiatkowski.feature.event.domain.model.WebsocketWaypointVisit as FeatureWebsocketWaypointVisit
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -101,6 +102,15 @@ object EventSetupModule {
         )
       }
 
+    override suspend fun postSessionWaypointVisits(
+      sessionUuid: String,
+      visits: List<FeatureWebsocketWaypointVisit>,
+    ): Either<DomainError, Unit> =
+      backendEventsRepository.postSessionWaypointVisits(
+        sessionUuid = sessionUuid,
+        visits = visits.map { it.toBackend() },
+      ).mapRight { }
+
     fun MobileEventDetailResponse.toFeature(): Either<DomainError, MobileEventDetails> = either {
       MobileEventDetails(
         id = id,
@@ -165,6 +175,12 @@ object EventSetupModule {
       sessionUuid = this.sessionUuid,
       joinedAt = this.joinedAt,
       finishedAt = this.finishedAt,
+    )
+
+    fun FeatureWebsocketWaypointVisit.toBackend(): WebsocketWaypointVisit = WebsocketWaypointVisit(
+      waypointId = waypointId,
+      visitedAt = visitedAt,
+      imagePath = imagePath,
     )
   }
 }

@@ -9,6 +9,7 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailRespo
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventListResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUserSessionStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionParticipant
+import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisit
 
 interface BackendEventsRepository {
   suspend fun getMobileEvents(): Either<DomainError, List<MobileEventListResponse>>
@@ -16,6 +17,7 @@ interface BackendEventsRepository {
   suspend fun joinEventSession(sessionUuid: String): Either<DomainError, Unit>
   suspend fun checkUserInEventSession(sessionUuid: String): Either<DomainError, BEUserSessionStatus>
   suspend fun uploadSessionImage(sessionUuid: String, imageBase64: String): Either<DomainError, BEUploadImageResponse>
+  suspend fun postSessionWaypointVisits(sessionUuid: String, visits: List<WebsocketWaypointVisit>): Either<DomainError, Unit>
   suspend fun getWaypointsVisited(sessionUuid: String): Either<DomainError, BESessionWaypointDetailsResponse>
   suspend fun finishEventSession(sessionUuid: String): Either<DomainError, BEFinishSessionResponse>
   suspend fun getFinishedSessionParticipantsForUser(sessionUuid: String): Either<DomainError, List<BESessionParticipant>>

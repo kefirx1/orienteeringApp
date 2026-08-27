@@ -38,6 +38,7 @@ import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.FinishSessionResponse
 import pl.dev.bkwiatkowski.feature.event.domain.model.SessionWaypointDetail
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.FindWaypointFromUserLocationUC
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.ObserveSessionUC
 
 interface EventMainVM {
   data class StateData(
@@ -162,6 +163,7 @@ class EventMainVMImpl @AssistedInject constructor(
   private val lifecycleMonitor: LifecycleMonitor,
   private val networkMonitor: NetworkMonitor,
   private val findWaypointFromUserLocationUC: FindWaypointFromUserLocationUC,
+  private val observeSessionUC: ObserveSessionUC,
   lifecycleMonitorImpl: LifecycleMonitorImpl,
   ) : CustomViewModel<EventMainVM.State, EventMainVM.ScreenData, EventMainVM.Action.Navigation>(
   initialStateValue = EventMainVM.State.Initial.Content,
@@ -349,7 +351,9 @@ class EventMainVMImpl @AssistedInject constructor(
           }
         }
         viewModelScope.launch {
-          eventBackendInteractor.observeSession().collect { event ->
+          observeSessionUC(
+            params = UseCase.Params.Empty,
+          ).collect { event ->
             dispatchAction(
               action = EventMainVM.Action.SetWaypointVisited(
                 lastWaypoint = event.lastVisitedWaypoint,

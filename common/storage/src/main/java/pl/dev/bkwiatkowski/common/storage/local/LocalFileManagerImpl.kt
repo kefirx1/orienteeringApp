@@ -30,11 +30,43 @@ class LocalFileManagerImpl(
     }
   }
 
+  override suspend fun saveFile(
+    fileName: String,
+    extension: FileExtension,
+    bytes: ByteArray,
+  ): Either<DomainError, File> = either {
+    withContext(Dispatchers.IO) {
+      val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        ?: raise(error = DomainError.Custom(IllegalStateException("External storage directory is not available")))
+
+      val baseName = fileName.ifBlank { "file" }
+      val file = File(storageDir, baseName + extension.value)
+      val target = if (file.exists()) {
+        File(storageDir, "${baseName}_${System.currentTimeMillis()}${extension.value}")
+      } else {
+        file
+      }
+
+      target.parentFile?.mkdirs()
+      target.writeBytes(bytes)
+      target
+    }
+  }
+
   override suspend fun readBytesFromUri(uri: Uri): Either<DomainError, ByteArray> = either {
     withContext(Dispatchers.IO) {
       context.contentResolver.openInputStream(uri)?.use { stream ->
         stream.readBytes()
       } ?: raise(error = DomainError.Custom(IllegalStateException("Failed to open input stream for uri: $uri")))
+    }
+  }
+
+  override suspend fun deleteFile(path: String): Either<DomainError, Unit> = either {
+    withContext(Dispatchers.IO) {
+      val file = File(path)
+      if (file.exists()) {
+        file.delete()
+      }
     }
   }
 }

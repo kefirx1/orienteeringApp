@@ -38,6 +38,9 @@ dependencies {
   implementation(libs.androidx.compose.material3)
   implementation(libs.dagger.hilt)
   ksp(libs.dagger.hilt.compiler)
+  implementation(libs.androidx.room.runtime)
+  implementation(libs.androidx.room.ktx)
+  ksp(libs.androidx.room.compiler)
 
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.espresso.core)
@@ -48,4 +51,6 @@ dependencies {
   implementation(project(":common:permissions"))
   implementation(project(":common:lifecycle"))
   implementation(project(":common:camera"))
+  implementation(project(":common:storage"))
+
 }

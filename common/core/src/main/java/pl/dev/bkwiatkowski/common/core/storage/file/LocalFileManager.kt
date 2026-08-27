@@ -8,5 +8,9 @@ import java.io.File
 interface LocalFileManager {
   suspend fun createTempFile(fileName: String, extension: FileExtension): Either<DomainError, File>
 
+  suspend fun saveFile(fileName: String, extension: FileExtension, bytes: ByteArray): Either<DomainError, File>
+
   suspend fun readBytesFromUri(uri: Uri): Either<DomainError, ByteArray>
+
+  suspend fun deleteFile(path: String): Either<DomainError, Unit>
 }
