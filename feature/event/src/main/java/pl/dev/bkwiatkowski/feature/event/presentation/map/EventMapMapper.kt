@@ -10,6 +10,7 @@ interface EventMapMapper : Mapper<EventMapMapper.Params, EventMapVM.ScreenData> 
     val state: EventMapVM.State,
     val onBackClick: () -> Unit,
     val onCheckWaypointClick: () -> Unit,
+    val onCompleteClick: () -> Unit,
   )
 }
 
@@ -30,7 +31,7 @@ class EventMapMapperImpl(
         errorData = params.state.errorScreenData,
       )
       is EventMapVM.State.Active.Content -> {
-        val details = params.state.eventDetails
+        val details = params.state.stateData.eventDetails
 
         EventMapVM.ScreenData.Main(
           onBackClick = params.onBackClick,
@@ -41,15 +42,27 @@ class EventMapMapperImpl(
               contentDescription = "Event map",
             )
           },
-          nextWaypointLabel = "Aktualnie poszukiwany punkt: ${params.state.nextWaypoint?.label ?: "Brak"}",
-          wrongWaypointInfo = "Odwiedzono niewłaściwe miejsce, musisz szukać innego punktu na mapie!".takeIf { params.state.visitedWrongWaypoint },
+          nextWaypointLabel = "Aktualnie poszukiwany punkt: ${params.state.stateData.nextWaypoint?.label ?: "Brak"}",
+          wrongWaypointInfo = "Odwiedzono niewłaściwe miejsce, musisz szukać innego punktu na mapie!".takeIf { params.state.stateData.visitedWrongWaypoint },
           checkWaypointButton = LargeButtonData.Primary(
             text = "Zatwierdź punkt",
             onClick = params.onCheckWaypointClick,
           ).takeIf {
-            params.state.currentWaypoint != null && params.state.nextWaypoint != null && params.state.currentWaypoint.id == params.state.nextWaypoint.id
+            params.state.stateData.currentWaypoint != null && params.state.stateData.nextWaypoint != null && params.state.stateData.currentWaypoint.id == params.state.stateData.nextWaypoint.id
           },
         )
       }
+      is EventMapVM.State.Completed.Content -> EventMapVM.ScreenData.Completed(
+        onBackClick = params.onBackClick,
+        descriptionLabel = "Udało Ci się przejść cały bieg na orientację, możesz teraz potwierdzić przejście trasy przyciskiem poniżej",
+        confirmButton = LargeButtonData.Primary(
+          text = "Potwierdź ukończenie trasy",
+          onClick = params.onCompleteClick,
+        ),
+      )
+      is EventMapVM.State.Completed.Error -> EventMapVM.ScreenData.ErrorScreen(
+        onBackClick = params.onBackClick,
+        errorData = params.state.errorScreenData,
+      )
     }
 }

@@ -1,6 +1,12 @@
 package pl.dev.bkwiatkowski.common.core.error
 
 sealed interface DomainError {
+  data class Business(
+    val message: String,
+    val primaryButtonLabel: String,
+    val secondaryButtonLabel: String? = null,
+  ) : DomainError
+
   data class Custom(
     val e: Throwable? = null,
   ) : DomainError

@@ -4,4 +4,6 @@ data class ErrorScreenData(
   val customMessage: String?,
   val onCloseButtonClick: () -> Unit,
   val onRetryButtonClick: (() -> Unit)?,
+  val primaryButtonLabel: String? = null,
+  val secondaryButtonLabel: String? = null,
 )

@@ -23,10 +23,12 @@ class EventMapPreviewProvider : ViewModelPreviewProvider<EventMapVM, EventMapVM.
         value = mapper(
           params = getMapperParams(
             state = EventMapVM.State.Active.Content(
-              eventDetails = getEventDetails(),
-              visitedWrongWaypoint = false,
-              currentWaypoint = null,
-              nextWaypoint = null,
+              stateData = EventMapVM.State.StateData(
+                eventDetails = getEventDetails(),
+                currentWaypoint = null,
+                visitedWrongWaypoint = false,
+                nextWaypoint = null,
+              ),
             ),
           ),
         ),
@@ -37,10 +39,28 @@ class EventMapPreviewProvider : ViewModelPreviewProvider<EventMapVM, EventMapVM.
         value = mapper(
           params = getMapperParams(
             state = EventMapVM.State.Active.Content(
-              eventDetails = getEventDetails(),
-              visitedWrongWaypoint = true,
-              currentWaypoint = null,
-              nextWaypoint = null,
+              stateData = EventMapVM.State.StateData(
+                eventDetails = getEventDetails(),
+                currentWaypoint = null,
+                visitedWrongWaypoint = true,
+                nextWaypoint = null,
+              ),
+            ),
+          ),
+        ),
+      )
+    },
+    object : EventMapVM {
+      override val screenData = MutableStateFlow(
+        value = mapper(
+          params = getMapperParams(
+            state = EventMapVM.State.Completed.Content(
+              stateData = EventMapVM.State.StateData(
+                eventDetails = getEventDetails(),
+                currentWaypoint = null,
+                visitedWrongWaypoint = false,
+                nextWaypoint = null,
+              ),
             ),
           ),
         ),
@@ -79,5 +99,6 @@ class EventMapPreviewProvider : ViewModelPreviewProvider<EventMapVM, EventMapVM.
       state = state,
       onBackClick = {},
       onCheckWaypointClick = {},
+      onCompleteClick = {},
     )
 }

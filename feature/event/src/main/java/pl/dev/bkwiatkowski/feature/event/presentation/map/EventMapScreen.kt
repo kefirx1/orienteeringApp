@@ -49,6 +49,7 @@ fun EventMapScreen(
   when (val screenData = state) {
     is EventMapVM.ScreenData.Loading -> EmptyScreen()
     is EventMapVM.ScreenData.Main -> EventMapScreenContent(data = screenData)
+    is EventMapVM.ScreenData.Completed -> EventMapCompletedContent(data = screenData)
     is EventMapVM.ScreenData.ErrorScreen -> ErrorScreen(data = screenData.errorData)
   }
 
@@ -135,6 +136,42 @@ fun EventMapScreenContent(
             buttonData = buttonData,
           )
         }
+      }
+    }
+  )
+}
+
+@Composable
+fun EventMapCompletedContent(
+  data: EventMapVM.ScreenData.Completed,
+) {
+  BaseScaffold(
+    content = {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .addDefaultPadding(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+      ) {
+        Spacer(modifier = Modifier.height(24.dp))
+
+        CustomText(
+          text = data.descriptionLabel,
+          style = MaterialTheme.typography.titleLarge,
+        )
+      }
+    },
+    bottomBar = {
+      Column(
+        modifier = Modifier.padding(
+          horizontal = 20.dp,
+          vertical = 10.dp,
+        ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+      ) {
+        LargeButton(
+          buttonData = data.confirmButton,
+        )
       }
     }
   )

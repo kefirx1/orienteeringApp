@@ -61,7 +61,7 @@ fun ErrorScreen(
         if (data.onRetryButtonClick != null) {
           LargeButton(
             buttonData = LargeButtonData.Primary(
-              text = "Spróbuj ponownie",
+              text = data.secondaryButtonLabel ?: "Spróbuj ponownie",
               onClick = data.onRetryButtonClick!!,
             ),
           )
@@ -69,14 +69,14 @@ fun ErrorScreen(
 
           LargeButton(
             buttonData = LargeButtonData.Secondary(
-              text = "Zamknij",
+              text = data.primaryButtonLabel ?: "Zamknij",
               onClick = data.onCloseButtonClick,
             ),
           )
         } else {
           LargeButton(
             buttonData = LargeButtonData.Primary(
-              text = "Zamknij",
+              text = data.primaryButtonLabel ?: "Zamknij",
               onClick = data.onCloseButtonClick,
             ),
           )
