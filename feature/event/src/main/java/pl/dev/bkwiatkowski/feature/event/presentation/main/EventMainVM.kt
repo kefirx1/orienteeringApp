@@ -38,6 +38,8 @@ import pl.dev.bkwiatkowski.feature.event.domain.model.FinishSessionResponse
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.SessionWaypointDetail
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.FindWaypointFromUserLocationUC
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.GetEventDetailsUC
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.GetSessionWaypointsUC
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.ObserveSessionUC
 
 interface EventMainVM {
@@ -164,6 +166,8 @@ class EventMainVMImpl @AssistedInject constructor(
   private val lifecycleMonitor: LifecycleMonitor,
   private val networkMonitor: NetworkMonitor,
   private val findWaypointFromUserLocationUC: FindWaypointFromUserLocationUC,
+  private val getEventDetailsUC: GetEventDetailsUC,
+  private val getSessionWaypointsUC: GetSessionWaypointsUC,
   private val observeSessionUC: ObserveSessionUC,
   lifecycleMonitorImpl: LifecycleMonitorImpl,
   ) : CustomViewModel<EventMainVM.State, EventMainVM.ScreenData, EventMainVM.Action.Navigation>(
@@ -298,17 +302,22 @@ class EventMainVMImpl @AssistedInject constructor(
           either {
             if (!ensureLocationPermission()) return@runWithLoaderUC
 
-            val details = eventBackendInteractor.getMobileEventDetails(
-              eventId = setupData.eventId,
+            val details = getEventDetailsUC(
+              params = GetEventDetailsUC.Params(
+                eventId = setupData.eventId,
+              )
             ).getRight()
-            val currentSessionWaypoints = eventBackendInteractor.getSessionWaypoints(
-              sessionUuid = setupData.sessionUuid,
+
+            val currentSessionWaypoints = getSessionWaypointsUC(
+              params = GetSessionWaypointsUC.Params(
+                sessionUuid = setupData.sessionUuid,
+              )
             ).getRight()
 
             contract.setEventDetails(eventDetails = details)
             contract.setInitialVisitedWaypoints(waypoints = currentSessionWaypoints.waypoints)
 
-            eventBackendInteractor.openSession(sessionUuid = setupData.sessionUuid).getRight()
+            eventBackendInteractor.openSession(sessionUuid = setupData.sessionUuid)
             EventMainVM.State.Active.Content(
               stateData = EventMainVM.StateData(
                 currentTab = EventMainVM.StateData.CurrentTab.MAP,

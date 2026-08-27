@@ -1,9 +1,10 @@
 package pl.dev.bkwiatkowski.feature.event.domain.repository
 
+import kotlinx.coroutines.flow.Flow
 import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.usecase.Either
-import kotlinx.coroutines.flow.Flow
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventWaypointVisitRecord
+import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.WaypointVisitResponse
 import java.time.LocalDateTime
 
@@ -16,11 +17,14 @@ interface EventRepository {
     sessionUuid: String,
   ): Either<DomainError, Unit>
 
-  suspend fun finishSession(sessionUuid: String): Either<DomainError, Unit>
+  suspend fun finishSession(
+    sessionUuid: String,
+    eventId: Int,
+  ): Either<DomainError, Unit>
 
-  suspend fun getVisitsForWaypoint(waypointId: Int, sessionUuid: String): Either<DomainError, EventWaypointVisitRecord>
+  suspend fun getAllVisitsForSession(sessionUuid: String): Either<DomainError, List<EventWaypointVisitRecord>>
 
-  suspend fun markVisitAsOnline(waypointId: Int, sessionUuid: String): Either<DomainError, Unit>
+  suspend fun markVisitAsSent(waypointId: Int, sessionUuid: String): Either<DomainError, Unit>
 
   fun observeLocalVisits(): Flow<WaypointVisitResponse>
 
@@ -32,4 +36,10 @@ interface EventRepository {
   suspend fun getUnsentVisitsForSession(sessionUuid: String): Either<DomainError, List<EventWaypointVisitRecord>>
 
   suspend fun readImageBytes(path: String): Either<DomainError, ByteArray>
+
+  suspend fun saveEventDetails(eventDetails: MobileEventDetails): Either<DomainError, Unit>
+
+  suspend fun getEventDetails(eventId: Int): Either<DomainError, MobileEventDetails>
+
+  suspend fun clearEventDetails(eventId: Int): Either<DomainError, Unit>
 }

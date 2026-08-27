@@ -143,7 +143,6 @@ class EventMapVMImpl @AssistedInject constructor(
             ).mutate()
           }
           is EventMapVM.Action.UpdateNextWaypoint -> {
-            println("update next")
             currentState.copy(
               nextWaypoint = action.nextWaypoint,
             ).mutate()
@@ -188,11 +187,12 @@ class EventMapVMImpl @AssistedInject constructor(
           }
           is EventMapVM.Action.CompleteEvent -> {
             either {
-              val response = finishSessionUC(
-                params = FinishSessionUC.Params(
-                  sessionUuid = currentState.eventDetails.session.id,
-                ),
-              ).getRight()
+               val response = finishSessionUC(
+                 params = FinishSessionUC.Params(
+                   sessionUuid = currentState.eventDetails.session.id,
+                   eventId = currentState.eventDetails.id,
+                 ),
+               ).getRight()
 
               EventMapVM.Action.Navigation.Completed(response = response).emit()
             }.onLeft { error ->

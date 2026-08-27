@@ -62,7 +62,7 @@ class ConfirmWaypointUCImpl(
       )
     }
 
-    eventRepository.markVisitAsOnline(
+    eventRepository.markVisitAsSent(
       waypointId = params.waypointId,
       sessionUuid = params.sessionUuid,
     ).getRight()

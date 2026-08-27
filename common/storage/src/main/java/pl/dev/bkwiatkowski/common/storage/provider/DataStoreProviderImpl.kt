@@ -107,7 +107,6 @@ class DataStoreProviderImpl(
       prefs[stringPreferencesKey(name = dataStoreKey)] =
         base64Coder.encode(data = encryptedData).getRight()
     }
-
     Unit
   }
 

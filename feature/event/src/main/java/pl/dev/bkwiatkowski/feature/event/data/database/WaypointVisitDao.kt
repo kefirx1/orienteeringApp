@@ -9,9 +9,6 @@ interface WaypointVisitDao {
   @Insert
   suspend fun insert(visit: WaypointVisitEntity): Long
 
-  @Query(value = "SELECT * FROM waypoint_visits WHERE waypointId = :waypointId AND sessionUuid = :sessionUuid LIMIT 1")
-  suspend fun findByWaypointIdAndSessionUuid(waypointId: Int, sessionUuid: String): WaypointVisitEntity?
-
   @Query(value = "SELECT * FROM waypoint_visits WHERE sessionUuid = :sessionUuid")
   suspend fun findBySessionUuid(sessionUuid: String): List<WaypointVisitEntity>
 

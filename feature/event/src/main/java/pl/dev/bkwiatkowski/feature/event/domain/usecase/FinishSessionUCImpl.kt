@@ -15,6 +15,7 @@ import javax.inject.Inject
 interface FinishSessionUC : EitherUseCase<FinishSessionUC.Params, FinishSessionResponse> {
   data class Params(
     val sessionUuid: String,
+    val eventId: Int,
   ) : UseCase.Params
 }
 
@@ -26,9 +27,6 @@ class FinishSessionUCImpl @Inject constructor(
 
   override suspend fun invoke(params: FinishSessionUC.Params): Either<DomainError, FinishSessionResponse> = either {
     val unsent = eventRepository.getUnsentVisitsForSession(sessionUuid = params.sessionUuid).getRight()
-
-    println("unsent: ${unsent.size}")
-    println("unsent: ${unsent}")
 
     val visitsToPost = unsent.map { visit ->
       val bytes = eventRepository.readImageBytes(path = visit.imagePath).getRight()
@@ -53,7 +51,7 @@ class FinishSessionUCImpl @Inject constructor(
       ).getRight()
 
       unsent.forEach { visit ->
-        eventRepository.markVisitAsOnline(
+        eventRepository.markVisitAsSent(
           waypointId = visit.waypointId,
           sessionUuid = params.sessionUuid,
         ).getRight()
@@ -62,7 +60,10 @@ class FinishSessionUCImpl @Inject constructor(
 
     val response = eventBackendInteractor.finishEventSession(sessionUuid = params.sessionUuid).getRight()
 
-    eventRepository.finishSession(sessionUuid = params.sessionUuid).getRight()
+    eventRepository.finishSession(
+      sessionUuid = params.sessionUuid,
+      eventId = params.eventId,
+    ).getRight()
 
     response
   }
