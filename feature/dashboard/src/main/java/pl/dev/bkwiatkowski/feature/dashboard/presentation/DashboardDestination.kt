@@ -30,5 +30,9 @@ sealed interface DashboardDestination : Destination {
 sealed interface DashboardResult {
   data object ExitApp : DashboardResult
   data object ToMaps : DashboardResult
+  data class ToEventSession(
+    val eventId: Int,
+    val sessionUuid: String,
+  ) : DashboardResult
   data object Logout : DashboardResult
 }

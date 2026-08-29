@@ -38,6 +38,7 @@ class EventRepositoryImpl(
 
   companion object {
     private const val EVENT_DETAILS_STORE_PREFIX = "EVENT_DETAILS_"
+    private const val LAST_SAVED_EVENT_ID_KEY = "LAST_SAVED_EVENT_ID"
   }
 
   private fun getDatabase(): Either<DomainError, EventDatabase> = either {
@@ -163,11 +164,19 @@ class EventRepositoryImpl(
   }
 
   override suspend fun saveEventDetails(eventDetails: MobileEventDetails): Either<DomainError, Unit> =
-    dataStoreProvider.updateDataStoreData(
-      dataStoreKey = EVENT_DETAILS_STORE_PREFIX + eventDetails.id,
-      data = eventDetails.toDto(),
-      dataStoreKeyProvider = DataStoreProvider.DataStoreKeyProvider.MasterKey,
-    )
+    either {
+      dataStoreProvider.updateDataStoreData(
+        dataStoreKey = EVENT_DETAILS_STORE_PREFIX + eventDetails.id,
+        data = eventDetails.toDto(),
+        dataStoreKeyProvider = DataStoreProvider.DataStoreKeyProvider.MasterKey,
+      ).getRight()
+
+      dataStoreProvider.updateDataStoreData(
+        dataStoreKey = LAST_SAVED_EVENT_ID_KEY,
+        data = eventDetails.id,
+        dataStoreKeyProvider = DataStoreProvider.DataStoreKeyProvider.MasterKey,
+      ).getRight()
+    }
 
   override suspend fun getEventDetails(eventId: Int): Either<DomainError, MobileEventDetails> =
     dataStoreProvider.getDataStoreData<MobileEventDetailsDto>(
@@ -177,9 +186,35 @@ class EventRepositoryImpl(
     ).mapRight { it.toDomain() }
 
   override suspend fun clearEventDetails(eventId: Int): Either<DomainError, Unit> =
-    dataStoreProvider.clearDataStoreData(
-      dataStoreKey = EVENT_DETAILS_STORE_PREFIX + eventId,
-    )
+    either {
+      dataStoreProvider.clearDataStoreData(
+        dataStoreKey = EVENT_DETAILS_STORE_PREFIX + eventId,
+      ).getRight()
+
+      val lastId = dataStoreProvider.getDataStoreData<Int>(
+        dataStoreKey = LAST_SAVED_EVENT_ID_KEY,
+        type = Int::class.java,
+        dataStoreKeyProvider = DataStoreProvider.DataStoreKeyProvider.MasterKey,
+      ).getRightOrNull()
+
+      if (lastId != null && lastId == eventId) {
+        dataStoreProvider.clearDataStoreData(dataStoreKey = LAST_SAVED_EVENT_ID_KEY).getRight()
+      }
+    }
+
+  override suspend fun getLastSavedEventDetails(): Either<DomainError, MobileEventDetails> = either {
+    val lastId = dataStoreProvider.getDataStoreData<Int>(
+      dataStoreKey = LAST_SAVED_EVENT_ID_KEY,
+      type = Int::class.java,
+      dataStoreKeyProvider = DataStoreProvider.DataStoreKeyProvider.MasterKey,
+    ).getRightOrNull() ?: raise(error = DomainError.Custom(NullPointerException("There is no saved event details")))
+
+    dataStoreProvider.getDataStoreData<MobileEventDetailsDto>(
+      dataStoreKey = EVENT_DETAILS_STORE_PREFIX + lastId,
+      type = MobileEventDetailsDto::class.java,
+      dataStoreKeyProvider = DataStoreProvider.DataStoreKeyProvider.MasterKey,
+    ).mapRight { it.toDomain() }.getRight()
+  }
 
   private fun getFileNameForWaypointVisit(waypointId: Int, visitedAt: LocalDateTime): String =
     "$waypointId-${visitedAt.toString().replace(":", "-")}"

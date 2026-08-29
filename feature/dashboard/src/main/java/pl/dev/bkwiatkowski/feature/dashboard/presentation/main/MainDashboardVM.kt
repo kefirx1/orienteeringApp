@@ -5,9 +5,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.error.DomainError
-import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
 import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
+import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
@@ -34,9 +34,23 @@ interface MainDashboardVM {
       val friendsData: FriendsStatsData,
     ) : State
 
-    data class Offline(
-      val userName: String,
-    ) : State
+    sealed interface Offline : State {
+      data class StateData(
+        val userName: String,
+        val continueEventId: Int? = null,
+        val continueSessionUuid: String? = null,
+        val userCanJoin: Boolean,
+      )
+
+      data class Content(
+        val stateData: StateData,
+      ) : Offline
+
+      data class Error(
+        val errorScreenData: ErrorScreenData,
+        val stateData: StateData,
+      ) : Offline
+    }
   }
 
   sealed interface Action {
@@ -47,6 +61,10 @@ interface MainDashboardVM {
       data object GoToNewRuns: Navigation
       data object GoToMyProfile: Navigation
       data object GoToFriends: Navigation
+      data class OpenEventSession(
+        val eventId: Int,
+        val sessionUuid: String,
+      ) : Navigation
     }
 
     data object NewRun : Action
@@ -55,6 +73,13 @@ interface MainDashboardVM {
     data object CheckNewRuns : Action
     data object ToMyProfile : Action
     data object LoadData : Action
+    data class OpenSavedEvent(
+      val eventId: Int?,
+      val sessionUuid: String?,
+    ) : Action
+    data class ShowError(
+      val errorData: ErrorScreenData,
+    ): Action
     data object Back : Action
   }
 
@@ -138,9 +163,19 @@ class MainDashboardVMImpl @Inject constructor(
                   ).override()
                 }.onLeft { error ->
                   when (error) {
-                    is DomainError.NoNetwork -> MainDashboardVM.State.Offline(
-                      userName = dashboardInteractor.getUserName().getRightOr(default = ""),
-                    ).override()
+                    is DomainError.NoNetwork -> {
+                      val last = dashboardInteractor.getLastActiveSavedEvent().getRightOrNull()
+                      val userCanJoin = last?.session?.userCanJoin == true
+
+                      MainDashboardVM.State.Offline.Content(
+                        stateData = MainDashboardVM.State.Offline.StateData(
+                          userName = dashboardInteractor.getUserName().getRightOr(default = ""),
+                          continueEventId = last?.id,
+                          continueSessionUuid = last?.session?.id,
+                          userCanJoin = userCanJoin,
+                        ),
+                      ).override()
+                    }
                     else -> {
                       MainDashboardVM.State.Error(
                         errorScreenData = errorDataMapper(
@@ -189,7 +224,7 @@ class MainDashboardVMImpl @Inject constructor(
             else -> {}
           }
         }
-        is MainDashboardVM.State.Offline -> {
+        is MainDashboardVM.State.Offline.Content -> {
           when (action) {
             is MainDashboardVM.Action.Back -> {
               MainDashboardVM.Action.Navigation.ExitApp.emit()
@@ -197,8 +232,41 @@ class MainDashboardVMImpl @Inject constructor(
             is MainDashboardVM.Action.NewRun -> {
               MainDashboardVM.Action.Navigation.GoToMap.emit()
             }
+            is MainDashboardVM.Action.OpenSavedEvent -> {
+              if (action.eventId == null || action.sessionUuid == null) {
+                MainDashboardVM.Action.ShowError(
+                  errorData = errorDataMapper(
+                    params = ErrorDataMapper.Params(
+                      error = DomainError.Custom(IllegalStateException("EventId or sessionUuid is null")),
+                      onCloseClick = { dispatchAction(MainDashboardVM.Action.Back) },
+                    ),
+                  ),
+                )
+                return@launch
+              }
+
+              MainDashboardVM.Action.Navigation.OpenEventSession(
+                eventId = action.eventId,
+                sessionUuid = action.sessionUuid,
+              ).emit()
+            }
             is MainDashboardVM.Action.LoadData -> {
               MainDashboardVM.State.Initial.override()
+            }
+            is MainDashboardVM.Action.ShowError -> {
+              MainDashboardVM.State.Error(
+                errorScreenData = action.errorData,
+              ).override()
+            }
+            else -> {}
+          }
+        }
+        is MainDashboardVM.State.Offline.Error -> {
+          when (action) {
+            is MainDashboardVM.Action.Back -> {
+              MainDashboardVM.State.Offline.Content(
+                stateData = currentState.stateData,
+              ).override()
             }
             else -> {}
           }
@@ -241,12 +309,12 @@ class MainDashboardVMImpl @Inject constructor(
       onMyProfileClick = {
         dispatchAction(MainDashboardVM.Action.ToMyProfile)
       },
-      onContinueLastRunClick = {
-        dispatchAction(MainDashboardVM.Action.NewRun)
+      onContinueLastRunClick = { eventId, sessionUuid ->
+        dispatchAction(MainDashboardVM.Action.OpenSavedEvent(eventId = eventId, sessionUuid = sessionUuid))
       },
       onRefreshState = {
         dispatchAction(MainDashboardVM.Action.LoadData)
       }
-    ),
+    )
   )
 }

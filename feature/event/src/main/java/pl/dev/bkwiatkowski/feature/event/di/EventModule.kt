@@ -28,6 +28,8 @@ import pl.dev.bkwiatkowski.feature.event.domain.usecase.GetSessionWaypointsUC
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.GetSessionWaypointsUCImpl
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.ObserveSessionUC
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.ObserveSessionUCImpl
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.GetLastActiveSavedEventUC
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.GetLastActiveSavedEventUCImpl
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.PublishWaypointVisitUC
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.PublishWaypointVisitUCImpl
 import pl.dev.bkwiatkowski.feature.event.presentation.game.EventGameMapper
@@ -130,6 +132,13 @@ object EventModule {
   ): GetEventDetailsUC = GetEventDetailsUCImpl(
     eventRepository = eventRepository,
     eventBackendInteractor = eventBackendInteractor,
+  )
+
+  @Provides
+  fun provideGetLastActiveSavedEventUC(
+    eventRepository: EventRepository,
+  ): GetLastActiveSavedEventUC = GetLastActiveSavedEventUCImpl(
+    eventRepository = eventRepository,
   )
 
   @Provides

@@ -49,6 +49,16 @@ fun MainAppNavGraph(
         when (result) {
           DashboardResult.ExitApp -> onAppExit()
           DashboardResult.ToMaps -> appNavController.navigate(destination = MapsDestination.MapsGraph)
+          is DashboardResult.ToEventSession -> {
+            appContractVM.setContractData(
+              destination = EventDestination.EventMain,
+              data = EventMainVM.SetupData(
+                sessionUuid = result.sessionUuid,
+                eventId = result.eventId,
+              ),
+            )
+            appNavController.navigate(destination = EventDestination.EventGraph)
+          }
           DashboardResult.Logout -> appNavController.navigate(destination = LoginDestinations.LoginGraph)
         }
       },

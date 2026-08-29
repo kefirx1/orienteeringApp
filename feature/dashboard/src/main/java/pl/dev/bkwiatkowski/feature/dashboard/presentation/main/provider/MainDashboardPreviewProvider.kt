@@ -66,7 +66,7 @@ class MainDashboardPreviewProvider : ViewModelPreviewProvider<MainDashboardVM, M
       onGoToFriendsClick = {},
       onCheckNewRunsClick = {},
       onMyProfileClick = {},
-      onContinueLastRunClick = {},
+      onContinueLastRunClick = { _,_ -> },
       onRefreshState = {},
     )
 }

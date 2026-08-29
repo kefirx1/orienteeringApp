@@ -18,7 +18,7 @@ interface MainDashboardMapper : Mapper<MainDashboardMapper.Params, MainDashboard
     val onGoToFriendsClick: () -> Unit,
     val onCheckNewRunsClick: () -> Unit,
     val onMyProfileClick: () -> Unit,
-    val onContinueLastRunClick: (() -> Unit)? = null,
+    val onContinueLastRunClick: (Int?, String?) -> Unit,
     val onRefreshState: () -> Unit,
   )
 }
@@ -69,10 +69,10 @@ class MainDashboardMapperImpl : MainDashboardMapper {
           fabIconResId = R.drawable.outline_directions_run_24
         )
       )
-      is MainDashboardVM.State.Offline -> MainDashboardVM.ScreenData.Offline(
+      is MainDashboardVM.State.Offline.Content -> MainDashboardVM.ScreenData.Offline(
         onBackClick = params.onBackClick,
         topBarData = TopAppBarData.Empty,
-        welcomeLabel = "Witaj ${params.state.userName}!",
+        welcomeLabel = "Witaj ${params.state.stateData.userName}!",
         welcomeDescription = "Nie masz połączenia z internetem, niektóre funkcje mogą być niedostępne",
         refreshStateButton = SmallButtonData.Secondary(
           text = "Odśwież",
@@ -80,8 +80,12 @@ class MainDashboardMapperImpl : MainDashboardMapper {
         ),
         continueLastRunButton = LargeButtonData.Primary(
           text = "Kontynuuj ostatni bieg",
-          onClick = params.onContinueLastRunClick ?: {},
-        ),
+          onClick = { params.onContinueLastRunClick(params.state.stateData.continueEventId, params.state.stateData.continueSessionUuid) },
+        ).takeIf { params.state.stateData.userCanJoin }
+      )
+      is MainDashboardVM.State.Offline.Error -> MainDashboardVM.ScreenData.ErrorScreen(
+        onBackClick = params.onBackClick,
+        errorData = params.state.errorScreenData,
       )
     }
 }

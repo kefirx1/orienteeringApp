@@ -9,8 +9,11 @@ import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.feature.dashboard.domain.interactor.DashboardInteractor
+import pl.dev.bkwiatkowski.feature.dashboard.domain.model.EventSession
+import pl.dev.bkwiatkowski.feature.dashboard.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.dashboard.domain.model.SessionsData
 import pl.dev.bkwiatkowski.feature.dashboard.domain.model.UserSessionData
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.GetLastActiveSavedEventUC
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.ChangePasswordUC
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetUserSessionsUC
 import pl.dev.bkwiatkowski.technical.mobile.domain.repository.MobileSettingsRepository
@@ -30,6 +33,7 @@ object DashboardSetupModule {
     changePasswordUC: ChangePasswordUC,
     getUserSessionsUC: GetUserSessionsUC,
     mobileSettingsRepository: MobileSettingsRepository,
+    getLastActiveSavedEventUC: GetLastActiveSavedEventUC,
   ): DashboardInteractor =
     object : DashboardInteractor {
       override suspend fun fetchMobileSettings(): Either<DomainError, Unit> =
@@ -62,5 +66,18 @@ object DashboardSetupModule {
           },
         )
       }
+
+      override suspend fun getLastActiveSavedEvent(): Either<DomainError, MobileEventDetails> =
+        getLastActiveSavedEventUC(params = UseCase.Params.Empty).mapRight { event ->
+          MobileEventDetails(
+            id = event.id,
+            session = EventSession(
+              id = event.session.id,
+              startedAt = event.session.startedAt,
+              userCanJoin = event.session.userCanJoin,
+              finishedAt = event.session.finishedAt,
+            ),
+          )
+        }
     }
 }

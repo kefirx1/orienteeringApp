@@ -46,6 +46,12 @@ fun NavGraphBuilder.dashboardNavGraph(
           is MainDashboardVM.Action.Navigation.GoToNewRuns -> {}
           is MainDashboardVM.Action.Navigation.GoToMyProfile -> navController.navigate(destination = DashboardDestination.UserProfile)
           is MainDashboardVM.Action.Navigation.GoToMap -> onResult(DashboardResult.ToMaps)
+          is MainDashboardVM.Action.Navigation.OpenEventSession -> onResult(
+            DashboardResult.ToEventSession(
+              eventId = action.eventId,
+              sessionUuid = action.sessionUuid,
+            )
+          )
           is MainDashboardVM.Action.Navigation.GoToFriends -> navController.navigate(destination = DashboardDestination.Friends)
         }
       }
