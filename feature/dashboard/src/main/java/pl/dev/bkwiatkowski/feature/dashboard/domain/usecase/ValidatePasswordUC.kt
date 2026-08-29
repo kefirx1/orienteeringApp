@@ -17,6 +17,10 @@ class ValidatePasswordUCImpl(
   override suspend fun invoke(params: ValidatePasswordUC.Params): ValidationResult =
     textValidator
       .addRule(rule = TextValidatorRule.Required)
+      .addRule(rule = TextValidatorRule.AtLeastOneDigit)
+      .addRule(rule = TextValidatorRule.AtLeastOneSpecialCharacters)
+      .addRule(rule = TextValidatorRule.AtLeastOneLowercaseLetter)
+      .addRule(rule = TextValidatorRule.AtLeastOneUppercaseLetter)
       .addRule(rule = TextValidatorRule.MinLength(minLength = 8))
       .validate(value = params.password)
 }

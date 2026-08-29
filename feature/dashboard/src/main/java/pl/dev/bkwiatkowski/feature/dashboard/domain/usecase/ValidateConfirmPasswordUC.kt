@@ -18,7 +18,6 @@ class ValidateConfirmPasswordUCImpl(
   override suspend fun invoke(params: ValidateConfirmPasswordUC.Params): ValidationResult =
     textValidator
       .addRule(rule = TextValidatorRule.Required)
-      .addRule(rule = TextValidatorRule.MinLength(minLength = 8))
       .addRule(rule = TextValidatorRule.EqualPasswords(otherPassword = params.password))
       .validate(value = params.confirmPassword)
 }
