@@ -88,9 +88,7 @@ fun MainAppNavGraph(
       navController = appNavController,
       onResult = { result ->
         when (result) {
-          is EventResult.Back -> appNavController.navigate(
-            destination = MapsDestination.EventDetails,
-          )
+          is EventResult.Back -> appNavController.pop(EventDestination.EventGraph)
         }
       },
     )

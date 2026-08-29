@@ -111,6 +111,7 @@ class EventRepositoryImpl(
     imageBytes: ByteArray,
     sessionUuid: String,
   ): Either<DomainError, Unit> = either {
+    println("save waypooint")
     val file = localFileManager.saveFile(
       fileName = getFileNameForWaypointVisit(
         waypointId = waypointId,
@@ -170,12 +171,20 @@ class EventRepositoryImpl(
         data = eventDetails.toDto(),
         dataStoreKeyProvider = DataStoreProvider.DataStoreKeyProvider.MasterKey,
       ).getRight()
+      Log.i(
+        tag = Tag(this@EventRepositoryImpl),
+        message = "Saved event details for eventId: ${eventDetails.id}",
+      )
 
       dataStoreProvider.updateDataStoreData(
         dataStoreKey = LAST_SAVED_EVENT_ID_KEY,
         data = eventDetails.id,
         dataStoreKeyProvider = DataStoreProvider.DataStoreKeyProvider.MasterKey,
       ).getRight()
+      Log.i(
+        tag = Tag(this@EventRepositoryImpl),
+        message = "Updated last saved event ID to: ${eventDetails.id}",
+      )
     }
 
   override suspend fun getEventDetails(eventId: Int): Either<DomainError, MobileEventDetails> =
@@ -208,12 +217,21 @@ class EventRepositoryImpl(
       type = Int::class.java,
       dataStoreKeyProvider = DataStoreProvider.DataStoreKeyProvider.MasterKey,
     ).getRightOrNull() ?: raise(error = DomainError.Custom(NullPointerException("There is no saved event details")))
+    Log.i(
+      tag = Tag(this@EventRepositoryImpl),
+      message = "Retrieved last saved event ID: $lastId",
+    )
 
     dataStoreProvider.getDataStoreData<MobileEventDetailsDto>(
       dataStoreKey = EVENT_DETAILS_STORE_PREFIX + lastId,
       type = MobileEventDetailsDto::class.java,
       dataStoreKeyProvider = DataStoreProvider.DataStoreKeyProvider.MasterKey,
-    ).mapRight { it.toDomain() }.getRight()
+    ).mapRight { it.toDomain() }.getRight().also {
+      Log.i(
+        tag = Tag(this@EventRepositoryImpl),
+        message = "Retrieved event details for eventId: $it",
+      )
+    }
   }
 
   private fun getFileNameForWaypointVisit(waypointId: Int, visitedAt: LocalDateTime): String =

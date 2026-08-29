@@ -330,29 +330,31 @@ class EventMapVMImpl @AssistedInject constructor(
     ),
   )
 
-  private suspend fun completeEvent(stateData: EventMapVM.State.StateData) = either {
-    val response = finishSessionUC(
-      params = FinishSessionUC.Params(
-        sessionUuid = stateData.eventDetails.session.id,
-        eventId = stateData.eventDetails.id,
-      ),
-    ).getRight()
+  private suspend fun completeEvent(stateData: EventMapVM.State.StateData) = runWithLoaderUC {
+    either {
+      val response = finishSessionUC(
+        params = FinishSessionUC.Params(
+          sessionUuid = stateData.eventDetails.session.id,
+          eventId = stateData.eventDetails.id,
+        ),
+      ).getRight()
 
-    EventMapVM.Action.Navigation.Completed(response = response).emit()
-  }.onLeft { error ->
-    EventMapVM.State.Completed.Error(
-      errorScreenData = errorDataMapper(
-        params = ErrorDataMapper.Params(
-          error = error,
-          onCloseClick = {
-            when (error) {
-              is DomainError.Business -> dispatchAction(EventMapVM.Action.CompleteEvent)
-              else -> dispatchAction(EventMapVM.Action.Back)
-            }
-          },
-        )
-      ),
-      stateData = stateData,
-    ).override()
+      EventMapVM.Action.Navigation.Completed(response = response).emit()
+    }.onLeft { error ->
+      EventMapVM.State.Completed.Error(
+        errorScreenData = errorDataMapper(
+          params = ErrorDataMapper.Params(
+            error = error,
+            onCloseClick = {
+              when (error) {
+                is DomainError.Business -> dispatchAction(EventMapVM.Action.CompleteEvent)
+                else -> dispatchAction(EventMapVM.Action.Back)
+              }
+            },
+          )
+        ),
+        stateData = stateData,
+      ).override()
+    }
   }
 }
