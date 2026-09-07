@@ -2,8 +2,11 @@ package pl.dev.bkwiatkowski.orienteeringapp.presentation.developer
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -13,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
+import pl.dev.bkwiatkowski.common.ui.component.switch.Switch
+import pl.dev.bkwiatkowski.common.ui.component.switch.SwitchData
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
 
@@ -33,7 +38,9 @@ fun DeveloperScreen(
   val state by viewModel.screenData.collectAsStateWithLifecycle()
 
   when (val screenData = state) {
-    is DeveloperVM.ScreenData.Main -> DeveloperScreenContent(data = screenData)
+    is DeveloperVM.ScreenData.Main -> DeveloperScreenContent(
+      data = screenData,
+    )
   }
 
   BackHandler(
@@ -42,7 +49,9 @@ fun DeveloperScreen(
 }
 
 @Composable
-fun DeveloperScreenContent(data: DeveloperVM.ScreenData.Main) {
+fun DeveloperScreenContent(
+  data: DeveloperVM.ScreenData.Main,
+) {
   BaseScaffold(
     topBarData = TopAppBarData.BackAndTitle(
       title = "Developer",
@@ -53,9 +62,27 @@ fun DeveloperScreenContent(data: DeveloperVM.ScreenData.Main) {
         modifier = Modifier
           .fillMaxSize()
           .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
       ) {
-        CustomText(text = "Developer Screen")
+        CustomText(text = "Feature flags")
+        Spacer(modifier = Modifier.padding(24.dp))
+
+        data.flags.forEach { flag ->
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            CustomText(text = flag.name)
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Switch(
+              data = SwitchData(
+                isChecked = flag.isChecked,
+                onCheckedChange = { isChecked ->
+                  data.onFlagToggleClick(flag.name,  isChecked)
+                },
+              )
+            )
+          }
+        }
       }
     },
     bottomBar = {}

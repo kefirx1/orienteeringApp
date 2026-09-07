@@ -95,6 +95,7 @@ dependencies {
   implementation(project(":technical:mobile"))
   implementation(project(":technical:backend"))
   implementation(project(":technical:user"))
+  implementation(project(":technical:flags"))
 
   implementation(project(":common:core"))
   implementation(project(":common:ui"))

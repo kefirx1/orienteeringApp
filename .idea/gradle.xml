@@ -45,6 +45,7 @@
             <option value="$PROJECT_DIR$/feature/maps" />
             <option value="$PROJECT_DIR$/technical" />
             <option value="$PROJECT_DIR$/technical/backend" />
+            <option value="$PROJECT_DIR$/technical/flags" />
             <option value="$PROJECT_DIR$/technical/mobile" />
             <option value="$PROJECT_DIR$/technical/user" />
           </set>
