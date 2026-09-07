@@ -339,7 +339,7 @@ class EventMainVMImpl @AssistedInject constructor(
       }
       is EventMainVM.State.PermissionDenied -> {
         viewModelScope.launch {
-          lifecycleMonitor.monitor().collect { lifecycleState ->
+          lifecycleMonitor.activityMonitor().collect { lifecycleState ->
             if (lifecycleState == Lifecycle.Event.ON_RESUME) {
               if (ensureLocationPermission()) {
                 EventMainVM.State.Initial.Content.override()

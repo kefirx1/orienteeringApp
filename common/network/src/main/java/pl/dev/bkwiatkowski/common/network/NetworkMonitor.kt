@@ -24,21 +24,25 @@ class NetworkMonitorImpl(
     replay = 0,
     extraBufferCapacity = 24,
   )
+  private var lastStatus: NetworkStatus? = null
   private var connectivityManager: ConnectivityManager? = null
 
   private val connectivityCallback = object : ConnectivityManager.NetworkCallback() {
     override fun onAvailable(network: Network) {
       Log.i(tag = Tag(this@NetworkMonitorImpl), message = "network: available")
+      lastStatus = NetworkStatus.CONNECTED
       currentState.tryEmit(value = NetworkStatus.CONNECTED)
     }
 
     override fun onLost(network: Network) {
       Log.i(tag = Tag(this@NetworkMonitorImpl), message = "network: lost")
+      lastStatus = NetworkStatus.DISCONNECTED
       currentState.tryEmit(value = NetworkStatus.DISCONNECTED)
     }
 
     override fun onUnavailable() {
       Log.i(tag = Tag(this@NetworkMonitorImpl), message = "network: unavailable")
+      lastStatus = NetworkStatus.DISCONNECTED
       currentState.tryEmit(value = NetworkStatus.DISCONNECTED)
     }
   }
@@ -67,6 +71,8 @@ class NetworkMonitorImpl(
   }
 
   override fun monitor(): Flow<NetworkStatus> = currentState
+
+  override fun getCurrentStatus(): NetworkStatus? = lastStatus
 }
 
 

@@ -1,16 +1,22 @@
 package pl.dev.bkwiatkowski.feature.dashboard.presentation.main
 
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
 import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
+import pl.dev.bkwiatkowski.common.core.network.NetworkMonitor
+import pl.dev.bkwiatkowski.common.core.network.NetworkStatus
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
+import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitor
+import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitorImpl
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.FabData
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.button.SmallButtonData
@@ -130,14 +136,46 @@ class MainDashboardVMImpl @Inject constructor(
   private val errorDataMapper: ErrorDataMapper,
   private val getFriendsStatsDataUC: GetFriendsStatsDataUC,
   private val dashboardInteractor: DashboardInteractor,
+  private val networkMonitor: NetworkMonitor,
+  lifecycleMonitor: LifecycleMonitorImpl,
 ) : CustomViewModel<MainDashboardVM.State, MainDashboardVM.ScreenData, MainDashboardVM.Action.Navigation>(
   initialStateValue = MainDashboardVM.State.Initial,
-), MainDashboardVM {
+), MainDashboardVM, LifecycleMonitor by lifecycleMonitor {
 
   override val screenData: StateFlow<MainDashboardVM.ScreenData> = _screenData
 
   init {
     initState()
+    setupLifecycleMonitoring()
+  }
+
+  private fun setupLifecycleMonitoring() {
+    viewModelScope.launch {
+      screenMonitor().collect { event ->
+        if (event == Lifecycle.Event.ON_RESUME) {
+          onComposableResumed()
+        }
+      }
+    }
+  }
+
+  private fun onComposableResumed() {
+    val currentNetworkStatus = networkMonitor.getCurrentStatus()
+
+    when (state.value) {
+      is MainDashboardVM.State.Active -> if (currentNetworkStatus == NetworkStatus.CONNECTED) {
+        return
+      } else {
+        dispatchAction(MainDashboardVM.Action.LoadData)
+      }
+
+      is MainDashboardVM.State.Offline.Content -> if (currentNetworkStatus == NetworkStatus.DISCONNECTED) {
+        return
+      } else {
+        dispatchAction(MainDashboardVM.Action.LoadData)
+      }
+      else -> {}
+    }
   }
 
   fun dispatchAction(action: MainDashboardVM.Action) {
@@ -220,6 +258,9 @@ class MainDashboardVMImpl @Inject constructor(
             }
             is MainDashboardVM.Action.ToMyProfile -> {
               MainDashboardVM.Action.Navigation.GoToMyProfile.emit()
+            }
+            is MainDashboardVM.Action.LoadData -> {
+              MainDashboardVM.State.Initial.override()
             }
             else -> {}
           }

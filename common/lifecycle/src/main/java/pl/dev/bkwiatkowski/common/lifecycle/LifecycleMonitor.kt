@@ -13,13 +13,21 @@ import pl.dev.bkwiatkowski.common.core.logger.Tag
 interface LifecycleMonitorActivityConnector : ActivityConnector
 
 interface LifecycleMonitor {
-  fun monitor(): Flow<Lifecycle.Event>
+  fun activityMonitor(): Flow<Lifecycle.Event>
+
+  fun screenMonitor(): Flow<Lifecycle.Event>
+
+  fun setScreenLifecycleOwner(lifecycleOwner: LifecycleOwner)
 }
 
 class LifecycleMonitorImpl: LifecycleEventObserver, LifecycleMonitor, LifecycleMonitorActivityConnector {
   lateinit var activity: AppCompatActivity
 
-  private val currentLifecycleState: MutableSharedFlow<Lifecycle.Event> = MutableSharedFlow(replay = 1)
+  private var screenLifecycleOwner: LifecycleOwner? = null
+  private var screenObserver: LifecycleEventObserver? = null
+
+  private val activityLifecycleState: MutableSharedFlow<Lifecycle.Event> = MutableSharedFlow(replay = 1)
+  private val screenLifecycleState: MutableSharedFlow<Lifecycle.Event> = MutableSharedFlow(replay = 1)
 
   override fun connect(activity: AppCompatActivity) {
     this.activity = activity
@@ -29,11 +37,43 @@ class LifecycleMonitorImpl: LifecycleEventObserver, LifecycleMonitor, LifecycleM
   override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
     Log.i(
       tag = Tag(this),
-      message = "Lifecycle event: $event",
+      message = "Activity Lifecycle event: $event",
     )
 
-    currentLifecycleState.tryEmit(value = event)
+    activityLifecycleState.tryEmit(value = event)
   }
 
-  override fun monitor(): Flow<Lifecycle.Event> = currentLifecycleState
+  override fun setScreenLifecycleOwner(lifecycleOwner: LifecycleOwner) {
+    if (screenLifecycleOwner == lifecycleOwner && screenObserver != null) return
+
+    detachPreviousScreenObserver()
+    attachScreenObserver(lifecycleOwner)
+  }
+
+  private fun detachPreviousScreenObserver() {
+    screenObserver?.let { observer ->
+      runCatching { screenLifecycleOwner?.lifecycle?.removeObserver(observer) }
+    }
+    screenObserver = null
+    screenLifecycleOwner = null
+  }
+
+  private fun attachScreenObserver(lifecycleOwner: LifecycleOwner) {
+    val observer = LifecycleEventObserver { _, event ->
+      Log.i(tag = Tag(this), message = "Screen Lifecycle event: $event")
+      screenLifecycleState.tryEmit(value = event)
+
+      if (event == Lifecycle.Event.ON_DESTROY) {
+        detachPreviousScreenObserver()
+      }
+    }
+
+    lifecycleOwner.lifecycle.addObserver(observer)
+    screenObserver = observer
+    screenLifecycleOwner = lifecycleOwner
+  }
+
+  override fun activityMonitor(): Flow<Lifecycle.Event> = activityLifecycleState
+
+  override fun screenMonitor(): Flow<Lifecycle.Event> = screenLifecycleState
 }

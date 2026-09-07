@@ -308,7 +308,6 @@ object CommonModule {
   fun provideSnackbarHost() = SnackbarHostImpl()
 
   @Provides
-  @Singleton
   fun provideLifecycleMonitor() = LifecycleMonitorImpl()
 
   @Provides

@@ -12,6 +12,8 @@ enum class NetworkStatus {
 interface NetworkMonitor {
   fun monitor(): Flow<NetworkStatus>
 
+  fun getCurrentStatus(): NetworkStatus?
+
   suspend fun register(): Either<DomainError, Unit>
 
   suspend fun unregister() : Either<DomainError, Unit>

@@ -111,7 +111,6 @@ class EventRepositoryImpl(
     imageBytes: ByteArray,
     sessionUuid: String,
   ): Either<DomainError, Unit> = either {
-    println("save waypooint")
     val file = localFileManager.saveFile(
       fileName = getFileNameForWaypointVisit(
         waypointId = waypointId,
