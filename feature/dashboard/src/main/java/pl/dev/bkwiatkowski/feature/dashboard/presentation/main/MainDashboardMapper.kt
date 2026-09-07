@@ -12,7 +12,6 @@ interface MainDashboardMapper : Mapper<MainDashboardMapper.Params, MainDashboard
   data class Params(
     val state: MainDashboardVM.State,
     val onBackClick: () -> Unit,
-    val onNotificationsClick: () -> Unit,
     val onSettingsClick: () -> Unit,
     val onNewRunClick: () -> Unit,
     val onGoToFriendsClick: () -> Unit,
@@ -35,10 +34,7 @@ class MainDashboardMapperImpl : MainDashboardMapper {
       )
       is MainDashboardVM.State.Active -> MainDashboardVM.ScreenData.Main(
         onBackClick = params.onBackClick,
-        topBarData = TopAppBarData.Action(
-          onActionIconClick = params.onNotificationsClick,
-          actionIconId = R.drawable.baseline_circle_notifications_24,
-        ),
+        topBarData = TopAppBarData.Empty,
         welcomeLabel = "Witaj ${params.state.userName}!",
         welcomeDescription = "Czas na nową trasę sprawdź ostatnio dodane nowe trasy i podejmij wyzwanie ich przejścia",
         friendsCardTitle = "Znajomi",

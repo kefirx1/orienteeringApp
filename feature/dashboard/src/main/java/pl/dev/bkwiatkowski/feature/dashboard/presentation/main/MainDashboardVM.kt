@@ -3,7 +3,6 @@ package pl.dev.bkwiatkowski.feature.dashboard.presentation.main
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.error.DomainError
@@ -332,9 +331,6 @@ class MainDashboardVMImpl @Inject constructor(
     params = MainDashboardMapper.Params(
       state = state.value,
       onBackClick = { dispatchAction(MainDashboardVM.Action.Back) },
-      onNotificationsClick = {
-        //todo implement notifications
-      },
       onSettingsClick = {
         dispatchAction(MainDashboardVM.Action.ToSettings)
       },
