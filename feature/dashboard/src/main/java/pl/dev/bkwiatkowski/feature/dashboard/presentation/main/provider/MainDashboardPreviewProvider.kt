@@ -60,7 +60,6 @@ class MainDashboardPreviewProvider : ViewModelPreviewProvider<MainDashboardVM, M
     MainDashboardMapper.Params(
       state = state,
       onBackClick = {},
-      onNotificationsClick = {},
       onSettingsClick = {},
       onNewRunClick = {},
       onGoToFriendsClick = {},

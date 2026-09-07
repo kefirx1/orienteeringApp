@@ -1,7 +1,6 @@
 package pl.dev.bkwiatkowski.common.network
 
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.android.Android
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
@@ -21,6 +20,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.contextual
 import pl.dev.bkwiatkowski.common.core.config.EnvironmentConfig
+import pl.dev.bkwiatkowski.common.core.config.Flavor
 import pl.dev.bkwiatkowski.common.core.logger.Log
 import pl.dev.bkwiatkowski.common.core.logger.Tag
 import pl.dev.bkwiatkowski.common.core.network.SessionManager
@@ -107,13 +107,15 @@ class HttpClientFactoryImpl(
           }
         }
       }
-      install(plugin = Logging) {
-        logger = object : Logger {
-          override fun log(message: String) {
-            Log.i(tag = Tag(this@HttpClientFactoryImpl), message = message)
+      if (environmentConfig.flavor != Flavor.PROD) {
+        install(plugin = Logging) {
+          logger = object : Logger {
+            override fun log(message: String) {
+              Log.i(tag = Tag(this@HttpClientFactoryImpl), message = message)
+            }
           }
+          level = LogLevel.BODY
         }
-        level = LogLevel.BODY
       }
       install(plugin = ContentNegotiation) {
         json(json = jsonBuilder)
