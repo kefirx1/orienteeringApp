@@ -34,5 +34,8 @@ sealed interface DashboardResult {
     val eventId: Int,
     val sessionUuid: String,
   ) : DashboardResult
+  data class ToEventDetails(
+    val eventId: Int,
+  ) : DashboardResult
   data object Logout : DashboardResult
 }

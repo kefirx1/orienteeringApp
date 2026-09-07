@@ -12,7 +12,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -142,7 +141,7 @@ fun MainDashboardOfflineContent(
 private fun WelcomeCard(
   welcomeLabel: String,
   welcomeDescription: String,
-  checkNewRunsButtonData: SmallButtonData,
+  checkNewRunsButtonData: SmallButtonData?,
 ) {
   BaseCard {
     Column(
@@ -162,11 +161,13 @@ private fun WelcomeCard(
       )
       Spacer(modifier = Modifier.height(16.dp))
 
-      Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-      ) {
-        SmallButton(buttonData = checkNewRunsButtonData)
+      checkNewRunsButtonData?.let { buttonData ->
+        Column(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+          SmallButton(buttonData = buttonData)
+        }
       }
     }
   }

@@ -37,6 +37,7 @@ interface MainDashboardVM {
     data class Active(
       val userName: String,
       val friendsData: FriendsStatsData,
+      val lastNewEventId: Int?,
     ) : State
 
     sealed interface Offline : State {
@@ -63,19 +64,23 @@ interface MainDashboardVM {
       data object ExitApp : Navigation
       data object GoToSettings : Navigation
       data object GoToMap : Navigation
-      data object GoToNewRuns: Navigation
       data object GoToMyProfile: Navigation
       data object GoToFriends: Navigation
       data class OpenEventSession(
         val eventId: Int,
         val sessionUuid: String,
       ) : Navigation
+      data class GoToEventDetails(
+        val eventId: Int,
+      ) : Navigation
     }
 
     data object NewRun : Action
     data object ToSettings : Action
     data object GoToFriends : Action
-    data object CheckNewRuns : Action
+    data class ToEventDetails(
+      val eventId: Int,
+    ) : Action
     data object ToMyProfile : Action
     data object LoadData : Action
     data class OpenSavedEvent(
@@ -107,7 +112,7 @@ interface MainDashboardVM {
       val settingsCard: ActionCardData,
       val newRunFab: FabData,
       val goToFriendsButton: SmallButtonData,
-      val checkNewRunsButton: SmallButtonData,
+      val checkNewRunsButton: SmallButtonData?,
     ) : ScreenData
 
     data class Offline(
@@ -193,10 +198,12 @@ class MainDashboardVMImpl @Inject constructor(
                   val userName = dashboardInteractor.getUserName().getRight()
                   val friendsData = getFriendsStatsDataUC(UseCase.Params.Empty)
                     .getRightOr(default = FriendsStatsData.EMPTY)
+                  val lastNewEventId = dashboardInteractor.getLastNewMobileEventId().getRightOrNull()
 
                   MainDashboardVM.State.Active(
                     userName = userName,
                     friendsData = friendsData,
+                    lastNewEventId = lastNewEventId,
                   ).override()
                 }.onLeft { error ->
                   when (error) {
@@ -252,11 +259,11 @@ class MainDashboardVMImpl @Inject constructor(
             is MainDashboardVM.Action.GoToFriends -> {
               MainDashboardVM.Action.Navigation.GoToFriends.emit()
             }
-            is MainDashboardVM.Action.CheckNewRuns -> {
-              MainDashboardVM.Action.Navigation.GoToNewRuns.emit()
-            }
             is MainDashboardVM.Action.ToMyProfile -> {
               MainDashboardVM.Action.Navigation.GoToMyProfile.emit()
+            }
+            is MainDashboardVM.Action.ToEventDetails -> {
+              MainDashboardVM.Action.Navigation.GoToEventDetails(eventId = action.eventId).emit()
             }
             is MainDashboardVM.Action.LoadData -> {
               MainDashboardVM.State.Initial.override()
@@ -337,8 +344,8 @@ class MainDashboardVMImpl @Inject constructor(
       onNewRunClick = {
         dispatchAction(MainDashboardVM.Action.NewRun)
       },
-      onCheckNewRunsClick = {
-        dispatchAction(MainDashboardVM.Action.CheckNewRuns)
+      onCheckNewEventClick = { id ->
+        dispatchAction(MainDashboardVM.Action.ToEventDetails(eventId = id))
       },
       onGoToFriendsClick = {
         dispatchAction(MainDashboardVM.Action.GoToFriends)
@@ -346,7 +353,7 @@ class MainDashboardVMImpl @Inject constructor(
       onMyProfileClick = {
         dispatchAction(MainDashboardVM.Action.ToMyProfile)
       },
-      onContinueLastRunClick = { eventId, sessionUuid ->
+      onContinueLastEventClick = { eventId, sessionUuid ->
         dispatchAction(MainDashboardVM.Action.OpenSavedEvent(eventId = eventId, sessionUuid = sessionUuid))
       },
       onRefreshState = {

@@ -73,6 +73,7 @@ interface EventDetailsVM {
   sealed interface Action {
     sealed interface Navigation : Action {
       data object Back : Navigation
+      data object BackToDashboard : Navigation
       data class ToEventSession(
         val eventId: Int,
         val sessionUuid: String,
@@ -135,6 +136,7 @@ interface EventDetailsVM {
 
   data class SetupData(
     val eventId: Int,
+    val isFromDashboard: Boolean,
   )
 
   val screenData: StateFlow<ScreenData>
@@ -167,26 +169,40 @@ class EventDetailsVMImpl @AssistedInject constructor(
     viewModelScope.launch {
       when (val currentState = state.value) {
         is EventDetailsVM.State.Loading.Content -> when (action) {
-          is EventDetailsVM.Action.Back -> {
-            EventDetailsVM.Action.Navigation.Back.emit()
-          }
+          is EventDetailsVM.Action.Back ->
+            if (setupData.isFromDashboard) {
+              EventDetailsVM.Action.Navigation.BackToDashboard.emit()
+            } else {
+              EventDetailsVM.Action.Navigation.Back.emit()
+            }
           else -> {}
         }
         is EventDetailsVM.State.Loading.Error -> when (action) {
-          is EventDetailsVM.Action.Back -> EventDetailsVM.Action.Navigation.Back.emit()
+          is EventDetailsVM.Action.Back ->
+            if (setupData.isFromDashboard) {
+              EventDetailsVM.Action.Navigation.BackToDashboard.emit()
+            } else {
+              EventDetailsVM.Action.Navigation.Back.emit()
+            }
           is EventDetailsVM.Action.RetryLoad -> EventDetailsVM.State.Loading.Content.override()
           else -> {}
         }
         is EventDetailsVM.State.Initialized.InitializedFinished -> when (action) {
-          is EventDetailsVM.Action.Back -> {
-            EventDetailsVM.Action.Navigation.Back.emit()
-          }
+          is EventDetailsVM.Action.Back ->
+            if (setupData.isFromDashboard) {
+              EventDetailsVM.Action.Navigation.BackToDashboard.emit()
+            } else {
+              EventDetailsVM.Action.Navigation.Back.emit()
+            }
           else -> {}
         }
         is EventDetailsVM.State.Initialized.InitializedAlreadyJoined -> when (action) {
-          is EventDetailsVM.Action.Back -> {
-            EventDetailsVM.Action.Navigation.Back.emit()
-          }
+          is EventDetailsVM.Action.Back ->
+            if (setupData.isFromDashboard) {
+              EventDetailsVM.Action.Navigation.BackToDashboard.emit()
+            } else {
+              EventDetailsVM.Action.Navigation.Back.emit()
+            }
           is EventDetailsVM.Action.ToEventSession -> {
             EventDetailsVM.Action.Navigation.ToEventSession(
               eventId = currentState.event.id,
@@ -196,9 +212,12 @@ class EventDetailsVMImpl @AssistedInject constructor(
           else -> {}
         }
         is EventDetailsVM.State.Initialized.NotJoined.Content -> when (action) {
-          is EventDetailsVM.Action.Back -> {
-            EventDetailsVM.Action.Navigation.Back.emit()
-          }
+          is EventDetailsVM.Action.Back ->
+            if (setupData.isFromDashboard) {
+              EventDetailsVM.Action.Navigation.BackToDashboard.emit()
+            } else {
+              EventDetailsVM.Action.Navigation.Back.emit()
+            }
           is EventDetailsVM.Action.ToEventSession -> {
             if (!ensureLocationPermission()) return@launch
 
@@ -246,7 +265,9 @@ class EventDetailsVMImpl @AssistedInject constructor(
           else -> {}
         }
         is EventDetailsVM.State.Initialized.InitializedNoSession -> when (action) {
-          is EventDetailsVM.Action.Back -> {
+          is EventDetailsVM.Action.Back -> if (setupData.isFromDashboard) {
+            EventDetailsVM.Action.Navigation.BackToDashboard.emit()
+          } else {
             EventDetailsVM.Action.Navigation.Back.emit()
           }
           else -> {}

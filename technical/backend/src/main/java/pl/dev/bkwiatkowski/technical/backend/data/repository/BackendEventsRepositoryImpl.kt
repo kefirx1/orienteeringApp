@@ -13,6 +13,7 @@ import pl.dev.bkwiatkowski.technical.backend.api.FinishEventSession
 import pl.dev.bkwiatkowski.technical.backend.api.GetFinishedSessionParticipants
 import pl.dev.bkwiatkowski.technical.backend.api.GetMobileEventById
 import pl.dev.bkwiatkowski.technical.backend.api.GetMobileEvents
+import pl.dev.bkwiatkowski.technical.backend.api.GetLastMobileEvent
 import pl.dev.bkwiatkowski.technical.backend.api.GetSessionWaypointDetails
 import pl.dev.bkwiatkowski.technical.backend.api.JoinEventSession
 import pl.dev.bkwiatkowski.technical.backend.api.UploadSessionImage
@@ -21,6 +22,7 @@ import pl.dev.bkwiatkowski.technical.backend.data.IsUserInSessionResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.JoinSessionRequestDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileEventDetailResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileEventListResponseDto
+import pl.dev.bkwiatkowski.technical.backend.data.MobileLastEventResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.SessionWaypointDetailsResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.SessionParticipantResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.UploadImageRequest
@@ -58,6 +60,13 @@ class BackendEventsRepositoryImpl(
       response
         .body<List<MobileEventListResponseDto>>()
         .map { it.toDomain() }
+    }
+
+  override suspend fun getLastNewMobileEventId(): Either<DomainError, Int> =
+    callMediator<GetLastMobileEvent> {
+      client.get(resource = GetLastMobileEvent).body()
+    }.mapRight { response ->
+      response.body<MobileLastEventResponseDto>().id
     }
 
   override suspend fun joinEventSession(sessionUuid: String): Either<DomainError, Unit> =

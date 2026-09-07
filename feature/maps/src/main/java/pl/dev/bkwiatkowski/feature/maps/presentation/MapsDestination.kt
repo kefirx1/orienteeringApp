@@ -17,6 +17,7 @@ sealed interface MapsDestination : Destination {
 
 sealed interface MapsResult {
   data object Back : MapsResult
+  data object BackToDashboard : MapsResult
   data class ToEventSession(
     val sessionUuid: String,
     val eventId: Int,

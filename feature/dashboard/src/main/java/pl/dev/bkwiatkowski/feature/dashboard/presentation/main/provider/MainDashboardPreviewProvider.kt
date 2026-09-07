@@ -36,7 +36,8 @@ class MainDashboardPreviewProvider : ViewModelPreviewProvider<MainDashboardVM, M
                     numberOfRuns = 7
                   )
                 )
-              )
+              ),
+              lastNewEventId = null,
             ),
           ),
         ),
@@ -49,6 +50,7 @@ class MainDashboardPreviewProvider : ViewModelPreviewProvider<MainDashboardVM, M
             state = MainDashboardVM.State.Active(
               userName = "Blazej",
               friendsData = FriendsStatsData.EMPTY,
+              lastNewEventId = null,
             ),
           ),
         ),
@@ -63,9 +65,9 @@ class MainDashboardPreviewProvider : ViewModelPreviewProvider<MainDashboardVM, M
       onSettingsClick = {},
       onNewRunClick = {},
       onGoToFriendsClick = {},
-      onCheckNewRunsClick = {},
+      onCheckNewEventClick = {},
       onMyProfileClick = {},
-      onContinueLastRunClick = { _,_ -> },
+      onContinueLastEventClick = { _, _ -> },
       onRefreshState = {},
     )
 }

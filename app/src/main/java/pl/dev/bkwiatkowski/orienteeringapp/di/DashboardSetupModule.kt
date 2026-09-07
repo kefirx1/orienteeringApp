@@ -14,6 +14,7 @@ import pl.dev.bkwiatkowski.feature.dashboard.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.dashboard.domain.model.SessionsData
 import pl.dev.bkwiatkowski.feature.dashboard.domain.model.UserSessionData
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.GetLastActiveSavedEventUC
+import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepository
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.ChangePasswordUC
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetUserSessionsUC
 import pl.dev.bkwiatkowski.technical.mobile.domain.repository.MobileSettingsRepository
@@ -33,11 +34,15 @@ object DashboardSetupModule {
     changePasswordUC: ChangePasswordUC,
     getUserSessionsUC: GetUserSessionsUC,
     mobileSettingsRepository: MobileSettingsRepository,
+    backendEventsRepository: BackendEventsRepository,
     getLastActiveSavedEventUC: GetLastActiveSavedEventUC,
   ): DashboardInteractor =
     object : DashboardInteractor {
       override suspend fun fetchMobileSettings(): Either<DomainError, Unit> =
         fetchMobileSettingsUC(UseCase.Params.Empty)
+
+      override suspend fun getLastNewMobileEventId(): Either<DomainError, Int> =
+        backendEventsRepository.getLastNewMobileEventId()
 
       override suspend fun getUserName(): Either<DomainError, String> =
         getUserNameUC(UseCase.Params.Empty)

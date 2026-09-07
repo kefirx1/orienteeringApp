@@ -17,6 +17,7 @@ import pl.dev.bkwiatkowski.feature.login.presentation.LoginResult
 import pl.dev.bkwiatkowski.feature.login.presentation.loginNavGraph
 import pl.dev.bkwiatkowski.feature.maps.presentation.MapsDestination
 import pl.dev.bkwiatkowski.feature.maps.presentation.MapsResult
+import pl.dev.bkwiatkowski.feature.maps.presentation.eventsmap.EventsMapVM
 import pl.dev.bkwiatkowski.feature.maps.presentation.mapsNavGraph
 
 @Composable
@@ -48,7 +49,14 @@ fun MainAppNavGraph(
       onResult = { result ->
         when (result) {
           DashboardResult.ExitApp -> onAppExit()
-          DashboardResult.ToMaps -> appNavController.navigate(destination = MapsDestination.MapsGraph)
+          DashboardResult.ToMaps -> {
+            appContractVM.setContractData(
+              destination = MapsDestination.EventsMap,
+              data = EventsMapVM.SetupData(eventId = null),
+            )
+
+            appNavController.navigate(destination = MapsDestination.MapsGraph)
+          }
           is DashboardResult.ToEventSession -> {
             appContractVM.setContractData(
               destination = EventDestination.EventMain,
@@ -59,15 +67,24 @@ fun MainAppNavGraph(
             )
             appNavController.navigate(destination = EventDestination.EventGraph)
           }
-          DashboardResult.Logout -> appNavController.navigate(destination = LoginDestinations.LoginGraph)
+          is DashboardResult.ToEventDetails -> {
+            appContractVM.setContractData(
+              destination = MapsDestination.EventsMap,
+              data = EventsMapVM.SetupData(eventId = result.eventId),
+            )
+            appNavController.navigate(destination = MapsDestination.MapsGraph)
+          }
+          is DashboardResult.Logout -> appNavController.navigate(destination = LoginDestinations.LoginGraph)
         }
       },
     )
     mapsNavGraph(
+      appContractVM = appContractVM,
       navController = appNavController,
       onResult = { result ->
         when (result) {
           MapsResult.Back -> appNavController.popBackStack()
+          MapsResult.BackToDashboard -> appNavController.pop(destination = MapsDestination.MapsGraph)
           is MapsResult.ToEventSession -> {
             appContractVM.setContractData(
               destination = EventDestination.EventMain,
@@ -88,7 +105,7 @@ fun MainAppNavGraph(
       navController = appNavController,
       onResult = { result ->
         when (result) {
-          is EventResult.Back -> appNavController.pop(EventDestination.EventGraph)
+          is EventResult.Back -> appNavController.pop(destination = EventDestination.EventGraph)
         }
       },
     )

@@ -4,6 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.navigation
 import pl.dev.bkwiatkowski.common.core.navigation.AppNavController
 import pl.dev.bkwiatkowski.common.core.navigation.createDestination
+import pl.dev.bkwiatkowski.common.core.viewmodel.ContractViewModel
 import pl.dev.bkwiatkowski.feature.maps.presentation.eventdetails.EventDetailsScreen
 import pl.dev.bkwiatkowski.feature.maps.presentation.eventdetails.EventDetailsVM
 import pl.dev.bkwiatkowski.feature.maps.presentation.eventdetails.EventDetailsVMImpl
@@ -12,6 +13,7 @@ import pl.dev.bkwiatkowski.feature.maps.presentation.eventsmap.EventsMapVM
 import pl.dev.bkwiatkowski.feature.maps.presentation.eventsmap.EventsMapVMImpl
 
 fun NavGraphBuilder.mapsNavGraph(
+  appContractVM: ContractViewModel,
   navController: AppNavController,
   onResult: (MapsResult) -> Unit,
 ) {
@@ -19,8 +21,9 @@ fun NavGraphBuilder.mapsNavGraph(
     route = MapsDestination.MapsGraph.route,
     startDestination = MapsDestination.EventsMap.route,
   ) {
-    createDestination<Nothing, MapsContractVM, EventsMapVMImpl, EventsMapVM.Action.Navigation>(
+    createDestination<EventsMapVM.SetupData, MapsContractVM, EventsMapVMImpl, EventsMapVM.Action.Navigation>(
       destination = MapsDestination.EventsMap,
+      graphInitContract = appContractVM,
       navController = navController,
       content = { viewModel ->
         EventsMapScreen(viewModel = viewModel)
@@ -31,7 +34,10 @@ fun NavGraphBuilder.mapsNavGraph(
           is EventsMapVM.Action.Navigation.ToEventDetails -> {
             contractViewModel.setContractData(
               destination = MapsDestination.EventDetails,
-              data = EventDetailsVM.SetupData(eventId = action.eventId),
+              data = EventDetailsVM.SetupData(
+                eventId = action.eventId,
+                isFromDashboard = action.isFromDashboard,
+              ),
             )
             navController.navigate(destination = MapsDestination.EventDetails)
           }
@@ -45,8 +51,9 @@ fun NavGraphBuilder.mapsNavGraph(
       content = { viewModel ->
         EventDetailsScreen(viewModel = viewModel)
       },
-      navActionHandler = { action, contractViewModel ->
+      navActionHandler = { action, _ ->
         when (action) {
+          is EventDetailsVM.Action.Navigation.BackToDashboard -> onResult(MapsResult.BackToDashboard)
           is EventDetailsVM.Action.Navigation.Back -> navController.popBackStack()
           is EventDetailsVM.Action.Navigation.ToEventSession ->
             onResult(

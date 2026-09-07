@@ -14,6 +14,7 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisit
 interface BackendEventsRepository {
   suspend fun getMobileEvents(): Either<DomainError, List<MobileEventListResponse>>
   suspend fun getMobileEventDetails(eventId: Int): Either<DomainError, MobileEventDetailResponse>
+  suspend fun getLastNewMobileEventId(): Either<DomainError, Int>
   suspend fun joinEventSession(sessionUuid: String): Either<DomainError, Unit>
   suspend fun checkUserInEventSession(sessionUuid: String): Either<DomainError, BEUserSessionStatus>
   suspend fun uploadSessionImage(sessionUuid: String, imageBase64: String): Either<DomainError, BEUploadImageResponse>

@@ -7,6 +7,7 @@ import pl.dev.bkwiatkowski.feature.dashboard.domain.model.SessionsData
 
 interface DashboardInteractor {
   suspend fun fetchMobileSettings(): Either<DomainError, Unit>
+  suspend fun getLastNewMobileEventId(): Either<DomainError, Int>
   suspend fun getUserName(): Either<DomainError, String>
   suspend fun logout(): Either<DomainError, Unit>
   suspend fun changePassword(

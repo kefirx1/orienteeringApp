@@ -15,9 +15,9 @@ interface MainDashboardMapper : Mapper<MainDashboardMapper.Params, MainDashboard
     val onSettingsClick: () -> Unit,
     val onNewRunClick: () -> Unit,
     val onGoToFriendsClick: () -> Unit,
-    val onCheckNewRunsClick: () -> Unit,
+    val onCheckNewEventClick: (Int) -> Unit,
     val onMyProfileClick: () -> Unit,
-    val onContinueLastRunClick: (Int?, String?) -> Unit,
+    val onContinueLastEventClick: (Int?, String?) -> Unit,
     val onRefreshState: () -> Unit,
   )
 }
@@ -55,10 +55,12 @@ class MainDashboardMapperImpl : MainDashboardMapper {
           },
           onClick = params.onGoToFriendsClick,
         ),
-        checkNewRunsButton = SmallButtonData.Secondary(
-          text = "Sprawdź",
-          onClick = params.onCheckNewRunsClick,
-        ),
+        checkNewRunsButton = params.state.lastNewEventId?.let { id ->
+          SmallButtonData.Secondary(
+            text = "Sprawdź",
+            onClick = { params.onCheckNewEventClick(id) },
+          )
+        },
         newRunFab = FabData(
           contentDescription = "Rozpocznij nowy bieg",
           onFabClick = params.onNewRunClick,
@@ -76,7 +78,7 @@ class MainDashboardMapperImpl : MainDashboardMapper {
         ),
         continueLastRunButton = LargeButtonData.Primary(
           text = "Kontynuuj ostatni bieg",
-          onClick = { params.onContinueLastRunClick(params.state.stateData.continueEventId, params.state.stateData.continueSessionUuid) },
+          onClick = { params.onContinueLastEventClick(params.state.stateData.continueEventId, params.state.stateData.continueSessionUuid) },
         ).takeIf { params.state.stateData.userCanJoin }
       )
       is MainDashboardVM.State.Offline.Error -> MainDashboardVM.ScreenData.ErrorScreen(

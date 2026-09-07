@@ -43,7 +43,7 @@ fun NavGraphBuilder.dashboardNavGraph(
         when (action) {
           is MainDashboardVM.Action.Navigation.ExitApp -> onResult(DashboardResult.ExitApp)
           is MainDashboardVM.Action.Navigation.GoToSettings -> navController.navigate(destination = DashboardDestination.Settings)
-          is MainDashboardVM.Action.Navigation.GoToNewRuns -> {}
+          is MainDashboardVM.Action.Navigation.GoToEventDetails -> onResult(DashboardResult.ToEventDetails(eventId = action.eventId))
           is MainDashboardVM.Action.Navigation.GoToMyProfile -> navController.navigate(destination = DashboardDestination.UserProfile)
           is MainDashboardVM.Action.Navigation.GoToMap -> onResult(DashboardResult.ToMaps)
           is MainDashboardVM.Action.Navigation.OpenEventSession -> onResult(

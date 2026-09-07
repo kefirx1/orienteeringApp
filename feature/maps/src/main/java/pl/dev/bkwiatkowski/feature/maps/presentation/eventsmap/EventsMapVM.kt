@@ -1,6 +1,9 @@
 package pl.dev.bkwiatkowski.feature.maps.presentation.eventsmap
 
 import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -8,11 +11,11 @@ import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
 import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
+import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
 import pl.dev.bkwiatkowski.common.ui.component.map.MapComponentData
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.feature.maps.domain.interactor.MapsBackendInteractor
 import pl.dev.bkwiatkowski.feature.maps.domain.model.MobileEvents
-import javax.inject.Inject
 
 interface EventsMapVM {
   sealed interface State {
@@ -32,6 +35,7 @@ interface EventsMapVM {
       data object Back : Navigation
       data class ToEventDetails(
         val eventId: Int,
+        val isFromDashboard: Boolean = false,
       ) : Navigation
     }
     data object RetryLoad : Action
@@ -60,11 +64,16 @@ interface EventsMapVM {
     ) : ScreenData
   }
 
+  data class SetupData(
+    val eventId: Int?,
+  )
+
   val screenData: StateFlow<ScreenData>
 }
 
-@HiltViewModel
-class EventsMapVMImpl @Inject constructor(
+@HiltViewModel(assistedFactory = EventsMapVMImpl.Factory::class)
+class EventsMapVMImpl @AssistedInject constructor(
+  @Assisted private val setupData: EventsMapVM.SetupData,
   private val mapper: EventsMapMapper,
   private val mapsBackendInteractor: MapsBackendInteractor,
   private val runWithLoaderUC: RunWithLoaderUC,
@@ -75,13 +84,16 @@ class EventsMapVMImpl @Inject constructor(
 
   override val screenData: StateFlow<EventsMapVM.ScreenData> = _screenData
 
+  @AssistedFactory
+  interface Factory : CustomViewModelFactory<EventsMapVM.SetupData, EventsMapVMImpl>
+
   init {
     initState()
   }
 
   fun dispatchAction(action: EventsMapVM.Action) {
     viewModelScope.launch {
-      when (val currentState = state.value) {
+      when (state.value) {
         is EventsMapVM.State.Loading -> {}
         is EventsMapVM.State.Initialized -> when (action) {
           is EventsMapVM.Action.Back -> {
@@ -103,27 +115,36 @@ class EventsMapVMImpl @Inject constructor(
   }
 
   override suspend fun onStateEnter(newState: EventsMapVM.State) {
-    when (newState) {
-      is EventsMapVM.State.Loading -> runWithLoaderUC {
-        mapsBackendInteractor.getMobileEvents().fold(
-          onRight = { events ->
-            EventsMapVM.State.Initialized(events = events).override()
-          },
-          onLeft = { error ->
-            EventsMapVM.State.Error(
-              errorScreenData = errorDataMapper(
-                params = ErrorDataMapper.Params(
-                  error = error,
-                  onCloseClick = { dispatchAction(EventsMapVM.Action.Back) },
-                  onRetryClick = { dispatchAction(EventsMapVM.Action.RetryLoad) },
-                )
-              ),
-            ).override()
+    viewModelScope.launch {
+      when (newState) {
+        is EventsMapVM.State.Loading -> runWithLoaderUC {
+          mapsBackendInteractor.getMobileEvents().fold(
+            onRight = { events ->
+              EventsMapVM.State.Initialized(events = events).override()
+            },
+            onLeft = { error ->
+              EventsMapVM.State.Error(
+                errorScreenData = errorDataMapper(
+                  params = ErrorDataMapper.Params(
+                    error = error,
+                    onCloseClick = { dispatchAction(EventsMapVM.Action.Back) },
+                    onRetryClick = { dispatchAction(EventsMapVM.Action.RetryLoad) },
+                  )
+                ),
+              ).override()
+            }
+          )
+        }
+        is EventsMapVM.State.Error -> {}
+        is EventsMapVM.State.Initialized -> {
+          if (setupData.eventId != null) {
+            EventsMapVM.Action.Navigation.ToEventDetails(
+              eventId = setupData.eventId,
+              isFromDashboard = true,
+            ).emit()
           }
-        )
+        }
       }
-      is EventsMapVM.State.Error -> {}
-      is EventsMapVM.State.Initialized -> {}
     }
   }
 
