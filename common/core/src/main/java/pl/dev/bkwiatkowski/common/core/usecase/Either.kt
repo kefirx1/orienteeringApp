@@ -66,8 +66,7 @@ sealed class Either<out L, out R> {
   }
 }
 
-@PublishedApi
-internal class DefaultEitherException(val error: DomainError) : RuntimeException()
+class DefaultEitherException(val error: DomainError) : RuntimeException()
 
 interface EitherScope {
   fun raise(error: DomainError): Nothing
@@ -77,9 +76,16 @@ interface EitherScope {
 @PublishedApi
 internal class EitherScopeImpl : EitherScope {
   override fun raise(error: DomainError): Nothing {
+    val message = when (error) {
+      is DomainError.Business -> error.message
+      is DomainError.Custom -> error.e?.message ?: "Unknown error"
+      is DomainError.NoNetwork -> "No network connection"
+      is DomainError.Network -> error.message ?: "Network error with code ${error.code.value}"
+    }
+
     Log.e(
-      tag = Tag("Either-raise"),
-      message = "Error: ${(error as? DomainError.Custom)?.e}.",
+      tag = Tag(this),
+      message = "Error: $message",
     )
     throw DefaultEitherException(error = error)
   }

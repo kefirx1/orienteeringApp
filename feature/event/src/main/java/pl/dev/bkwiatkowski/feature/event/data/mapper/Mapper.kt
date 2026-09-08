@@ -55,6 +55,8 @@ fun MobileEventDetails.toDto(): MobileEventDetailsDto = MobileEventDetailsDto(
     userCanJoin = session.userCanJoin,
     finishedAt = session.finishedAt,
   ),
+  maxImageSizeBytes = maxImageSizeBytes,
+  compressedImageQualityPercent = compressedImageQualityPercent,
   eventWaypoints = eventWaypoints.map { mw ->
     MapWaypointDto(
       id = mw.id,
@@ -107,6 +109,8 @@ fun MobileEventDetailsDto.toDomain(): MobileEventDetails = MobileEventDetails(
     userCanJoin = session.userCanJoin,
     finishedAt = session.finishedAt,
   ),
+  maxImageSizeBytes = maxImageSizeBytes,
+  compressedImageQualityPercent = compressedImageQualityPercent,
   eventWaypoints = eventWaypoints.map { dto ->
     MapWaypoint(
       id = dto.id,

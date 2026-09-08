@@ -13,6 +13,8 @@ data class MobileEventDetailResponse(
   val startLocationY: Float,
   val eventStatus: BEEventStatus,
   val eventType: BEEventType,
+  val maxImageSizeBytes: Int,
+  val compressedImageQualityPercent: Int,
   val eventWaypoints: List<BEMapWaypoint>,
   val session: EventSessionResponse? = null,
 )

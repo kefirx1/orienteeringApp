@@ -61,6 +61,8 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
                     userCanJoin = true,
                     finishedAt = null
                   ),
+                  maxImageSizeBytes = 400_000,
+                  compressedImageQualityPercent = 50,
                   eventWaypoints = emptyList(),
                 ),
               ),

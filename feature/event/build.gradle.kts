@@ -52,5 +52,4 @@ dependencies {
   implementation(project(":common:lifecycle"))
   implementation(project(":common:camera"))
   implementation(project(":common:storage"))
-
 }

@@ -22,6 +22,7 @@ import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.ConfirmWaypointUC
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.FinishSessionUC
+import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventFlagsInteractor
 
 interface EventMapVM {
   sealed interface State {
@@ -31,6 +32,7 @@ interface EventMapVM {
       val alreadyConfirmedWaypointId: Int? = null,
       val visitedWrongWaypoint: Boolean = false,
       val nextWaypoint: MapWaypoint?,
+      val isDebugLocationEnabled: Boolean = false,
     )
 
     sealed interface Loading : State {
@@ -81,6 +83,7 @@ interface EventMapVM {
     ) : Action
     data object CompleteEvent : Action
     data object CheckWaypoint : Action
+    data object DebugCheckWaypoint : Action
   }
 
   sealed interface ScreenData {
@@ -97,6 +100,7 @@ interface EventMapVM {
       val nextWaypointLabel: String,
       val wrongWaypointInfo: String?,
       val checkWaypointButton: LargeButtonData.Primary?,
+      val debugCheckWaypointButton: LargeButtonData.Secondary?,
     ) : ScreenData
 
     data class ErrorScreen(
@@ -123,6 +127,7 @@ class EventMapVMImpl @AssistedInject constructor(
   private val confirmWaypointUC: ConfirmWaypointUC,
   private val finishSessionUC: FinishSessionUC,
   private val publishWaypointVisitUC: PublishWaypointVisitUC,
+  private val eventFlagsInteractor: EventFlagsInteractor,
 ) : CustomViewModel<EventMapVM.State, EventMapVM.ScreenData, EventMapVM.Action.Navigation>(
   initialStateValue = EventMapVM.State.Loading.Content,
 ), EventMapVM {
@@ -174,44 +179,20 @@ class EventMapVMImpl @AssistedInject constructor(
             ).mutate()
           }
           is EventMapVM.Action.CheckWaypoint -> {
-            runWithLoaderUC {
-              currentState.stateData.currentWaypoint ?: return@runWithLoaderUC
+            currentState.stateData.currentWaypoint ?: return@launch
 
-              either {
-                confirmWaypointUC(
-                  params = ConfirmWaypointUC.Params(
-                    sessionUuid = currentState.stateData.eventDetails.session.id,
-                    waypointId = currentState.stateData.currentWaypoint.id,
-                  ),
-                ).onRight { result ->
-                  currentState.copy(
-                    stateData = currentState.stateData.copy(
-                      alreadyConfirmedWaypointId = currentState.stateData.currentWaypoint.id,
-                    )
-                  ).mutate()
+            checkWaypoint(
+              stateData = currentState.stateData,
+              waypointId = currentState.stateData.currentWaypoint.id,
+            )
+          }
+          is EventMapVM.Action.DebugCheckWaypoint -> {
+            currentState.stateData.nextWaypoint ?: return@launch
 
-                  when (result) {
-                    is ConfirmWaypointUC.Result.Success -> {}
-                    is ConfirmWaypointUC.Result.BackendFailed -> publishWaypointVisitUC(
-                      params = PublishWaypointVisitUC.Params(
-                        waypointId = currentState.stateData.currentWaypoint.id,
-                        visitedAt = result.visitedAt,
-                      ),
-                    ).getRight()
-                  }
-                }.getRight()
-              }.onLeft { error ->
-                EventMapVM.State.Active.Error(
-                  errorScreenData = errorDataMapper(
-                    params = ErrorDataMapper.Params(
-                      error = error,
-                      onCloseClick = { dispatchAction(EventMapVM.Action.Back) },
-                    )
-                  ),
-                  stateData = currentState.stateData,
-                ).override()
-              }
-            }
+            checkWaypoint(
+              stateData = currentState.stateData,
+              waypointId = currentState.stateData.nextWaypoint.id,
+            )
           }
           is EventMapVM.Action.CompleteEvent -> EventMapVM.State.Completed.Content(
             stateData = currentState.stateData,
@@ -245,11 +226,16 @@ class EventMapVMImpl @AssistedInject constructor(
       is EventMapVM.State.Loading.Content -> either {
         val details = contract.getEventDetails().getRight()
 
+        val isDebugEnabled = eventFlagsInteractor.isDebugLocationEnabled().getRightOrElse {
+          false
+        }
+
         EventMapVM.State.Active.Content(
           stateData = EventMapVM.State.StateData(
             eventDetails = details,
             currentWaypoint = null,
             nextWaypoint = contract.getNextWaypoint(),
+            isDebugLocationEnabled = isDebugEnabled,
           ),
         ).override()
       }.onLeft { error ->
@@ -327,8 +313,47 @@ class EventMapVMImpl @AssistedInject constructor(
       onCompleteClick = {
         dispatchAction(EventMapVM.Action.CompleteEvent)
       },
+      onDebugCheckWaypointClick = {
+        dispatchAction(EventMapVM.Action.DebugCheckWaypoint)
+      },
     ),
   )
+
+  private suspend fun checkWaypoint(
+    stateData: EventMapVM.State.StateData,
+    waypointId: Int,
+  ) = runWithLoaderUC {
+    either {
+      confirmWaypointUC(
+        params = ConfirmWaypointUC.Params(
+          sessionUuid = stateData.eventDetails.session.id,
+          waypointId = waypointId,
+          maxImageSizeBytes = stateData.eventDetails.maxImageSizeBytes,
+          compressedImageQualityPercent = stateData.eventDetails.compressedImageQualityPercent,
+        ),
+      ).onRight { result ->
+        when (result) {
+          is ConfirmWaypointUC.Result.Success -> {}
+          is ConfirmWaypointUC.Result.BackendFailed -> publishWaypointVisitUC(
+            params = PublishWaypointVisitUC.Params(
+              waypointId = waypointId,
+              visitedAt = result.visitedAt,
+            ),
+          ).getRight()
+        }
+      }.getRight()
+    }.onLeft { error ->
+      EventMapVM.State.Active.Error(
+        errorScreenData = errorDataMapper(
+          params = ErrorDataMapper.Params(
+            error = error,
+            onCloseClick = { dispatchAction(EventMapVM.Action.Back) },
+          )
+        ),
+        stateData = stateData,
+      ).override()
+    }
+  }
 
   private suspend fun completeEvent(stateData: EventMapVM.State.StateData) = runWithLoaderUC {
     either {

@@ -11,6 +11,7 @@ interface EventMapMapper : Mapper<EventMapMapper.Params, EventMapVM.ScreenData> 
     val onBackClick: () -> Unit,
     val onCheckWaypointClick: () -> Unit,
     val onCompleteClick: () -> Unit,
+    val onDebugCheckWaypointClick: () -> Unit,
   )
 }
 
@@ -30,28 +31,34 @@ class EventMapMapperImpl(
         onBackClick = params.onBackClick,
         errorData = params.state.errorScreenData,
       )
-      is EventMapVM.State.Active.Content -> {
-        val details = params.state.stateData.eventDetails
+       is EventMapVM.State.Active.Content -> {
+         val details = params.state.stateData.eventDetails
 
-        EventMapVM.ScreenData.Main(
-          onBackClick = params.onBackClick,
-          title = details.name,
-          mapData = bitmapReader.decode(encoded = details.map.imageData)?.let { bitmap ->
-            ZoomImageData(
-              bitmap = bitmap,
-              contentDescription = "Event map",
-            )
-          },
-          nextWaypointLabel = "Aktualnie poszukiwany punkt: ${params.state.stateData.nextWaypoint?.label ?: "Brak"}",
-          wrongWaypointInfo = "Odwiedzono niewłaściwe miejsce, musisz szukać innego punktu na mapie!".takeIf { params.state.stateData.visitedWrongWaypoint },
-          checkWaypointButton = LargeButtonData.Primary(
-            text = "Zatwierdź punkt",
-            onClick = params.onCheckWaypointClick,
-          ).takeIf {
-            params.state.stateData.currentWaypoint != null && params.state.stateData.nextWaypoint != null && params.state.stateData.currentWaypoint.id == params.state.stateData.nextWaypoint.id
-          },
-        )
-      }
+         EventMapVM.ScreenData.Main(
+           onBackClick = params.onBackClick,
+           title = details.name,
+           mapData = bitmapReader.decode(encoded = details.map.imageData)?.let { bitmap ->
+             ZoomImageData(
+               bitmap = bitmap,
+               contentDescription = "Event map",
+             )
+           },
+           nextWaypointLabel = "Aktualnie poszukiwany punkt: ${params.state.stateData.nextWaypoint?.label ?: "Brak"}",
+           wrongWaypointInfo = "Odwiedzono niewłaściwe miejsce, musisz szukać innego punktu na mapie!".takeIf { params.state.stateData.visitedWrongWaypoint },
+           checkWaypointButton = LargeButtonData.Primary(
+             text = "Zatwierdź punkt",
+             onClick = params.onCheckWaypointClick,
+           ).takeIf {
+             params.state.stateData.currentWaypoint != null && params.state.stateData.nextWaypoint != null && params.state.stateData.currentWaypoint.id == params.state.stateData.nextWaypoint.id
+           },
+           debugCheckWaypointButton = LargeButtonData.Secondary(
+             text = "DEBUG: Zatwierdź punkt",
+             onClick = params.onDebugCheckWaypointClick,
+           ).takeIf {
+             params.state.stateData.isDebugLocationEnabled && params.state.stateData.nextWaypoint != null
+           },
+         )
+       }
       is EventMapVM.State.Completed.Content -> EventMapVM.ScreenData.Completed(
         onBackClick = params.onBackClick,
         descriptionLabel = "Udało Ci się przejść cały bieg na orientację, możesz teraz potwierdzić przejście trasy przyciskiem poniżej",

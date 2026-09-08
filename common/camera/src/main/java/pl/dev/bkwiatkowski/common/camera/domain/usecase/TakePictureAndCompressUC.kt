@@ -11,7 +11,12 @@ import pl.dev.bkwiatkowski.common.core.usecase.EitherUseCase
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 
-interface TakePictureAndCompressUC : EitherUseCase<UseCase.Params.Empty, ByteArray>
+interface TakePictureAndCompressUC : EitherUseCase<TakePictureAndCompressUC.Params, ByteArray> {
+  data class Params(
+    val compressedQualityPercent: Int,
+    val maxCompressedImageSizeBytes: Int,
+  ) : UseCase.Params
+}
 
 class TakePictureAndCompressUCImpl(
   private val cameraManager: CameraManager,
@@ -19,11 +24,7 @@ class TakePictureAndCompressUCImpl(
   private val localFileManager: LocalFileManager,
 ) : TakePictureAndCompressUC {
 
-  companion object {
-    private const val COMPRESSED_IMAGE_QUALITY_PERCENT = 70
-  }
-
-  override suspend fun invoke(params: UseCase.Params.Empty): Either<DomainError, ByteArray> = either {
+  override suspend fun invoke(params: TakePictureAndCompressUC.Params): Either<DomainError, ByteArray> = either {
     val photoUri = cameraManager.takePicture().getRight()
 
     val originalBytes = localFileManager.readBytesFromUri(photoUri).getRight()
@@ -33,14 +34,29 @@ class TakePictureAndCompressUCImpl(
       message = "Original image size: ${originalBytes.size} bytes",
     )
 
-    imageCompressor.compress(
+    val compressedBytes = imageCompressor.compress(
       bytes = originalBytes,
-      qualityPercent = COMPRESSED_IMAGE_QUALITY_PERCENT,
+      qualityPercent = params.compressedQualityPercent,
     ).onRight { compressedBytes ->
       Log.i(
         tag = Tag(this@TakePictureAndCompressUCImpl),
         message = "Compressed image size: ${compressedBytes.size} bytes",
       )
     }.getRight()
+
+    if (compressedBytes.isEmpty()) {
+      raise(error = DomainError.Custom(NullPointerException("Compressed image is empty")))
+    }
+
+    if (compressedBytes.size > params.maxCompressedImageSizeBytes) {
+      raise(
+        error = DomainError.Business(
+          message = "Rozmiar zdjęcia przekracza maksymalny dozwolony rozmiar ${params.maxCompressedImageSizeBytes / 1024} KB",
+          primaryButtonLabel = "Zamknij",
+        ),
+      )
+    }
+
+    compressedBytes
   }
 }

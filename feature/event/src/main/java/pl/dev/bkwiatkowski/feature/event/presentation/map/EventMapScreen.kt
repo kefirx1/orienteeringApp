@@ -137,6 +137,19 @@ fun EventMapScreenContent(
           )
         }
       }
+      data.debugCheckWaypointButton?.let { debugButtonData ->
+        Column(
+          modifier = Modifier.padding(
+            horizontal = 20.dp,
+            vertical = 10.dp
+          ),
+          horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+          LargeButton(
+            buttonData = debugButtonData,
+          )
+        }
+      }
     }
   )
 }

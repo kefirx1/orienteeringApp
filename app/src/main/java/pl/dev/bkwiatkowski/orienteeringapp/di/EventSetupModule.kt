@@ -10,6 +10,7 @@ import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
+import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventFlagsInteractor
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventSession
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventStatus
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventType
@@ -34,6 +35,8 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisit
 import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisitResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepository
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.SessionWebSocketRepository
+import pl.dev.bkwiatkowski.technical.flags.domain.usecase.GetFeatureFlagUC
+import pl.dev.bkwiatkowski.technical.flags.domain.model.FeatureFlag
 import java.time.LocalDateTime
 import pl.dev.bkwiatkowski.feature.event.domain.model.WebsocketWaypointVisit as FeatureWebsocketWaypointVisit
 
@@ -125,6 +128,8 @@ object EventSetupModule {
         eventType = eventType.toFeature(),
         session = session?.toFeature()
           ?: raise(error = DomainError.Custom(IllegalStateException("Session is null"))),
+        maxImageSizeBytes = maxImageSizeBytes,
+        compressedImageQualityPercent = compressedImageQualityPercent,
         eventWaypoints = eventWaypoints.map { it.toFeature() },
       )
     }
@@ -182,5 +187,13 @@ object EventSetupModule {
       visitedAt = visitedAt,
       imagePath = imagePath,
     )
+  }
+
+  @Provides
+  fun provideEventFlagsInteractor(
+    getFeatureFlagUC: GetFeatureFlagUC,
+  ): EventFlagsInteractor = object : EventFlagsInteractor {
+    override suspend fun isDebugLocationEnabled(): Either<DomainError, Boolean> =
+      getFeatureFlagUC(params = GetFeatureFlagUC.GetFeatureFlagParams(flag = FeatureFlag.DEBUG_LOCATION))
   }
 }

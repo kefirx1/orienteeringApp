@@ -29,6 +29,8 @@ data class MobileEventDetailsDto(
   @SerialName("eventStatus") val eventStatus: EventStatusDto,
   @SerialName("eventType") val eventType: EventTypeDto,
   @SerialName("session") val session: EventSessionDto,
+  @SerialName("maxImageSizeBytes") val maxImageSizeBytes: Int,
+  @SerialName("compressedImageQualityPercent") val compressedImageQualityPercent: Int,
   @SerialName("eventWaypoints") val eventWaypoints: List<MapWaypointDto>,
 )
 

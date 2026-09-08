@@ -118,8 +118,10 @@ object BackendMapper {
         MobileEventDetailResponseDto.EventType.ONLINE -> BEEventType.ONLINE
         MobileEventDetailResponseDto.EventType.OFFLINE -> BEEventType.OFFLINE
       },
+      maxImageSizeBytes = maxImageSizeBytes,
+      compressedImageQualityPercent = compressedImageQualityPercent,
+      eventWaypoints = eventWaypoints?.map { it.toDomain() } ?: emptyList(),
       session = session?.toDomain(),
-      eventWaypoints = eventWaypoints?.map { it.toDomain() } ?: emptyList()
     )
 
   fun MapWaypointDto.toDomain(): BEMapWaypoint =

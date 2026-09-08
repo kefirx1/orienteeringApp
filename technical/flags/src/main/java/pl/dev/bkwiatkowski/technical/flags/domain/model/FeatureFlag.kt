@@ -8,5 +8,9 @@ enum class FeatureFlag(
   val debug: Boolean,
   val prod: Boolean,
 ) {
-
+  DEBUG_LOCATION(
+    value = "debug_location",
+    debug = true,
+    prod = false
+  ),
 }

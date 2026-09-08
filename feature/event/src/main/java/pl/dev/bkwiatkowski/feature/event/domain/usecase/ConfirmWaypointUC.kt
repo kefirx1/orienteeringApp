@@ -15,6 +15,8 @@ interface ConfirmWaypointUC : EitherUseCase<ConfirmWaypointUC.Params, ConfirmWay
   data class Params(
     val sessionUuid: String,
     val waypointId: Int,
+    val maxImageSizeBytes: Int,
+    val compressedImageQualityPercent: Int,
   ) : UseCase.Params
 
   sealed interface Result {
@@ -34,7 +36,12 @@ class ConfirmWaypointUCImpl(
 
   override suspend fun invoke(params: ConfirmWaypointUC.Params): Either<DomainError, ConfirmWaypointUC.Result> = either {
     val visitedAt = LocalDateTime.now()
-    val bytes = takePictureAndCompressUC(params = UseCase.Params.Empty).getRight()
+    val bytes = takePictureAndCompressUC(
+      params = TakePictureAndCompressUC.Params(
+        compressedQualityPercent = params.compressedImageQualityPercent,
+        maxCompressedImageSizeBytes = params.maxImageSizeBytes,
+      ),
+    ).getRight()
 
     eventRepository.saveWaypointVisit(
       waypointId = params.waypointId,
@@ -46,10 +53,14 @@ class ConfirmWaypointUCImpl(
     val uploadResponse = eventBackendInteractor.uploadSessionImage(
       sessionUuid = params.sessionUuid,
       imageBase64 = base64Coder.encode(data = bytes).getRight(),
-    ).getRightOrElse {
-      return@either ConfirmWaypointUC.Result.BackendFailed(
-        visitedAt = visitedAt,
-      )
+    ).getRightOrElse { error ->
+      if (error is DomainError.NoNetwork) {
+        return@either ConfirmWaypointUC.Result.BackendFailed(
+          visitedAt = visitedAt,
+        )
+      } else {
+        raise(error = error)
+      }
     }
 
     eventBackendInteractor.confirmWaypoint(

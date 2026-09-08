@@ -1,10 +1,12 @@
 package pl.dev.bkwiatkowski.feature.event.presentation.map.provider
 
 import kotlinx.coroutines.flow.MutableStateFlow
+import pl.dev.bkwiatkowski.common.core.location.Position
 import pl.dev.bkwiatkowski.common.ui.preview.ViewModelPreviewProvider
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventSession
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventStatus
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventType
+import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileMap
 import pl.dev.bkwiatkowski.feature.event.presentation.map.EventMapMapper
@@ -28,6 +30,7 @@ class EventMapPreviewProvider : ViewModelPreviewProvider<EventMapVM, EventMapVM.
                 currentWaypoint = null,
                 visitedWrongWaypoint = false,
                 nextWaypoint = null,
+                isDebugLocationEnabled = true,
               ),
             ),
           ),
@@ -44,6 +47,7 @@ class EventMapPreviewProvider : ViewModelPreviewProvider<EventMapVM, EventMapVM.
                 currentWaypoint = null,
                 visitedWrongWaypoint = true,
                 nextWaypoint = null,
+                isDebugLocationEnabled = true,
               ),
             ),
           ),
@@ -60,6 +64,31 @@ class EventMapPreviewProvider : ViewModelPreviewProvider<EventMapVM, EventMapVM.
                 currentWaypoint = null,
                 visitedWrongWaypoint = false,
                 nextWaypoint = null,
+                isDebugLocationEnabled = true,
+              ),
+            ),
+          ),
+        ),
+      )
+    },
+    object : EventMapVM {
+      override val screenData = MutableStateFlow(
+        value = mapper(
+          params = getMapperParams(
+            state = EventMapVM.State.Active.Content(
+              stateData = EventMapVM.State.StateData(
+                eventDetails = getEventDetails(),
+                currentWaypoint = null,
+                visitedWrongWaypoint = false,
+                nextWaypoint = MapWaypoint(
+                  id = 1,
+                  label = "Waypoint 1",
+                  position = Position(
+                    latitude = 52.2297,
+                    longitude = 21.0122,
+                  ),
+                ),
+                isDebugLocationEnabled = true,
               ),
             ),
           ),
@@ -91,6 +120,8 @@ class EventMapPreviewProvider : ViewModelPreviewProvider<EventMapVM, EventMapVM.
       userCanJoin = true,
       finishedAt = null
     ),
+    maxImageSizeBytes = 400_000,
+    compressedImageQualityPercent = 50,
     eventWaypoints = emptyList(),
   )
 
@@ -100,5 +131,6 @@ class EventMapPreviewProvider : ViewModelPreviewProvider<EventMapVM, EventMapVM.
       onBackClick = {},
       onCheckWaypointClick = {},
       onCompleteClick = {},
+      onDebugCheckWaypointClick = {},
     )
 }

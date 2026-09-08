@@ -3,8 +3,10 @@ package pl.dev.bkwiatkowski.common.network
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import kotlinx.coroutines.CancellationException
 import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.storage.JsonSerializer
+import pl.dev.bkwiatkowski.common.core.usecase.DefaultEitherException
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.network.model.ErrorResponsePayload
@@ -27,28 +29,32 @@ class CallMediatorImpl(
       val response = call()
 
       if (response.status.value !in 200..299) {
-        raise(error = handleError(response = response))
+        raise(error = handleCodeError(response = response))
       }
 
       response
+    } catch (e: CancellationException) {
+      throw e
     } catch (e: ResponseException) {
-      raise(error = handleError(e = e))
+      raise(error = handleCodeError(e = e))
     } catch (_: UnknownHostException) {
       raise(error = DomainError.NoNetwork)
     } catch (_: ConnectException) {
       raise(error = DomainError.NoNetwork)
     } catch (_: SocketTimeoutException) {
       raise(error = DomainError.NoNetwork)
+    } catch (e: DefaultEitherException) {
+      raise(error = e.error)
     } catch (e: Exception) {
       raise(error = DomainError.Custom(e))
     }
   }
 
-  private suspend fun handleError(e: ResponseException): DomainError {
-    return handleError(response = e.response)
+  private suspend fun handleCodeError(e: ResponseException): DomainError {
+    return handleCodeError(response = e.response)
   }
 
-  private suspend fun handleError(response: HttpResponse): DomainError {
+  private suspend fun handleCodeError(response: HttpResponse): DomainError {
     val code = DomainError.Network.Code.fromValue(response.status.value)
     val body = runCatching { response.bodyAsText() }
       .getOrNull()
@@ -62,14 +68,14 @@ class CallMediatorImpl(
     )
   }
 
-  private fun extractMessageFromBody(body: String): String? = runCatching {
+  private fun extractMessageFromBody(
+    body: String,
+  ): String? = runCatching {
     jsonSerializer
       .deserialize<ErrorResponsePayload>(serializedData = body, type = ErrorResponsePayload::class.java)
       .fold(
         onLeft = { null },
-        onRight = { errorResponse ->
-          "${errorResponse.businessCode}: ${errorResponse.message}"
-        },
+        onRight = { errorResponse -> errorResponse.message },
       )
   }.getOrElse {
     null
