@@ -78,6 +78,7 @@ dependencies {
   implementation(libs.ktor.resources)
   implementation(platform(libs.firebase.bom))
   implementation(libs.play.services.location)
+  implementation(libs.ktor.okhttp)
 
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)

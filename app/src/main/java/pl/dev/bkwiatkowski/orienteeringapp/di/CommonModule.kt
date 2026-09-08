@@ -15,6 +15,9 @@ import pl.dev.bkwiatkowski.common.camera.domain.usecase.TakePictureAndCompressUC
 import pl.dev.bkwiatkowski.common.camera.domain.usecase.TakePictureAndCompressUCImpl
 import pl.dev.bkwiatkowski.common.camera.image.ImageCompressorImpl
 import pl.dev.bkwiatkowski.common.core.config.EnvironmentConfig
+import pl.dev.bkwiatkowski.common.core.device.AppInfo
+import pl.dev.bkwiatkowski.common.core.device.DeviceInfo
+import pl.dev.bkwiatkowski.common.core.device.SessionIdProvider
 import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
 import pl.dev.bkwiatkowski.common.core.image.ImageCompressor
 import pl.dev.bkwiatkowski.common.core.intents.OpenAppSettingsIntentUC
@@ -48,6 +51,7 @@ import pl.dev.bkwiatkowski.common.loader.domain.RunWithLoaderUCImpl
 import pl.dev.bkwiatkowski.common.localization.GpsManagerImpl
 import pl.dev.bkwiatkowski.common.network.CallMediator
 import pl.dev.bkwiatkowski.common.network.CallMediatorImpl
+import pl.dev.bkwiatkowski.common.network.DefaultHeadersPlugin
 import pl.dev.bkwiatkowski.common.network.HttpClientFactory
 import pl.dev.bkwiatkowski.common.network.HttpClientFactoryImpl
 import pl.dev.bkwiatkowski.common.network.NetworkMonitorImpl
@@ -78,6 +82,9 @@ import pl.dev.bkwiatkowski.common.ui.snackbar.SnackbarHostImpl
 import pl.dev.bkwiatkowski.common.validators.DateValidatorImpl
 import pl.dev.bkwiatkowski.common.validators.TextValidatorImpl
 import pl.dev.bkwiatkowski.orienteeringapp.config.EnvironmentConfigImpl
+import pl.dev.bkwiatkowski.orienteeringapp.core.device.AppInfoImpl
+import pl.dev.bkwiatkowski.orienteeringapp.core.device.DeviceInfoImpl
+import pl.dev.bkwiatkowski.orienteeringapp.core.device.SessionIdProviderImpl
 import pl.dev.bkwiatkowski.orienteeringapp.core.error.ErrorDataMapperImpl
 import pl.dev.bkwiatkowski.orienteeringapp.core.lifecycle.ActivityConnectorImpl
 import pl.dev.bkwiatkowski.orienteeringapp.core.network.RefreshTokenHandlerImpl
@@ -93,6 +100,18 @@ object CommonModule {
   @Provides
   @Singleton
   fun provideEnvironmentConfig(): EnvironmentConfig = EnvironmentConfigImpl()
+
+  @Provides
+  @Singleton
+  fun provideDeviceInfo(): DeviceInfo = DeviceInfoImpl()
+
+  @Provides
+  @Singleton
+  fun provideAppInfo(): AppInfo = AppInfoImpl()
+
+  @Provides
+  @Singleton
+  fun provideSessionIdProvider(): SessionIdProvider = SessionIdProviderImpl()
 
   @Provides
   @Singleton
@@ -125,10 +144,24 @@ object CommonModule {
     environmentConfig: EnvironmentConfig,
     sessionManager: SessionManager,
     refreshTokenHandler: RefreshTokenHandler,
+    defaultHeadersPlugin: DefaultHeadersPlugin,
   ): HttpClientFactory = HttpClientFactoryImpl(
     environmentConfig = environmentConfig,
     sessionManager = sessionManager,
     refreshTokenHandler = refreshTokenHandler,
+    defaultHeadersPlugin = defaultHeadersPlugin,
+  )
+
+  @Provides
+  @Singleton
+  fun provideDefaultHeadersPlugin(
+    deviceInfo: DeviceInfo,
+    appInfo: AppInfo,
+    sessionIdProvider: SessionIdProvider,
+  ): DefaultHeadersPlugin = DefaultHeadersPlugin(
+    deviceInfo = deviceInfo,
+    appInfo = appInfo,
+    sessionIdProvider = sessionIdProvider,
   )
 
   @Provides

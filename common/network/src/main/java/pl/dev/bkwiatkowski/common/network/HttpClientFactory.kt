@@ -35,6 +35,7 @@ class HttpClientFactoryImpl(
   private val environmentConfig: EnvironmentConfig,
   private val sessionManager: SessionManager,
   private val refreshTokenHandler: RefreshTokenHandler,
+  private val defaultHeadersPlugin: DefaultHeadersPlugin,
 ) : HttpClientFactory {
   override fun create(): HttpClient {
     val jsonBuilder = Json {
@@ -77,6 +78,7 @@ class HttpClientFactoryImpl(
 
   private fun buildClient(installWebSockets: Boolean, jsonBuilder: Json, baseUrl: String): HttpClient {
     return HttpClient(engineFactory = OkHttp) {
+      install(defaultHeadersPlugin)
       defaultRequest {
         url(urlString = baseUrl)
         contentType(ContentType.Application.Json)
@@ -114,7 +116,7 @@ class HttpClientFactoryImpl(
               Log.i(tag = Tag(this@HttpClientFactoryImpl), message = message)
             }
           }
-          level = LogLevel.BODY
+          level = LogLevel.ALL
         }
       }
       install(plugin = ContentNegotiation) {
