@@ -60,7 +60,7 @@ class CallMediatorImpl(
       .getOrNull()
       ?.trim()
       ?.takeIf { it.isNotEmpty() }
-    val message = body?.let(::extractMessageFromBody) ?: body ?: response.status.description
+    val message = body?.let(::extractMessageFromBody)
 
     return DomainError.Network(
       code = code,
@@ -75,7 +75,9 @@ class CallMediatorImpl(
       .deserialize<ErrorResponsePayload>(serializedData = body, type = ErrorResponsePayload::class.java)
       .fold(
         onLeft = { null },
-        onRight = { errorResponse -> errorResponse.message },
+        onRight = { errorResponse ->
+          errorResponse.message.takeIf { errorResponse.showMessage }
+        },
       )
   }.getOrElse {
     null
