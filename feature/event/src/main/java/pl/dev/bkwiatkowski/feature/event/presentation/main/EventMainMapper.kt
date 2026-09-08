@@ -47,8 +47,6 @@ class EventMainMapperImpl : EventMainMapper {
       )
       is EventMainVM.State.Active.Content -> EventMainVM.ScreenData.Main(
         onBackClick = params.onBackClick,
-        onOpenMapClick = params.onOpenMapClick,
-        onOpenGameClick = params.onOpenGameClick,
         currentTab = params.state.stateData.currentTab,
         topAppBarData = TopAppBarData.Back(
           onNavigationIconClick = params.onBackClick,

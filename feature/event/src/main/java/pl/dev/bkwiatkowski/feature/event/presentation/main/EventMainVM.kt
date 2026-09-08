@@ -119,8 +119,6 @@ interface EventMainVM {
 
     data class Main(
       override val onBackClick: () -> Unit,
-      val onOpenMapClick: () -> Unit,
-      val onOpenGameClick: () -> Unit,
       val topAppBarData: TopAppBarData,
       val currentTab: StateData.CurrentTab,
       val tabs: List<TabData>,
@@ -353,6 +351,10 @@ class EventMainVMImpl @AssistedInject constructor(
       is EventMainVM.State.Active.Error -> {}
 
       is EventMainVM.State.Active.Content -> {
+        if (newState.stateData.currentTab != EventMainVM.StateData.CurrentTab.MAP) {
+          dispatchAction(EventMainVM.Action.GoToMap)
+        }
+
         stateScope.launch {
           gpsManager.getLocationFlow().distinctUntilChanged().collect { location ->
             dispatchAction(
@@ -374,7 +376,8 @@ class EventMainVMImpl @AssistedInject constructor(
         stateScope.launch {
           networkMonitor.monitor().collect { status ->
             if (status == NetworkStatus.CONNECTED) {
-              eventBackendInteractor.openSession(sessionUuid = setupData.sessionUuid).getRightOrNull()
+              eventBackendInteractor.openSession(sessionUuid = setupData.sessionUuid)
+                .getRightOrNull()
             }
           }
         }

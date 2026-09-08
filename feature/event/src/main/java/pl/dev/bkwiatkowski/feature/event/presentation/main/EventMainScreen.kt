@@ -84,12 +84,6 @@ fun EventMainScreenContent(
   nestedContent: @Composable () -> Unit,
 ) {
 
-  LaunchedEffect(Unit) {
-    if (data.currentTab != EventMainVM.StateData.CurrentTab.MAP) {
-      data.onOpenMapClick()
-    }
-  }
-
   BaseScaffold(
     topBarData = data.topAppBarData,
     content = {
