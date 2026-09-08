@@ -338,7 +338,7 @@ class EventMainVMImpl @AssistedInject constructor(
         }
       }
       is EventMainVM.State.PermissionDenied -> {
-        viewModelScope.launch {
+        stateScope.launch {
           lifecycleMonitor.activityMonitor().collect { lifecycleState ->
             if (lifecycleState == Lifecycle.Event.ON_RESUME) {
               if (ensureLocationPermission()) {
@@ -353,14 +353,14 @@ class EventMainVMImpl @AssistedInject constructor(
       is EventMainVM.State.Active.Error -> {}
 
       is EventMainVM.State.Active.Content -> {
-        viewModelScope.launch {
+        stateScope.launch {
           gpsManager.getLocationFlow().distinctUntilChanged().collect { location ->
             dispatchAction(
               action = EventMainVM.Action.CheckUserLocation(newLocation = location),
             )
           }
         }
-        viewModelScope.launch {
+        stateScope.launch {
           observeSessionUC(
             params = UseCase.Params.Empty,
           ).collect { event ->
@@ -371,7 +371,7 @@ class EventMainVMImpl @AssistedInject constructor(
             )
           }
         }
-        viewModelScope.launch {
+        stateScope.launch {
           networkMonitor.monitor().collect { status ->
             if (status == NetworkStatus.CONNECTED) {
               eventBackendInteractor.openSession(sessionUuid = setupData.sessionUuid).getRightOrNull()

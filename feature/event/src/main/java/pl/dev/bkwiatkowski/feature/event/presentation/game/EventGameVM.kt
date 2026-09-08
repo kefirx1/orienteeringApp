@@ -113,14 +113,14 @@ class EventGameVMImpl @AssistedInject constructor(
   override suspend fun onStateEnter(newState: EventGameVM.State) {
     when (newState) {
       is EventGameVM.State.Empty -> {
-        viewModelScope.launch {
+        stateScope.launch {
           contract.visitedWaypointsMonitor().collect { visited ->
             dispatchAction(EventGameVM.Action.UpdateVisitedWaypoints(visited = visited))
           }
         }
       }
       is EventGameVM.State.Active -> {
-        viewModelScope.launch {
+        stateScope.launch {
           contract.visitedWaypointsMonitor().collect { visited ->
             dispatchAction(EventGameVM.Action.UpdateVisitedWaypoints(visited = visited))
           }

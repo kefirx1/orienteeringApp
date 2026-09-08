@@ -249,7 +249,7 @@ class EventMapVMImpl @AssistedInject constructor(
         ).override()
       }
       is EventMapVM.State.Active.Content -> {
-        viewModelScope.launch {
+        stateScope.launch {
           contract.currentWaypointMonitor().collect { waypoint ->
             val nextWaypoint = contract.getNextWaypoint()
 
@@ -282,7 +282,7 @@ class EventMapVMImpl @AssistedInject constructor(
             }
           }
         }
-        viewModelScope.launch {
+        stateScope.launch {
           contract.nextWaypointMonitor().collect { nextWaypoint ->
             if (nextWaypoint == null) {
               dispatchAction(EventMapVM.Action.CompleteEvent)

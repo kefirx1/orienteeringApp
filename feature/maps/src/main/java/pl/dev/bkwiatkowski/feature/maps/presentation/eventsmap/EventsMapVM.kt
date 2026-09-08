@@ -115,34 +115,32 @@ class EventsMapVMImpl @AssistedInject constructor(
   }
 
   override suspend fun onStateEnter(newState: EventsMapVM.State) {
-    viewModelScope.launch {
-      when (newState) {
-        is EventsMapVM.State.Loading -> runWithLoaderUC {
-          mapsBackendInteractor.getMobileEvents().fold(
-            onRight = { events ->
-              EventsMapVM.State.Initialized(events = events).override()
-            },
-            onLeft = { error ->
-              EventsMapVM.State.Error(
-                errorScreenData = errorDataMapper(
-                  params = ErrorDataMapper.Params(
-                    error = error,
-                    onCloseClick = { dispatchAction(EventsMapVM.Action.Back) },
-                    onRetryClick = { dispatchAction(EventsMapVM.Action.RetryLoad) },
-                  )
-                ),
-              ).override()
-            }
-          )
-        }
-        is EventsMapVM.State.Error -> {}
-        is EventsMapVM.State.Initialized -> {
-          if (setupData.eventId != null) {
-            EventsMapVM.Action.Navigation.ToEventDetails(
-              eventId = setupData.eventId,
-              isFromDashboard = true,
-            ).emit()
+    when (newState) {
+      is EventsMapVM.State.Loading -> runWithLoaderUC {
+        mapsBackendInteractor.getMobileEvents().fold(
+          onRight = { events ->
+            EventsMapVM.State.Initialized(events = events).override()
+          },
+          onLeft = { error ->
+            EventsMapVM.State.Error(
+              errorScreenData = errorDataMapper(
+                params = ErrorDataMapper.Params(
+                  error = error,
+                  onCloseClick = { dispatchAction(EventsMapVM.Action.Back) },
+                  onRetryClick = { dispatchAction(EventsMapVM.Action.RetryLoad) },
+                )
+              ),
+            ).override()
           }
+        )
+      }
+      is EventsMapVM.State.Error -> {}
+      is EventsMapVM.State.Initialized -> {
+        if (setupData.eventId != null) {
+          EventsMapVM.Action.Navigation.ToEventDetails(
+            eventId = setupData.eventId,
+            isFromDashboard = true,
+          ).emit()
         }
       }
     }

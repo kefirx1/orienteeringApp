@@ -2,6 +2,9 @@ package pl.dev.bkwiatkowski.common.core.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +23,9 @@ abstract class CustomViewModel<STATE, SCREEN_DATA, NAV_ACTION>(
   private val _state: MutableStateFlow<STATE> = MutableStateFlow(initialStateValue)
   protected val state: StateFlow<STATE> = _state
   val navAction: MutableSharedFlow<NAV_ACTION> = MutableSharedFlow()
+
+  protected var stateScope: CoroutineScope =
+    CoroutineScope(viewModelScope.coroutineContext + SupervisorJob())
 
   private var stateAlreadyChanged = false
 
@@ -44,7 +50,9 @@ abstract class CustomViewModel<STATE, SCREEN_DATA, NAV_ACTION>(
 //  Use to change to new state
   suspend fun STATE.override() {
     stateAlreadyChanged = false
+    stateScope.cancel()
     _state.emit(this@override)
+    stateScope = CoroutineScope(viewModelScope.coroutineContext + SupervisorJob())
   }
 
 //  Use to update in current state

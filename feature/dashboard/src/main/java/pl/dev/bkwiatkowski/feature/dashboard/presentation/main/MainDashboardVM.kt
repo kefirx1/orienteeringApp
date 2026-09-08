@@ -154,7 +154,7 @@ class MainDashboardVMImpl @Inject constructor(
   }
 
   private fun setupLifecycleMonitoring() {
-    viewModelScope.launch {
+    stateScope.launch {
       screenMonitor().collect { event ->
         if (event == Lifecycle.Event.ON_RESUME) {
           onComposableResumed()
