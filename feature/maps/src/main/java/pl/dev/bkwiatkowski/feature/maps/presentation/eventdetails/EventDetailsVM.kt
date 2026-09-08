@@ -2,6 +2,7 @@ package pl.dev.bkwiatkowski.feature.maps.presentation.eventdetails
 
 import android.graphics.Bitmap
 import androidx.compose.material3.SnackbarHostState
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -17,6 +18,8 @@ import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
+import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitor
+import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitorImpl
 import pl.dev.bkwiatkowski.common.permission.AppPermission
 import pl.dev.bkwiatkowski.common.permission.PermissionResult
 import pl.dev.bkwiatkowski.common.permission.PermissionsManager
@@ -152,9 +155,10 @@ class EventDetailsVMImpl @AssistedInject constructor(
   private val errorDataMapper: ErrorDataMapper,
   private val openAppSettingsIntentUC: OpenAppSettingsIntentUC,
   snackbarHost: SnackbarHostImpl,
+  lifecycleMonitor: LifecycleMonitorImpl,
   ) : CustomViewModel<EventDetailsVM.State, EventDetailsVM.ScreenData, EventDetailsVM.Action.Navigation>(
     initialStateValue = EventDetailsVM.State.Loading.Content,
-  ), EventDetailsVM, SnackbarHost by snackbarHost {
+  ), EventDetailsVM, SnackbarHost by snackbarHost, LifecycleMonitor by lifecycleMonitor {
 
   override val screenData: StateFlow<EventDetailsVM.ScreenData> = _screenData
 
@@ -163,6 +167,25 @@ class EventDetailsVMImpl @AssistedInject constructor(
 
   init {
     initState()
+    setupLifecycleMonitoring()
+  }
+
+  private fun setupLifecycleMonitoring() {
+    viewModelScope.launch {
+      screenMonitor().collect { event ->
+        if (event == Lifecycle.Event.ON_START) {
+          onComposableResumed()
+        }
+      }
+    }
+  }
+
+  private suspend fun onComposableResumed() {
+    when (state.value) {
+      is EventDetailsVM.State.Initialized ->
+        EventDetailsVM.State.Loading.Content.override()
+      else -> {}
+    }
   }
 
   fun dispatchAction(action: EventDetailsVM.Action) {

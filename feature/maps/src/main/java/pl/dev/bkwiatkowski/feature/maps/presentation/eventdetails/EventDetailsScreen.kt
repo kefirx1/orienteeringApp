@@ -14,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +22,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.dev.bkwiatkowski.common.ui.component.addDefaultPadding
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
@@ -35,6 +37,11 @@ import pl.dev.bkwiatkowski.feature.maps.presentation.eventdetails.provider.Event
 @Composable
 fun EventDetailsScreen(viewModel: EventDetailsVM) {
   val state by viewModel.screenData.collectAsStateWithLifecycle()
+  val lifecycleOwner = LocalLifecycleOwner.current
+
+  LaunchedEffect(Unit) {
+    (viewModel as? EventDetailsVMImpl)?.setScreenLifecycleOwner(lifecycleOwner)
+  }
 
   when (val screenData = state) {
     is EventDetailsVM.ScreenData.Loading -> EmptyScreen()
