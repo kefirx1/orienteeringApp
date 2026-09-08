@@ -53,52 +53,53 @@ fun UserProfileDashboardScreenContent(
   BaseScaffold(
     topBarData = data.topBarData,
     content = {
-      Column(
+      LazyColumn(
         modifier = Modifier
           .fillMaxSize()
           .addDefaultPadding(),
       ) {
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          CustomImage(
-            imageSize = ImageSize.MEDIUM_X,
-            iconRes = R.drawable.outline_person_24,
-            color = MaterialTheme.colorScheme.primary,
-            contentDescription = "User profile icon",
-          )
-          Spacer(Modifier.width(12.dp))
-
-          CustomText(
-            text = data.userName,
-            style = MaterialTheme.typography.headlineMedium,
-          )
-        }
-        Spacer(modifier = Modifier.height(48.dp))
-
-        CustomText(
-          text = data.sessionsLabel,
-          style = MaterialTheme.typography.titleLarge,
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-
-        LazyColumn {
-          items(count = data.groupedSessions.size) { index ->
-            val entry = data.groupedSessions.entries.elementAt(index)
+        item {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            CustomImage(
+              imageSize = ImageSize.MEDIUM_X,
+              iconRes = R.drawable.outline_person_24,
+              color = MaterialTheme.colorScheme.primary,
+              contentDescription = "User profile icon",
+            )
+            Spacer(Modifier.width(12.dp))
 
             CustomText(
-              text = entry.key,
-              style = MaterialTheme.typography.titleMedium,
+              text = data.userName,
+              style = MaterialTheme.typography.headlineMedium,
             )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            entry.value.forEach { sessionData ->
-              UserSessionCard(sessionData = sessionData)
-              Spacer(modifier = Modifier.height(8.dp))
-            }
-            Spacer(modifier = Modifier.height(12.dp))
           }
+          Spacer(modifier = Modifier.height(48.dp))
+        }
+        item {
+          CustomText(
+            text = data.sessionsLabel,
+            style = MaterialTheme.typography.titleLarge,
+          )
+          Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        items(count = data.groupedSessions.size) { index ->
+          val entry = data.groupedSessions.entries.elementAt(index)
+
+          CustomText(
+            text = entry.key,
+            style = MaterialTheme.typography.titleMedium,
+          )
+          Spacer(modifier = Modifier.height(12.dp))
+
+          entry.value.forEach { sessionData ->
+            UserSessionCard(sessionData = sessionData)
+            Spacer(modifier = Modifier.height(8.dp))
+          }
+          Spacer(modifier = Modifier.height(12.dp))
         }
       }
     },

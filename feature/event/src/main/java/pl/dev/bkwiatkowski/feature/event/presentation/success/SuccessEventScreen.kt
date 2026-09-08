@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,7 +21,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.dev.bkwiatkowski.common.ui.component.addDefaultPadding
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButton
-import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.card.BaseCard
 import pl.dev.bkwiatkowski.common.ui.component.divider.Divider
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
@@ -51,6 +50,7 @@ fun SuccessEventScreenContent(
       Column(
         modifier = Modifier
           .fillMaxSize()
+          .verticalScroll(rememberScrollState())
           .addDefaultPadding(),
         horizontalAlignment = Alignment.Start,
       ) {
@@ -85,7 +85,7 @@ fun SuccessEventScreenContent(
         Divider(spacer = 24.dp)
 
         BaseCard {
-          LazyColumn(
+          Column(
             modifier = Modifier
               .fillMaxWidth()
               .padding(
@@ -93,7 +93,7 @@ fun SuccessEventScreenContent(
                 horizontal = 12.dp,
               ),
           ) {
-            itemsIndexed(items = data.waypoints) { index, waypoint ->
+            data.waypoints.forEachIndexed { index, waypoint ->
               CustomText(
                 text = waypoint.label,
                 style = MaterialTheme.typography.titleMedium,
