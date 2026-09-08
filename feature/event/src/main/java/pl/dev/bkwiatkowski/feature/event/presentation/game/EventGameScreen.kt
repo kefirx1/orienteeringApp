@@ -73,7 +73,7 @@ fun EventGameScreenEmpty(
         }
       }
     },
-    bottomBar = {}
+    isNested = true,
   )
 }
 
@@ -118,7 +118,7 @@ fun EventGameScreenContent(
         }
       }
     },
-    bottomBar = {}
+    isNested = true,
   )
 }
 

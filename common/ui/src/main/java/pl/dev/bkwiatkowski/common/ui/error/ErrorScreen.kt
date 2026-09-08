@@ -26,6 +26,7 @@ import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 @Composable
 fun ErrorScreen(
   data: ErrorScreenData,
+  isNested: Boolean = false,
 ) {
   BaseScaffold(
     content = {
@@ -82,7 +83,8 @@ fun ErrorScreen(
           )
         }
       }
-    }
+    },
+    isNested = isNested,
   )
 }
 

@@ -24,10 +24,14 @@ class TakePictureAndCompressUCImpl(
   private val localFileManager: LocalFileManager,
 ) : TakePictureAndCompressUC {
 
-  override suspend fun invoke(params: TakePictureAndCompressUC.Params): Either<DomainError, ByteArray> = either {
-    val photoUri = cameraManager.takePicture().getRight()
+  private val photoError = DomainError.Business(
+    message = "Nie udało się zrobić zdjęcia",
+    primaryButtonLabel = "Zamknij",
+  )
 
-    val originalBytes = localFileManager.readBytesFromUri(photoUri).getRight()
+  override suspend fun invoke(params: TakePictureAndCompressUC.Params): Either<DomainError, ByteArray> = either {
+    val photoUri = cameraManager.takePicture().mapLeft { photoError }.getRight()
+    val originalBytes = localFileManager.readBytesFromUri(photoUri).mapLeft { photoError }.getRight()
 
     Log.i(
       tag = Tag(this@TakePictureAndCompressUCImpl),
@@ -42,10 +46,10 @@ class TakePictureAndCompressUCImpl(
         tag = Tag(this@TakePictureAndCompressUCImpl),
         message = "Compressed image size: ${compressedBytes.size} bytes",
       )
-    }.getRight()
+    }.mapLeft { photoError }.getRight()
 
     if (compressedBytes.isEmpty()) {
-      raise(error = DomainError.Custom(NullPointerException("Compressed image is empty")))
+      raise(error = photoError)
     }
 
     if (compressedBytes.size > params.maxCompressedImageSizeBytes) {

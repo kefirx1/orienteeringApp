@@ -50,7 +50,10 @@ fun EventMapScreen(
     is EventMapVM.ScreenData.Loading -> EmptyScreen()
     is EventMapVM.ScreenData.Main -> EventMapScreenContent(data = screenData)
     is EventMapVM.ScreenData.Completed -> EventMapCompletedContent(data = screenData)
-    is EventMapVM.ScreenData.ErrorScreen -> ErrorScreen(data = screenData.errorData)
+    is EventMapVM.ScreenData.ErrorScreen -> ErrorScreen(
+      data = screenData.errorData,
+      isNested = true,
+    )
   }
 
   BackHandler {
@@ -150,7 +153,8 @@ fun EventMapScreenContent(
           )
         }
       }
-    }
+    },
+    isNested = true,
   )
 }
 
@@ -186,7 +190,8 @@ fun EventMapCompletedContent(
           buttonData = data.confirmButton,
         )
       }
-    }
+    },
+    isNested = true,
   )
 }
 

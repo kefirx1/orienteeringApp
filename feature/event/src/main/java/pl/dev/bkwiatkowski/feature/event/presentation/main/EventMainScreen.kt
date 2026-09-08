@@ -75,7 +75,6 @@ fun EventMainPermissionDeniedScreen(
         )
       }
     },
-    bottomBar = {}
   )
 }
 

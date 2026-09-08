@@ -43,10 +43,11 @@ data class FabData(
 fun BaseScaffold(
   modifier: Modifier = Modifier,
   topBarData: TopAppBarData? = null,
-  bottomBar: @Composable () -> Unit = {},
+  bottomBar: @Composable () -> Unit =  {},
   fabData: FabData? = null,
   content: @Composable () -> Unit,
   snackbarHostState: SnackbarHostState? = null,
+  isNested: Boolean = false,
 ) {
   Scaffold(
     modifier = modifier.imePadding(),
@@ -79,8 +80,11 @@ fun BaseScaffold(
     },
     bottomBar = {
       Column(
-        modifier = Modifier
-          .windowInsetsPadding(insets = WindowInsets.navigationBars)
+        modifier = if (isNested) {
+          Modifier
+        } else {
+          Modifier.windowInsetsPadding(insets = WindowInsets.navigationBars)
+        }
           .fillMaxWidth()
           .background(color = MaterialTheme.colorScheme.background)
       ) {
@@ -139,7 +143,7 @@ fun BaseScaffoldPreview() {
         contentDescription = "FAB",
         onFabClick = {},
         fabIconResId = R.drawable.outline_directions_run_24
-      )
+      ),
     )
   }
 }
