@@ -19,3 +19,27 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keep class net.sqlcipher.** { *; }
+-keep class net.sqlcipher.database.** { *; }
+
+-assumenosideeffects class pl.dev.bkwiatkowski.common.core.logger.StaticLogger {
+    public void e(pl.dev.bkwiatkowski.common.core.logger.Tag, java.lang.String);
+    public void i(pl.dev.bkwiatkowski.common.core.logger.Tag, java.lang.String);
+}
+
+-assumenosideeffects class android.util.Log {
+    public static int v(java.lang.String, java.lang.String);
+    public static int d(java.lang.String, java.lang.String);
+    public static int i(java.lang.String, java.lang.String);
+    public static int w(java.lang.String, java.lang.String);
+    public static int e(java.lang.String, java.lang.String);
+}
+
+-assumenosideeffects class android.util.Log {
+    public static int v(java.lang.String, java.lang.String, java.lang.Throwable);
+    public static int d(java.lang.String, java.lang.String, java.lang.Throwable);
+    public static int i(java.lang.String, java.lang.String, java.lang.Throwable);
+    public static int w(java.lang.String, java.lang.String, java.lang.Throwable);
+    public static int e(java.lang.String, java.lang.String, java.lang.Throwable);
+}

@@ -30,6 +30,7 @@ android {
     create("develop") {
       dimension = "environment"
       buildConfigField("String", "API_BASE_URL", "\"http://192.168.100.116:8080\"")
+      resValue("string", "app_name", "\"[DEV] OrienteeringApp\"")
     }
     create("prod") {
       dimension = "environment"
@@ -39,8 +40,13 @@ android {
 
   buildTypes {
     release {
-      isMinifyEnabled = false
-      proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+      isMinifyEnabled = true
+      isShrinkResources = true
+      proguardFiles(
+        getDefaultProguardFile("proguard-android-optimize.txt"),
+        "proguard-rules.pro",
+      )
+      signingConfig = signingConfigs.getByName("debug")
     }
   }
   compileOptions {
@@ -50,6 +56,7 @@ android {
   buildFeatures {
     compose = true
     buildConfig = true
+    resValues = true
   }
 }
 
