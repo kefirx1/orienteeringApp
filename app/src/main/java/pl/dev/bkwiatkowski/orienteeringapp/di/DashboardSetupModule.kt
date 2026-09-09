@@ -104,6 +104,7 @@ object DashboardSetupModule {
         getUserByUsernameUC(params = GetUserByUsernameUC.Params(username = username)).mapRight { user ->
           CheckUserResponse(
             username = user.username,
+            id = user.id,
           )
         }
 

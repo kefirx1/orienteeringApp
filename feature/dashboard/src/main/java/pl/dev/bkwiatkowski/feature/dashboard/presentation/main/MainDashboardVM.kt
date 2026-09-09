@@ -81,6 +81,7 @@ interface MainDashboardVM {
     ) : Action
     data object ToMyProfile : Action
     data object LoadData : Action
+    data object RefreshFriendsList : Action
     data class OpenSavedEvent(
       val eventId: Int?,
       val sessionUuid: String?,
@@ -169,7 +170,7 @@ class MainDashboardVMImpl @Inject constructor(
 
     when (state.value) {
       is MainDashboardVM.State.Active -> if (currentNetworkStatus == NetworkStatus.CONNECTED) {
-        return
+        dispatchAction(MainDashboardVM.Action.RefreshFriendsList)
       } else {
         dispatchAction(MainDashboardVM.Action.LoadData)
       }
@@ -267,6 +268,15 @@ class MainDashboardVMImpl @Inject constructor(
             }
             is MainDashboardVM.Action.LoadData -> {
               MainDashboardVM.State.Initial.override()
+            }
+            is MainDashboardVM.Action.RefreshFriendsList -> {
+              val friendsData = dashboardInteractor.getFriendsList().getRightOrElse {
+                return@launch
+              }
+
+              currentState.copy(
+                friendsData = friendsData,
+              ).mutate()
             }
             else -> {}
           }

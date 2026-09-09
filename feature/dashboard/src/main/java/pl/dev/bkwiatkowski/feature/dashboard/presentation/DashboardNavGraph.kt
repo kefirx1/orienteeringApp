@@ -124,7 +124,7 @@ fun NavGraphBuilder.dashboardNavGraph(
         when (action) {
           is FriendsDashboardVM.Action.Navigation.Back -> navController.popBackStack()
         }
-      }
+      },
     )
 
     createDestination<Nothing, DashboardContractVM, UserProfileDashboardVMImpl, UserProfileDashboardVM.Action.Navigation>(

@@ -4,15 +4,20 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
+import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
+import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
+import pl.dev.bkwiatkowski.common.ui.component.button.SmallButtonData
 import pl.dev.bkwiatkowski.common.ui.component.input.TextFieldData
 import pl.dev.bkwiatkowski.common.ui.component.input.ValidationState
 import pl.dev.bkwiatkowski.common.ui.component.input.ValidationState.Companion.getState
 import pl.dev.bkwiatkowski.common.ui.component.input.ValidationState.Companion.isValid
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.feature.dashboard.domain.interactor.DashboardInteractor
+import pl.dev.bkwiatkowski.feature.dashboard.domain.model.FriendsListData
 import pl.dev.bkwiatkowski.feature.dashboard.domain.usecase.ValidateSearchTextUC
 import javax.inject.Inject
 
@@ -20,14 +25,28 @@ interface FriendsDashboardVM {
   data class StateContent(
     val searchText: String = "",
     val searchTextValidation: ValidationState = ValidationState.UnVerified,
+    val friendsData: FriendsListData,
   )
 
   sealed interface State {
-    data object Initial : State
+    sealed interface Initial : State {
+      data object Loading : Initial
 
-    data class Active(
-      val content: StateContent,
-    ) : State
+      data class Error(
+        val errorScreenData: ErrorScreenData,
+      ) : Initial
+    }
+
+    sealed interface Active : State {
+      data class Content(
+        val stateContent: StateContent
+      ) : Active
+
+      data class Error(
+        val errorScreenData: ErrorScreenData,
+        val stateContent: StateContent,
+      ) : Active
+    }
   }
 
   sealed interface Action {
@@ -35,6 +54,9 @@ interface FriendsDashboardVM {
       data object Back : Navigation
     }
 
+    data class OnAcceptFriendClick(val friendId: Int) : Action
+    data class OnRemoveFriendClick(val friendId: Int) : Action
+    data object LoadData : Action
     data class UpdateSearchText(val searchText: String) : Action
     data object OnSearchClick : Action
     data object Back : Action
@@ -52,6 +74,20 @@ interface FriendsDashboardVM {
       val topBarData: TopAppBarData,
       val searchFieldData: TextFieldData,
       val searchButtonData: LargeButtonData,
+      val friendsList: List<FriendsListItem>,
+      val emptyLabel: String,
+    ) : ScreenData {
+      data class FriendsListItem(
+        val acceptationLabel: String?,
+        val username: String,
+        val acceptFriendRequestButtonData: SmallButtonData?,
+        val removeFriendButtonData: SmallButtonData,
+      )
+    }
+
+    data class ErrorScreen(
+      override val onBackClick: () -> Unit,
+      val errorData: ErrorScreenData,
     ) : ScreenData
   }
 
@@ -61,11 +97,12 @@ interface FriendsDashboardVM {
 @HiltViewModel
 class FriendsDashboardVMImpl @Inject constructor(
   private val mapper: FriendsDashboardMapper,
+  private val errorDataMapper: ErrorDataMapper,
   private val validateSearchTextUC: ValidateSearchTextUC,
   private val runWithLoaderUC: RunWithLoaderUC,
   private val dashboardInteractor: DashboardInteractor,
 ) : CustomViewModel<FriendsDashboardVM.State, FriendsDashboardVM.ScreenData, FriendsDashboardVM.Action.Navigation>(
-  initialStateValue = FriendsDashboardVM.State.Initial,
+  initialStateValue = FriendsDashboardVM.State.Initial.Loading,
 ), FriendsDashboardVM {
 
   override val screenData: StateFlow<FriendsDashboardVM.ScreenData> = _screenData
@@ -77,14 +114,43 @@ class FriendsDashboardVMImpl @Inject constructor(
   fun dispatchAction(action: FriendsDashboardVM.Action) {
     viewModelScope.launch {
       when (val currentState = state.value) {
-        is FriendsDashboardVM.State.Initial -> when (action) {
+        is FriendsDashboardVM.State.Initial.Loading -> when (action) {
+          is FriendsDashboardVM.Action.Back ->
+            FriendsDashboardVM.Action.Navigation.Back.emit()
+
+          is FriendsDashboardVM.Action.LoadData -> runWithLoaderUC {
+            either {
+              val friendsList = dashboardInteractor.getFriendsList().getRight()
+
+              FriendsDashboardVM.State.Active.Content(
+                stateContent = FriendsDashboardVM.StateContent(
+                  friendsData = friendsList,
+                ),
+              ).override()
+            }.onLeft { error ->
+              FriendsDashboardVM.State.Initial.Error(
+                errorScreenData = errorDataMapper(
+                  params = ErrorDataMapper.Params(
+                    error = error,
+                    onCloseClick = { dispatchAction(FriendsDashboardVM.Action.Back) },
+                  )
+                ),
+              ).override()
+            }
+          }
           else -> {}
         }
 
-        is FriendsDashboardVM.State.Active -> when (action) {
+        is FriendsDashboardVM.State.Initial.Error -> when (action) {
+          is FriendsDashboardVM.Action.Back ->
+            FriendsDashboardVM.Action.Navigation.Back.emit()
+          else -> {}
+        }
+
+        is FriendsDashboardVM.State.Active.Content -> when (action) {
           is FriendsDashboardVM.Action.UpdateSearchText -> {
             currentState.copy(
-              content = currentState.content.copy(
+              stateContent = currentState.stateContent.copy(
                 searchText = action.searchText,
                 searchTextValidation = ValidationState.UnVerified,
               )
@@ -94,33 +160,53 @@ class FriendsDashboardVMImpl @Inject constructor(
           is FriendsDashboardVM.Action.OnSearchClick -> runWithLoaderUC {
             val validationResult = validateSearchTextUC(
               params = ValidateSearchTextUC.Params(
-                searchText = currentState.content.searchText,
+                searchText = currentState.stateContent.searchText,
               )
             ).getState()
 
             if (!validationResult.isValid()) {
               currentState.copy(
-                content = currentState.content.copy(
+                stateContent = currentState.stateContent.copy(
                   searchTextValidation = validationResult,
                 )
               ).mutate()
               return@runWithLoaderUC
             }
 
-            dashboardInteractor.getUserByUsername(
-              username = currentState.content.searchText,
-            ).onRight { userResponse ->
+            either {
+              val userResponse = dashboardInteractor.getUserByUsername(
+                username = currentState.stateContent.searchText,
+              ).onLeft { _ ->
+                currentState.copy(
+                  stateContent = currentState.stateContent.copy(
+                    searchTextValidation = ValidationState.Invalid(message = "Użytkownik nie znaleziony"),
+                  )
+                ).mutate()
+                return@either
+              }.getRight()
+
               currentState.copy(
-                content = currentState.content.copy(
+                stateContent = currentState.stateContent.copy(
                   searchTextValidation = ValidationState.Valid,
                 )
               ).mutate()
-            }.onLeft { _ ->
-              currentState.copy(
-                content = currentState.content.copy(
-                  searchTextValidation = ValidationState.Invalid(message = "Użytkownik nie znaleziony"),
-                )
-              ).mutate()
+
+              dashboardInteractor.sendFriendRequest(
+                friendId = userResponse.id,
+              ).onRight {
+                dispatchAction(FriendsDashboardVM.Action.LoadData)
+              }.onLeft { error ->
+                FriendsDashboardVM.State.Active.Error(
+                  errorScreenData = errorDataMapper(
+                    params = ErrorDataMapper.Params(
+                      error = error,
+                      onCloseClick = { dispatchAction(FriendsDashboardVM.Action.Back) },
+                    )
+                  ),
+                  stateContent = currentState.stateContent,
+                ).override()
+                return@either
+              }.getRight()
             }
           }
 
@@ -128,6 +214,52 @@ class FriendsDashboardVMImpl @Inject constructor(
             FriendsDashboardVM.Action.Navigation.Back.emit()
           }
 
+          is FriendsDashboardVM.Action.OnAcceptFriendClick -> runWithLoaderUC {
+            either {
+              dashboardInteractor.acceptFriendRequest(friendId = action.friendId).getRight()
+            }.onRight {
+              dispatchAction(FriendsDashboardVM.Action.LoadData)
+            }.onLeft { error ->
+              FriendsDashboardVM.State.Active.Error(
+                errorScreenData = errorDataMapper(
+                  params = ErrorDataMapper.Params(
+                    error = error,
+                    onCloseClick = { dispatchAction(FriendsDashboardVM.Action.Back) },
+                  )
+                ),
+                stateContent = currentState.stateContent,
+              ).override()
+            }
+          }
+
+          is FriendsDashboardVM.Action.OnRemoveFriendClick -> runWithLoaderUC {
+            either {
+              dashboardInteractor.removeFriend(friendId = action.friendId).getRight()
+            }.onRight {
+              dispatchAction(FriendsDashboardVM.Action.LoadData)
+            }.onLeft { error ->
+              FriendsDashboardVM.State.Active.Error(
+                errorScreenData = errorDataMapper(
+                  params = ErrorDataMapper.Params(
+                    error = error,
+                    onCloseClick = { dispatchAction(FriendsDashboardVM.Action.Back) },
+                  )
+                ),
+                stateContent = currentState.stateContent,
+              ).override()
+            }
+          }
+
+          is FriendsDashboardVM.Action.LoadData ->
+            FriendsDashboardVM.State.Initial.Loading.override()
+
+          else -> {}
+        }
+
+        is FriendsDashboardVM.State.Active.Error -> when (action) {
+          is FriendsDashboardVM.Action.Back -> FriendsDashboardVM.State.Active.Content(
+            stateContent = currentState.stateContent,
+          ).override()
           else -> {}
         }
       }
@@ -136,8 +268,10 @@ class FriendsDashboardVMImpl @Inject constructor(
 
   override suspend fun onStateEnter(newState: FriendsDashboardVM.State) {
     when (newState) {
-      is FriendsDashboardVM.State.Initial -> {}
-      is FriendsDashboardVM.State.Active -> {}
+      is FriendsDashboardVM.State.Initial.Loading -> dispatchAction(FriendsDashboardVM.Action.LoadData)
+      is FriendsDashboardVM.State.Initial.Error -> {}
+      is FriendsDashboardVM.State.Active.Content -> {}
+      is FriendsDashboardVM.State.Active.Error -> {}
     }
   }
 
@@ -147,6 +281,8 @@ class FriendsDashboardVMImpl @Inject constructor(
       onBackClick = { dispatchAction(FriendsDashboardVM.Action.Back) },
       onSearchTextChanged = { text -> dispatchAction(FriendsDashboardVM.Action.UpdateSearchText(searchText = text)) },
       onSearchClick = { dispatchAction(FriendsDashboardVM.Action.OnSearchClick) },
+      onAcceptFriendClick = { friendId -> dispatchAction(FriendsDashboardVM.Action.OnAcceptFriendClick(friendId = friendId)) },
+      onRemoveFriendClick = { friendId -> dispatchAction(FriendsDashboardVM.Action.OnRemoveFriendClick(friendId = friendId)) },
     ),
   )
 }

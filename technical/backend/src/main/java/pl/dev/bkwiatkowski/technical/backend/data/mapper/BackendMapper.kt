@@ -213,6 +213,7 @@ object BackendMapper {
 
   fun CheckUserResponseDto.toDomain() = BECheckUserResponse(
     username = this.username,
+    id = this.id,
   )
 
   fun FriendshipStatusDto.toDomain(): BEFriendshipStatus = when (this) {

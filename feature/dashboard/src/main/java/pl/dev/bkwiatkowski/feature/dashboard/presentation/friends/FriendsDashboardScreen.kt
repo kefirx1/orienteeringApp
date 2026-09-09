@@ -1,13 +1,17 @@
 package pl.dev.bkwiatkowski.feature.dashboard.presentation.friends
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -19,8 +23,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.dev.bkwiatkowski.common.ui.component.addDefaultPadding
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButton
+import pl.dev.bkwiatkowski.common.ui.component.button.SmallButton
+import pl.dev.bkwiatkowski.common.ui.component.card.BaseCard
+import pl.dev.bkwiatkowski.common.ui.component.divider.Divider
 import pl.dev.bkwiatkowski.common.ui.component.emptyscreen.EmptyScreen
 import pl.dev.bkwiatkowski.common.ui.component.input.TextField
+import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
+import pl.dev.bkwiatkowski.common.ui.error.ErrorScreen
 import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.friends.provider.FriendsDashboardPreviewProvider
 
@@ -30,6 +39,7 @@ fun FriendsDashboardScreen(viewModel: FriendsDashboardVM) {
 
   when (val screenData = state) {
     is FriendsDashboardVM.ScreenData.Empty -> EmptyScreen()
+    is FriendsDashboardVM.ScreenData.ErrorScreen -> ErrorScreen(data = screenData.errorData)
     is FriendsDashboardVM.ScreenData.Main -> FriendsDashboardScreenContent(data = screenData)
   }
 
@@ -45,26 +55,87 @@ fun FriendsDashboardScreenContent(
   BaseScaffold(
     topBarData = data.topBarData,
     content = {
-      Column(
+      LazyColumn(
         modifier = Modifier
           .fillMaxSize()
-          .addDefaultPadding()
-          .verticalScroll(rememberScrollState()),
+          .addDefaultPadding(),
       ) {
-        Spacer(modifier = Modifier.height(16.dp))
+        item {
+          Spacer(modifier = Modifier.height(16.dp))
 
-        TextField(textFieldData = data.searchFieldData,)
-        Spacer(modifier = Modifier.height(16.dp))
+          TextField(textFieldData = data.searchFieldData)
+          Spacer(modifier = Modifier.height(16.dp))
 
-      Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(horizontal = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-      ) {
-          LargeButton(
-            buttonData = data.searchButtonData,
-          )
+          Column(
+            modifier = Modifier
+              .fillMaxSize()
+              .padding(horizontal = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+          ) {
+            LargeButton(
+              buttonData = data.searchButtonData,
+            )
+          }
+
+          Divider(spacer = 32.dp)
+        }
+
+        if (data.friendsList.isEmpty()) {
+          item {
+            BaseCard {
+              Column(
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .padding(
+                    vertical = 12.dp,
+                  ),
+                horizontalAlignment = Alignment.CenterHorizontally,
+              ) {
+                CustomText(
+                  text = data.emptyLabel,
+                  style = MaterialTheme.typography.bodyMedium,
+                )
+              }
+            }
+          }
+        } else {
+          items(count = data.friendsList.size) { index ->
+            val friend = data.friendsList[index]
+
+            BaseCard {
+              Column(
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .padding(
+                    vertical = 8.dp,
+                    horizontal = 12.dp,
+                  ),
+              ) {
+                Row(
+                  modifier = Modifier
+                    .fillMaxWidth(),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                  CustomText(
+                    text = friend.username,
+                    style = MaterialTheme.typography.bodyMedium,
+                  )
+
+                  Row {
+                    SmallButton(buttonData = friend.removeFriendButtonData)
+
+                    friend.acceptFriendRequestButtonData?.let { buttonData ->
+                      Spacer(modifier = Modifier.width(8.dp))
+
+                      SmallButton(buttonData = buttonData)
+                    }
+                  }
+                }
+              }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+          }
         }
       }
     },
