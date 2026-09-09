@@ -271,8 +271,10 @@ object CommonModule {
   @Singleton
   fun provideCallMediator(
     jsonSerializer: JsonSerializer,
+    networkMonitor: NetworkMonitor,
   ): CallMediator = CallMediatorImpl(
     jsonSerializer = jsonSerializer,
+    networkMonitor = networkMonitor,
   )
 
   @Provides

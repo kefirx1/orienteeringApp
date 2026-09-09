@@ -5,6 +5,8 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.CancellationException
 import pl.dev.bkwiatkowski.common.core.error.DomainError
+import pl.dev.bkwiatkowski.common.core.network.NetworkMonitor
+import pl.dev.bkwiatkowski.common.core.network.NetworkStatus
 import pl.dev.bkwiatkowski.common.core.storage.JsonSerializer
 import pl.dev.bkwiatkowski.common.core.usecase.DefaultEitherException
 import pl.dev.bkwiatkowski.common.core.usecase.Either
@@ -21,8 +23,14 @@ interface CallMediator {
 }
 
 class CallMediatorImpl(
+  private val networkMonitor: NetworkMonitor,
   private val jsonSerializer: JsonSerializer,
 ) : CallMediator {
+
+  private val serverUnavailableError = DomainError.Network(
+    code = DomainError.Network.Code.SERVICE_UNAVAILABLE,
+    message = "Aplikacja nie jest w stanie połączyć się z serwerem. Spróbuj ponownie później",
+  )
 
   override suspend fun <T> invoke(call: suspend () -> HttpResponse): Either<DomainError, HttpResponse> = either {
     try {
@@ -38,11 +46,15 @@ class CallMediatorImpl(
     } catch (e: ResponseException) {
       raise(error = handleCodeError(e = e))
     } catch (_: UnknownHostException) {
-      raise(error = DomainError.NoNetwork)
+      raise(error = serverUnavailableError)
     } catch (_: ConnectException) {
-      raise(error = DomainError.NoNetwork)
+      if (networkMonitor.getCurrentStatus() == NetworkStatus.CONNECTED) {
+        raise(error = serverUnavailableError)
+      } else {
+        raise(error = DomainError.NoNetwork)
+      }
     } catch (_: SocketTimeoutException) {
-      raise(error = DomainError.NoNetwork)
+      raise(error = serverUnavailableError)
     } catch (e: DefaultEitherException) {
       raise(error = e.error)
     } catch (e: Exception) {
