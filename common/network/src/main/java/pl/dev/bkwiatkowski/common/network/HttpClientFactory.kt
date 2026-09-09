@@ -21,6 +21,7 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.contextual
 import pl.dev.bkwiatkowski.common.core.config.EnvironmentConfig
 import pl.dev.bkwiatkowski.common.core.config.Flavor
+import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.logger.Log
 import pl.dev.bkwiatkowski.common.core.logger.Tag
 import pl.dev.bkwiatkowski.common.core.network.SessionManager
@@ -105,7 +106,18 @@ class HttpClientFactoryImpl(
           refreshTokens {
             refreshTokenHandler.refreshToken(
               client = this.client,
-            ).getRightOrNull()
+            ).onLeft { error ->
+              Log.e(
+                tag = Tag(this@HttpClientFactoryImpl),
+                message = "Failed to refresh token: $error",
+              )
+
+              when (error) {
+                is DomainError.NoNetwork,
+                is DomainError.UnavailableServer -> {}
+                else -> refreshTokenHandler.afterRefreshError()
+              }
+            }.getRightOrNull()
           }
         }
       }

@@ -93,6 +93,7 @@ import pl.dev.bkwiatkowski.orienteeringapp.core.network.RefreshTokenHandlerImpl
 import pl.dev.bkwiatkowski.orienteeringapp.core.network.SessionManagerImpl
 import pl.dev.bkwiatkowski.technical.user.data.datastore.MasterKeyCacheDataStore
 import pl.dev.bkwiatkowski.technical.user.domain.repository.SessionRepository
+import pl.dev.bkwiatkowski.technical.user.domain.usecase.LogoutUC
 import javax.inject.Singleton
 
 @Module
@@ -170,8 +171,10 @@ object CommonModule {
   @Singleton
   fun provideRefreshTokenHandler(
     sessionRepository: SessionRepository,
+    logoutUC: LogoutUC,
   ): RefreshTokenHandler = RefreshTokenHandlerImpl(
     sessionRepository = sessionRepository,
+    logoutUC = logoutUC,
   )
 
   @Provides

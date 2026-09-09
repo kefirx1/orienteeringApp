@@ -8,6 +8,7 @@ import io.ktor.client.request.setBody
 import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.network.Token
 import pl.dev.bkwiatkowski.common.core.usecase.Either
+import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.network.RefreshTokenHandler
 import pl.dev.bkwiatkowski.technical.backend.api.RefreshMobileToken
@@ -16,9 +17,11 @@ import pl.dev.bkwiatkowski.technical.backend.data.MobileSignInResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.mapper.BackendMapper.toDomain
 import pl.dev.bkwiatkowski.technical.user.domain.model.TokenData
 import pl.dev.bkwiatkowski.technical.user.domain.repository.SessionRepository
+import pl.dev.bkwiatkowski.technical.user.domain.usecase.LogoutUC
 
 class RefreshTokenHandlerImpl(
   private val sessionRepository: SessionRepository,
+  private val logoutUC: LogoutUC,
 ) : RefreshTokenHandler {
 
   override suspend fun refreshToken(
@@ -47,11 +50,14 @@ class RefreshTokenHandlerImpl(
           expireAtTimestamp = newTokens.refreshTokenExpiresTimestamp,
         ),
       ),
-    )
+    ).getRight()
 
     BearerTokens(
       accessToken = newTokens.accessToken,
       refreshToken = newTokens.refreshToken,
     )
   }
+
+  override suspend fun afterRefreshError(): Either<DomainError, Unit> =
+    logoutUC(params = UseCase.Params.Empty)
 }

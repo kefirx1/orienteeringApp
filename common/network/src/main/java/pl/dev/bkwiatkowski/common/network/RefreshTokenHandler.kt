@@ -9,4 +9,5 @@ interface RefreshTokenHandler {
   suspend fun refreshToken(
     client: HttpClient,
   ): Either<DomainError, BearerTokens>
+  suspend fun afterRefreshError(): Either<DomainError, Unit>
 }
