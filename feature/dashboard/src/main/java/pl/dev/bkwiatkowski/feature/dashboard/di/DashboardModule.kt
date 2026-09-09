@@ -24,6 +24,8 @@ import pl.dev.bkwiatkowski.feature.dashboard.domain.usecase.ValidatePasswordUC
 import pl.dev.bkwiatkowski.feature.dashboard.domain.usecase.ValidatePasswordUCImpl
 import pl.dev.bkwiatkowski.feature.dashboard.domain.usecase.ValidateConfirmPasswordUC
 import pl.dev.bkwiatkowski.feature.dashboard.domain.usecase.ValidateConfirmPasswordUCImpl
+import pl.dev.bkwiatkowski.feature.dashboard.domain.usecase.ValidateSearchTextUC
+import pl.dev.bkwiatkowski.feature.dashboard.domain.usecase.ValidateSearchTextUCImpl
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -65,6 +67,13 @@ object DashboardModule {
   fun provideValidateConfirmPasswordUC(
     textValidator: TextValidator,
   ): ValidateConfirmPasswordUC = ValidateConfirmPasswordUCImpl(
+    textValidator = textValidator,
+  )
+
+  @Provides
+  fun provideValidateSearchTextUC(
+    textValidator: TextValidator,
+  ): ValidateSearchTextUC = ValidateSearchTextUCImpl(
     textValidator = textValidator,
   )
 }

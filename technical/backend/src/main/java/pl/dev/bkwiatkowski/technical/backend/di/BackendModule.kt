@@ -18,6 +18,10 @@ import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendSettingsRe
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepository
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendUserRepository
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.SessionWebSocketRepository
+import pl.dev.bkwiatkowski.technical.backend.domain.usecase.AcceptFriendRequestUC
+import pl.dev.bkwiatkowski.technical.backend.domain.usecase.AcceptFriendRequestUCImpl
+import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetFriendsListUC
+import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetFriendsListUCImpl
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetMobileSettingsUC
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetMobileSettingsUCImpl
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.RegisterUserUC
@@ -28,6 +32,12 @@ import pl.dev.bkwiatkowski.technical.backend.domain.usecase.ChangePasswordUC
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.ChangePasswordUCImpl
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetUserSessionsUC
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetUserSessionsUCImpl
+import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetUserByUsernameUC
+import pl.dev.bkwiatkowski.technical.backend.domain.usecase.GetUserByUsernameUCImpl
+import pl.dev.bkwiatkowski.technical.backend.domain.usecase.RemoveFriendUC
+import pl.dev.bkwiatkowski.technical.backend.domain.usecase.RemoveFriendUCImpl
+import pl.dev.bkwiatkowski.technical.backend.domain.usecase.SendFriendRequestUC
+import pl.dev.bkwiatkowski.technical.backend.domain.usecase.SendFriendRequestUCImpl
 import javax.inject.Singleton
 
 @Module
@@ -116,6 +126,41 @@ object BackendModule {
   fun provideGetUserSessionsUC(
     backendUserRepository: BackendUserRepository,
   ): GetUserSessionsUC = GetUserSessionsUCImpl(
+    backendUserRepository = backendUserRepository,
+  )
+
+  @Provides
+  fun provideGetUserByUsernameUC(
+    backendUserRepository: BackendUserRepository,
+  ): GetUserByUsernameUC = GetUserByUsernameUCImpl(
+    backendUserRepository = backendUserRepository,
+  )
+
+  @Provides
+  fun provideGetFriendsListUC(
+    backendUserRepository: BackendUserRepository,
+  ): GetFriendsListUC = GetFriendsListUCImpl(
+    backendUserRepository = backendUserRepository,
+  )
+
+  @Provides
+  fun provideSendFriendRequestUC(
+    backendUserRepository: BackendUserRepository,
+  ): SendFriendRequestUC = SendFriendRequestUCImpl(
+    backendUserRepository = backendUserRepository,
+  )
+
+  @Provides
+  fun provideAcceptFriendRequestUC(
+    backendUserRepository: BackendUserRepository,
+  ): AcceptFriendRequestUC = AcceptFriendRequestUCImpl(
+    backendUserRepository = backendUserRepository,
+  )
+
+  @Provides
+  fun provideRemoveFriendUC(
+    backendUserRepository: BackendUserRepository,
+  ): RemoveFriendUC = RemoveFriendUCImpl(
     backendUserRepository = backendUserRepository,
   )
 }

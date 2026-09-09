@@ -1,8 +1,13 @@
 package pl.dev.bkwiatkowski.technical.backend.data.mapper
 
 import pl.dev.bkwiatkowski.common.core.location.Position
+import pl.dev.bkwiatkowski.technical.backend.data.CheckUserResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.EventSessionResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.FinishSessionResponseDto
+import pl.dev.bkwiatkowski.technical.backend.data.FriendDto
+import pl.dev.bkwiatkowski.technical.backend.data.FriendshipStatusDto
+import pl.dev.bkwiatkowski.technical.backend.data.GetFriendsListResponseDto
+import pl.dev.bkwiatkowski.technical.backend.data.IsUserInSessionResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MapWaypointDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileEventDetailResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileEventListResponseDto
@@ -16,20 +21,24 @@ import pl.dev.bkwiatkowski.technical.backend.data.SessionParticipantResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.SessionWaypointDetailDto
 import pl.dev.bkwiatkowski.technical.backend.data.SessionWaypointDetailsResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.UploadImageResponse
+import pl.dev.bkwiatkowski.technical.backend.data.UserSessionDto
 import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitDto
 import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitResponseDto
-import pl.dev.bkwiatkowski.technical.backend.data.IsUserInSessionResponseDto
-import pl.dev.bkwiatkowski.technical.backend.data.UserSessionDto
-import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUserSession
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BECheckUserResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEFriend
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEFriendshipStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEFinishSessionResponse
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEGetFriendsListResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMapWaypoint
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMobileMap
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionParticipant
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionWaypointDetail
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionWaypointDetailsResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUploadImageResponse
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUserSession
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUserSessionStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.EventSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventListResponse
@@ -39,7 +48,6 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignUpRequest
 import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisit
 import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisitResponse
-import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUserSessionStatus
 
 object BackendMapper {
 
@@ -202,4 +210,27 @@ object BackendMapper {
     IsUserInSessionResponseDto.Status.NOT_JOINED -> BEUserSessionStatus.NOT_JOINED
     IsUserInSessionResponseDto.Status.FINISHED -> BEUserSessionStatus.FINISHED
   }
+
+  fun CheckUserResponseDto.toDomain() = BECheckUserResponse(
+    username = this.username,
+  )
+
+  fun FriendshipStatusDto.toDomain(): BEFriendshipStatus = when (this) {
+    FriendshipStatusDto.ACCEPTED -> BEFriendshipStatus.ACCEPTED
+    FriendshipStatusDto.NOT_ACCEPTED -> BEFriendshipStatus.NOT_ACCEPTED
+  }
+
+  fun FriendDto.toDomain(): BEFriend =
+    BEFriend(
+      friendId = friendId,
+      username = username,
+      createdAt = createdAt,
+      status = status.toDomain(),
+      friendStatus = friendStatus.toDomain(),
+    )
+
+  fun GetFriendsListResponseDto.toDomain(): BEGetFriendsListResponse =
+    BEGetFriendsListResponse(
+      friends = friends.map { it.toDomain() },
+    )
 }

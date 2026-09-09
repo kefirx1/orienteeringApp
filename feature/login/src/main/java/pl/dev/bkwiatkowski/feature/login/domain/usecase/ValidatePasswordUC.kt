@@ -3,6 +3,7 @@ import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.validators.TextValidator
 import pl.dev.bkwiatkowski.common.core.validators.TextValidatorRule
 import pl.dev.bkwiatkowski.common.core.validators.ValidationResult
+
 interface ValidatePasswordUC : UseCase<ValidatePasswordUC.Params, ValidationResult> {
   data class Params(
     val password: String,
