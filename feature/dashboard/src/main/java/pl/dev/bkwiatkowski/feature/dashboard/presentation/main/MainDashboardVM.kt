@@ -115,6 +115,7 @@ interface MainDashboardVM {
     ) : ScreenData {
       data class FriendStatsData(
         val friendName: String,
+        val friendDescriptionLabel: String?,
       )
     }
 

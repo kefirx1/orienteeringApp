@@ -27,13 +27,13 @@ class MainDashboardPreviewProvider : ViewModelPreviewProvider<MainDashboardVM, M
                     username = "JanKowalski",
                     createdAt = LocalDateTime.of(2024, 6, 1, 12, 0),
                     status = FriendshipStatus.ACCEPTED,
-                    friendStatus = FriendshipStatus.ACCEPTED,
+                    friendStatus = FriendshipStatus.NOT_ACCEPTED,
                   ),
                   FriendItem(
                     friendId = 2,
                     username = "AnnaNowak",
                     createdAt = LocalDateTime.of(2024, 6, 2, 14, 30),
-                    status = FriendshipStatus.ACCEPTED,
+                    status = FriendshipStatus.NOT_ACCEPTED,
                     friendStatus = FriendshipStatus.ACCEPTED,
                   ),
                   FriendItem(

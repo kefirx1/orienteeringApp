@@ -54,7 +54,9 @@ class FriendsDashboardMapperImpl @Inject constructor() : FriendsDashboardMapper 
           ),
           friendsList = params.state.stateContent.friendsData.friends.map { friend ->
             FriendsDashboardVM.ScreenData.Main.FriendsListItem(
-              acceptationLabel = "Oczekuje na akceptację".takeIf { friend.friendStatus == FriendshipStatus.NOT_ACCEPTED },
+              acceptationLabel = "Oczekuje na akceptację zaproszenia".takeIf {
+                friend.friendStatus == FriendshipStatus.NOT_ACCEPTED
+              },
               username = friend.username,
               acceptFriendRequestButtonData = SmallButtonData.Primary(
                 text = "Akceptuj",

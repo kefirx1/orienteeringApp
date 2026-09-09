@@ -111,6 +111,13 @@ fun FriendsDashboardScreenContent(
                     horizontal = 12.dp,
                   ),
               ) {
+                friend.acceptationLabel?.let { label ->
+                  CustomText(
+                    text = label,
+                    style = MaterialTheme.typography.bodySmall,
+                  )
+                  Spacer(modifier = Modifier.height(4.dp))
+                }
                 Row(
                   modifier = Modifier
                     .fillMaxWidth(),

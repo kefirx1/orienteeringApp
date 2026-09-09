@@ -7,6 +7,7 @@ import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.button.SmallButtonData
 import pl.dev.bkwiatkowski.common.ui.component.card.ActionCardData
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
+import pl.dev.bkwiatkowski.feature.dashboard.domain.model.FriendshipStatus
 
 interface MainDashboardMapper : Mapper<MainDashboardMapper.Params, MainDashboardVM.ScreenData> {
   data class Params(
@@ -42,6 +43,13 @@ class MainDashboardMapperImpl : MainDashboardMapper {
         friendsData = params.state.friendsData.friends.map { friendItem ->
           MainDashboardVM.ScreenData.Main.FriendStatsData(
             friendName = friendItem.username,
+            friendDescriptionLabel = when (friendItem.friendStatus) {
+              FriendshipStatus.ACCEPTED -> when (friendItem.status) {
+                FriendshipStatus.ACCEPTED -> null
+                FriendshipStatus.NOT_ACCEPTED -> "Zakceptuj zaproszenie"
+              }
+              FriendshipStatus.NOT_ACCEPTED -> "Oczekuje na akceptację"
+            },
           )
         },
         settingsCard = ActionCardData(
