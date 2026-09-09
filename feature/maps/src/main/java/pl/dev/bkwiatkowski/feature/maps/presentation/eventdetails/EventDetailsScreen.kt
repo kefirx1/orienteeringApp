@@ -153,6 +153,14 @@ fun EventDetailsWithSessionScreenContent(
           text = data.startDateTime,
           style = MaterialTheme.typography.bodySmall,
         )
+        data.finishedSessionDateTime?.let { date ->
+          Spacer(modifier = Modifier.height(8.dp))
+
+          CustomText(
+            text = date,
+            style = MaterialTheme.typography.bodySmall,
+          )
+        }
         Spacer(modifier = Modifier.height(12.dp))
 
         CustomText(
@@ -220,6 +228,15 @@ fun EventDetailsFinishedScreenContent(
           text = data.startDateTime,
           style = MaterialTheme.typography.bodySmall,
         )
+
+        data.finishedSessionDateTime?.let { date ->
+          Spacer(modifier = Modifier.height(8.dp))
+
+          CustomText(
+            text = date,
+            style = MaterialTheme.typography.bodySmall,
+          )
+        }
         Spacer(modifier = Modifier.height(12.dp))
 
         CustomText(

@@ -42,7 +42,15 @@ class EventDetailsMapperImpl(
           dateTime = params.state.event.startDate,
           format = DateFormatter.Format.DATE_TIME,
         ).let { time ->
-          "Rozpoczęto: $time"
+          "Rozpoczęto wydarzenie: $time"
+        },
+        finishedSessionDateTime = params.state.session.finishedAt?.let { finishedAt ->
+          dateFormatter.format(
+            dateTime = finishedAt,
+            format = DateFormatter.Format.DATE_TIME,
+          ).let { time ->
+            "Zakończono wydarzenie: $time"
+          }
         },
         map = bitmapReader.decode(encoded = params.state.event.map.imageData),
         playButtonData = when (params.state.event.eventStatus) {
@@ -73,7 +81,15 @@ class EventDetailsMapperImpl(
           dateTime = params.state.event.startDate,
           format = DateFormatter.Format.DATE_TIME,
         ).let { time ->
-          "Rozpoczęto: $time"
+          "Rozpoczęto wydarzenie: $time"
+        },
+        finishedSessionDateTime = params.state.session.finishedAt?.let { finishedAt ->
+          dateFormatter.format(
+            dateTime = finishedAt,
+            format = DateFormatter.Format.DATE_TIME,
+          ).let { time ->
+            "Zakończono wydarzenie: $time"
+          }
         },
         map = bitmapReader.decode(encoded = params.state.event.map.imageData),
         playButtonData = when {
@@ -106,7 +122,7 @@ class EventDetailsMapperImpl(
           dateTime = params.state.event.startDate,
           format = DateFormatter.Format.DATE_TIME,
         ).let { time ->
-          "Rozpoczyna się: $time"
+          "Wydarzenie rozpoczyna się: $time"
         },
         map = bitmapReader.decode(encoded = params.state.event.map.imageData),
         eventTypeDescriptionLabel = params.state.event.eventType.getEventTypeDescriptionLabel(),
@@ -123,7 +139,15 @@ class EventDetailsMapperImpl(
           dateTime = params.state.event.startDate,
           format = DateFormatter.Format.DATE_TIME,
         ).let { time ->
-          "Rozpoczęto: $time"
+          "Rozpoczęto wydarzenie: $time"
+        },
+        finishedSessionDateTime = params.state.session.finishedAt?.let { finishedAt ->
+          dateFormatter.format(
+            dateTime = finishedAt,
+            format = DateFormatter.Format.DATE_TIME,
+          ).let { time ->
+            "Zakończono wydarzenie: $time"
+          }
         },
         map = bitmapReader.decode(encoded = params.state.event.map.imageData),
         userSessionSectionLabel = if (params.state.sessionParticipants.size > 1) {
