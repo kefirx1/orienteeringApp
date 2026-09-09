@@ -2,11 +2,13 @@ package pl.dev.bkwiatkowski.feature.dashboard.presentation.main.provider
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import pl.dev.bkwiatkowski.common.ui.preview.ViewModelPreviewProvider
-import pl.dev.bkwiatkowski.feature.dashboard.domain.model.FriendData
-import pl.dev.bkwiatkowski.feature.dashboard.domain.model.FriendsStatsData
-import pl.dev.bkwiatkowski.feature.dashboard.presentation.main.MainDashboardVM
+import pl.dev.bkwiatkowski.feature.dashboard.domain.model.FriendItem
+import pl.dev.bkwiatkowski.feature.dashboard.domain.model.FriendsListData
+import pl.dev.bkwiatkowski.feature.dashboard.domain.model.FriendshipStatus
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.main.MainDashboardMapper
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.main.MainDashboardMapperImpl
+import pl.dev.bkwiatkowski.feature.dashboard.presentation.main.MainDashboardVM
+import java.time.LocalDateTime
 
 class MainDashboardPreviewProvider : ViewModelPreviewProvider<MainDashboardVM, MainDashboardVM.ScreenData, MainDashboardMapper.Params>() {
   override val mapper: MainDashboardMapper = MainDashboardMapperImpl()
@@ -18,24 +20,30 @@ class MainDashboardPreviewProvider : ViewModelPreviewProvider<MainDashboardVM, M
           params = getMapperParams(
             state = MainDashboardVM.State.Active(
               userName = "Blazej",
-              friendsData = FriendsStatsData(
+              friendsData = FriendsListData(
                 friends = listOf(
-                  FriendData(
-                    id = 1,
-                    name = "JanKowalski",
-                    numberOfRuns = 5
+                  FriendItem(
+                    friendId = 1,
+                    username = "JanKowalski",
+                    createdAt = LocalDateTime.of(2024, 6, 1, 12, 0),
+                    status = FriendshipStatus.ACCEPTED,
+                    friendStatus = FriendshipStatus.ACCEPTED,
                   ),
-                  FriendData(
-                    id = 2,
-                    name = "AnnaNowak",
-                    numberOfRuns = 3
+                  FriendItem(
+                    friendId = 2,
+                    username = "AnnaNowak",
+                    createdAt = LocalDateTime.of(2024, 6, 2, 14, 30),
+                    status = FriendshipStatus.ACCEPTED,
+                    friendStatus = FriendshipStatus.ACCEPTED,
                   ),
-                  FriendData(
-                    id = 3,
-                    name = "PiotrWiśniewski",
-                    numberOfRuns = 7
-                  )
-                )
+                  FriendItem(
+                    friendId = 3,
+                    username = "PiotrWiśniewski",
+                    createdAt = LocalDateTime.of(2024, 6, 3, 9, 15),
+                    status = FriendshipStatus.ACCEPTED,
+                    friendStatus = FriendshipStatus.ACCEPTED,
+                  ),
+                ),
               ),
               lastNewEventId = null,
             ),
@@ -49,7 +57,7 @@ class MainDashboardPreviewProvider : ViewModelPreviewProvider<MainDashboardVM, M
           params = getMapperParams(
             state = MainDashboardVM.State.Active(
               userName = "Blazej",
-              friendsData = FriendsStatsData.EMPTY,
+              friendsData = FriendsListData.EMPTY,
               lastNewEventId = null,
             ),
           ),

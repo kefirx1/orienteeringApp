@@ -11,7 +11,6 @@ import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.network.NetworkMonitor
 import pl.dev.bkwiatkowski.common.core.network.NetworkStatus
-import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitor
@@ -22,8 +21,7 @@ import pl.dev.bkwiatkowski.common.ui.component.button.SmallButtonData
 import pl.dev.bkwiatkowski.common.ui.component.card.ActionCardData
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.feature.dashboard.domain.interactor.DashboardInteractor
-import pl.dev.bkwiatkowski.feature.dashboard.domain.model.FriendsStatsData
-import pl.dev.bkwiatkowski.feature.dashboard.domain.usecase.GetFriendsStatsDataUC
+import pl.dev.bkwiatkowski.feature.dashboard.domain.model.FriendsListData
 import javax.inject.Inject
 
 interface MainDashboardVM {
@@ -36,7 +34,7 @@ interface MainDashboardVM {
 
     data class Active(
       val userName: String,
-      val friendsData: FriendsStatsData,
+      val friendsData: FriendsListData,
       val lastNewEventId: Int?,
     ) : State
 
@@ -107,13 +105,17 @@ interface MainDashboardVM {
       val welcomeDescription: String,
       val friendsCardTitle: String,
       val friendsCardEmptyState: String,
-      val friendsData: FriendsStatsData,
+      val friendsData: List<FriendStatsData>,
       val myProfileCard: ActionCardData,
       val settingsCard: ActionCardData,
       val newRunFab: FabData,
       val goToFriendsButton: SmallButtonData,
       val checkNewRunsButton: SmallButtonData?,
-    ) : ScreenData
+    ) : ScreenData {
+      data class FriendStatsData(
+        val friendName: String,
+      )
+    }
 
     data class Offline(
       override val onBackClick: () -> Unit,
@@ -138,7 +140,6 @@ class MainDashboardVMImpl @Inject constructor(
   private val mapper: MainDashboardMapper,
   private val runWithLoaderUC: RunWithLoaderUC,
   private val errorDataMapper: ErrorDataMapper,
-  private val getFriendsStatsDataUC: GetFriendsStatsDataUC,
   private val dashboardInteractor: DashboardInteractor,
   private val networkMonitor: NetworkMonitor,
   lifecycleMonitor: LifecycleMonitorImpl,
@@ -196,8 +197,7 @@ class MainDashboardVMImpl @Inject constructor(
                   dashboardInteractor.fetchMobileSettings().getRight()
 
                   val userName = dashboardInteractor.getUserName().getRight()
-                  val friendsData = getFriendsStatsDataUC(UseCase.Params.Empty)
-                    .getRightOr(default = FriendsStatsData.EMPTY)
+                  val friendsData = dashboardInteractor.getFriendsList().getRightOrElse { FriendsListData.EMPTY }
                   val lastNewEventId = dashboardInteractor.getLastNewMobileEventId().getRightOrNull()
 
                   MainDashboardVM.State.Active(

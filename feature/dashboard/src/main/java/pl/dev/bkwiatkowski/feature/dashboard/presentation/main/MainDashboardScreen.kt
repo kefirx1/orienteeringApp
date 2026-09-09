@@ -18,8 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.dev.bkwiatkowski.common.ui.component.addDefaultPadding
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButton
@@ -31,7 +31,6 @@ import pl.dev.bkwiatkowski.common.ui.component.emptyscreen.EmptyScreen
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
 import pl.dev.bkwiatkowski.common.ui.error.ErrorScreen
 import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
-import pl.dev.bkwiatkowski.feature.dashboard.domain.model.FriendsStatsData
 import pl.dev.bkwiatkowski.feature.dashboard.presentation.main.provider.MainDashboardPreviewProvider
 
 @Composable
@@ -178,10 +177,10 @@ private fun FriendsCard(
   addNewFriendsButtonData: SmallButtonData,
   friendsCardTitle: String,
   friendsCardEmptyState: String,
-  friendsStatsData: FriendsStatsData,
+  friendsStatsData: List<MainDashboardVM.ScreenData.Main.FriendStatsData>,
 ) {
   BaseCard {
-    if (friendsStatsData.friends.isEmpty()) {
+    if (friendsStatsData.isEmpty()) {
       Column(
         modifier = Modifier
           .fillMaxSize()
@@ -208,12 +207,12 @@ private fun FriendsCard(
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        friendsStatsData.friends.forEachIndexed { index, friend ->
+        friendsStatsData.forEachIndexed { index, friend ->
           CustomText(
-            text = friend.name,
+            text = friend.friendName,
             style = MaterialTheme.typography.bodyMedium,
           )
-          if (index < friendsStatsData.friends.size - 1) {
+          if (index < friendsStatsData.size - 1) {
             Spacer(modifier = Modifier.height(4.dp))
           }
         }

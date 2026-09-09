@@ -38,8 +38,12 @@ class MainDashboardMapperImpl : MainDashboardMapper {
         welcomeLabel = "Witaj ${params.state.userName}!",
         welcomeDescription = "Czas na nową trasę sprawdź ostatnio dodane nowe trasy i podejmij wyzwanie ich przejścia",
         friendsCardTitle = "Znajomi",
-        friendsCardEmptyState = "Tutaj pojawią się statystyki Twoich znajomych, gdy dodasz ich do listy znajomych",
-        friendsData = params.state.friendsData,
+        friendsCardEmptyState = "Tutaj pojawią się statystyki Twoich znajomych, gdy dodasz ich do listy",
+        friendsData = params.state.friendsData.friends.map { friendItem ->
+          MainDashboardVM.ScreenData.Main.FriendStatsData(
+            friendName = friendItem.username,
+          )
+        },
         settingsCard = ActionCardData(
           onClick = params.onSettingsClick,
           text = "Ustawienia",

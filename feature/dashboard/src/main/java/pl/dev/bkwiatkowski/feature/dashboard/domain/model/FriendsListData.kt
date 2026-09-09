@@ -4,7 +4,13 @@ import java.time.LocalDateTime
 
 data class FriendsListData(
   val friends: List<FriendItem>,
-)
+) {
+  companion object {
+    val EMPTY = FriendsListData(
+      friends = emptyList(),
+    )
+  }
+}
 
 data class FriendItem(
   val friendId: Int,
