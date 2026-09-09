@@ -29,11 +29,13 @@ android {
   productFlavors {
     create("develop") {
       dimension = "environment"
+      applicationIdSuffix = ".develop"
+
       buildConfigField("String", "API_BASE_URL", "\"http://192.168.100.116:8080\"")
-      resValue("string", "app_name", "\"[DEV] OrienteeringApp\"")
     }
     create("prod") {
       dimension = "environment"
+
       buildConfigField("String", "API_BASE_URL", "\"https://api.example.com\"")
     }
   }
