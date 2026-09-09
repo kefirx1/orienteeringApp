@@ -7,11 +7,16 @@ import dagger.hilt.components.SingletonComponent
 import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.network.Token
 import pl.dev.bkwiatkowski.common.core.usecase.Either
+import pl.dev.bkwiatkowski.common.core.usecase.UseCase
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.ClearEventDataUC
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignInRequest
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileSignUpRequest
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.RegisterUserUC
 import pl.dev.bkwiatkowski.technical.backend.domain.usecase.RemoteLoginUserUC
+import pl.dev.bkwiatkowski.technical.flags.domain.usecase.ClearFlagDataUC
 import pl.dev.bkwiatkowski.technical.user.domain.interactor.UserBackendInteractor
+import pl.dev.bkwiatkowski.technical.user.domain.interactor.UserEventInteractor
+import pl.dev.bkwiatkowski.technical.user.domain.interactor.UserFlagsInteractor
 import pl.dev.bkwiatkowski.technical.user.domain.model.TokenData
 import java.time.LocalDateTime
 
@@ -75,5 +80,21 @@ object UserSetupModule {
         ),
       )
     }
+  }
+
+  @Provides
+  fun provideUserFlagsInteractor(
+    clearFlagDataUC: ClearFlagDataUC,
+  ): UserFlagsInteractor = object : UserFlagsInteractor {
+    override suspend fun clearData(): Either<DomainError, Unit> =
+      clearFlagDataUC(UseCase.Params.Empty)
+  }
+
+  @Provides
+  fun provideUserEventInteractor(
+    clearEventDataUC: ClearEventDataUC,
+  ): UserEventInteractor = object : UserEventInteractor {
+    override suspend fun clearData(): Either<DomainError, Unit> =
+      clearEventDataUC(UseCase.Params.Empty)
   }
 }

@@ -16,6 +16,8 @@ import pl.dev.bkwiatkowski.common.ui.image.BitmapReader
 import pl.dev.bkwiatkowski.feature.event.data.repository.EventRepositoryImpl
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
 import pl.dev.bkwiatkowski.feature.event.domain.repository.EventRepository
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.ClearEventDataUC
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.ClearEventDataUCImpl
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.ConfirmWaypointUC
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.ConfirmWaypointUCImpl
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.FindWaypointFromUserLocationUC
@@ -148,5 +150,12 @@ object EventModule {
   ): GetSessionWaypointsUC = GetSessionWaypointsUCImpl(
     eventRepository = eventRepository,
     eventBackendInteractor = eventBackendInteractor,
+  )
+
+  @Provides
+  fun provideClearEventDataUC(
+    eventRepository: EventRepository,
+  ): ClearEventDataUC = ClearEventDataUCImpl(
+    eventRepository = eventRepository,
   )
 }

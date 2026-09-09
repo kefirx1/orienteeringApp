@@ -44,4 +44,6 @@ interface EventRepository {
   suspend fun clearEventDetails(eventId: Int): Either<DomainError, Unit>
 
   suspend fun getLastSavedEventDetails(): Either<DomainError, MobileEventDetails>
+
+  suspend fun clearAllEventData(): Either<DomainError, Unit>
 }

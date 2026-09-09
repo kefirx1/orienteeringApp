@@ -15,6 +15,8 @@ import pl.dev.bkwiatkowski.common.core.storage.provider.DataStoreProvider
 import pl.dev.bkwiatkowski.technical.user.data.repository.SessionRepositoryImpl
 import pl.dev.bkwiatkowski.technical.user.data.repository.UserRepositoryImpl
 import pl.dev.bkwiatkowski.technical.user.domain.interactor.UserBackendInteractor
+import pl.dev.bkwiatkowski.technical.user.domain.interactor.UserEventInteractor
+import pl.dev.bkwiatkowski.technical.user.domain.interactor.UserFlagsInteractor
 import pl.dev.bkwiatkowski.technical.user.domain.repository.SessionRepository
 import pl.dev.bkwiatkowski.technical.user.domain.repository.UserRepository
 import pl.dev.bkwiatkowski.technical.user.domain.usecase.CreateNewLocalUserUC
@@ -138,8 +140,12 @@ object UserModule {
   fun provideLogoutUC(
     userRepository: UserRepository,
     sessionRepository: SessionRepository,
+    userEventInteractor: UserEventInteractor,
+    userFlagsInteractor: UserFlagsInteractor,
   ): LogoutUC = LogoutUCImpl(
     userRepository = userRepository,
     sessionRepository = sessionRepository,
+    userEventInteractor = userEventInteractor,
+    userFlagsInteractor = userFlagsInteractor,
   )
 }

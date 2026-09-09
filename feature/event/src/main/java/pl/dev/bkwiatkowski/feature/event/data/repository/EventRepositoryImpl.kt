@@ -233,6 +233,30 @@ class EventRepositoryImpl(
     }
   }
 
+  override suspend fun clearAllEventData(): Either<DomainError, Unit> = either {
+    val database = getDatabase().getRight()
+
+    database.waypointVisitDao().getAll().forEach { record ->
+      localFileManager.deleteFile(path = record.imagePath).onLeft { error ->
+        Log.e(
+          tag = Tag(this@EventRepositoryImpl),
+          message = "Error deleting file: $error",
+        )
+      }
+    }
+    database.waypointVisitDao().deleteAll()
+    database.close()
+
+    dataStoreProvider.getDataStoreData<Int>(
+      dataStoreKey = LAST_SAVED_EVENT_ID_KEY,
+      type = Int::class.java,
+      dataStoreKeyProvider = DataStoreProvider.DataStoreKeyProvider.MasterKey,
+    ).getRightOrNull()?.let { lastId ->
+      dataStoreProvider.clearDataStoreData(dataStoreKey = EVENT_DETAILS_STORE_PREFIX + lastId).getRight()
+      dataStoreProvider.clearDataStoreData(dataStoreKey = LAST_SAVED_EVENT_ID_KEY).getRight()
+    }
+  }
+
   private fun getFileNameForWaypointVisit(waypointId: Int, visitedAt: LocalDateTime): String =
     "$waypointId-${visitedAt.toString().replace(":", "-")}"
 }

@@ -40,6 +40,17 @@ class FeatureFlagRepositoryImpl(
     ).getRight()
   }
 
+  override suspend fun clearAllFeatureFlags(): Either<DomainError, Unit> {
+    FeatureFlag.entries.forEach { flag ->
+      val dataStoreKey = "${FEATURE_FLAG_DATA_STORE_KEY}_${flag.value}"
+
+      dataStoreProvider.clearDataStoreData(
+        dataStoreKey = dataStoreKey,
+      )
+    }
+    return Either.Right(value = Unit)
+  }
+
   private fun getDefaultValue(flag: FeatureFlag): Boolean {
     return when (environmentConfig.flavor) {
       Flavor.DEVELOP -> flag.debug

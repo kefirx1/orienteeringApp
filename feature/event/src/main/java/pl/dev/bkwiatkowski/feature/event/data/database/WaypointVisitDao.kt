@@ -12,8 +12,14 @@ interface WaypointVisitDao {
   @Query(value = "SELECT * FROM waypoint_visits WHERE sessionUuid = :sessionUuid")
   suspend fun findBySessionUuid(sessionUuid: String): List<WaypointVisitEntity>
 
+  @Query(value = "SELECT * FROM waypoint_visits")
+  suspend fun getAll(): List<WaypointVisitEntity>
+
   @Query(value = "DELETE FROM waypoint_visits WHERE sessionUuid = :sessionUuid")
   suspend fun deleteBySessionUuid(sessionUuid: String): Int
+
+  @Query(value = "DELETE FROM waypoint_visits")
+  suspend fun deleteAll(): Int
 
   @Query(value = "UPDATE waypoint_visits SET sendOnBackend = :sendOnBackend WHERE waypointId = :waypointId AND sessionUuid = :sessionUuid")
   suspend fun updateStatusByWaypointIdAndSessionUuid(waypointId: Int, sessionUuid: String, sendOnBackend: Boolean): Int

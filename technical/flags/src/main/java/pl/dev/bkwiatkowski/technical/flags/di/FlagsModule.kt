@@ -8,6 +8,8 @@ import pl.dev.bkwiatkowski.common.core.config.EnvironmentConfig
 import pl.dev.bkwiatkowski.common.core.storage.provider.DataStoreProvider
 import pl.dev.bkwiatkowski.technical.flags.data.repository.FeatureFlagRepositoryImpl
 import pl.dev.bkwiatkowski.technical.flags.domain.repository.FeatureFlagRepository
+import pl.dev.bkwiatkowski.technical.flags.domain.usecase.ClearFlagDataUC
+import pl.dev.bkwiatkowski.technical.flags.domain.usecase.ClearFlagDataUCImpl
 import pl.dev.bkwiatkowski.technical.flags.domain.usecase.GetFeatureFlagUC
 import pl.dev.bkwiatkowski.technical.flags.domain.usecase.GetFeatureFlagUCImpl
 import pl.dev.bkwiatkowski.technical.flags.domain.usecase.SetFeatureFlagUC
@@ -39,6 +41,13 @@ object FlagsModule {
   fun provideSetFeatureFlagUC(
     featureFlagRepository: FeatureFlagRepository,
   ): SetFeatureFlagUC = SetFeatureFlagUCImpl(
+    featureFlagRepository = featureFlagRepository,
+  )
+
+  @Provides
+  fun provideClearFlagDataUC(
+    featureFlagRepository: FeatureFlagRepository,
+  ): ClearFlagDataUC = ClearFlagDataUCImpl(
     featureFlagRepository = featureFlagRepository,
   )
 }
