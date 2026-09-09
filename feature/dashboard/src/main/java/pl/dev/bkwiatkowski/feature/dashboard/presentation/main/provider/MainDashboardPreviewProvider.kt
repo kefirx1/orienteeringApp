@@ -28,6 +28,8 @@ class MainDashboardPreviewProvider : ViewModelPreviewProvider<MainDashboardVM, M
                     createdAt = LocalDateTime.of(2024, 6, 1, 12, 0),
                     status = FriendshipStatus.ACCEPTED,
                     friendStatus = FriendshipStatus.NOT_ACCEPTED,
+                    joinedAt = LocalDateTime.of(2024, 6, 1, 12, 0),
+                    attendedEventsCount = 5,
                   ),
                   FriendItem(
                     friendId = 2,
@@ -35,6 +37,8 @@ class MainDashboardPreviewProvider : ViewModelPreviewProvider<MainDashboardVM, M
                     createdAt = LocalDateTime.of(2024, 6, 2, 14, 30),
                     status = FriendshipStatus.NOT_ACCEPTED,
                     friendStatus = FriendshipStatus.ACCEPTED,
+                    joinedAt = LocalDateTime.of(2024, 6, 2, 14, 30),
+                    attendedEventsCount = 3,
                   ),
                   FriendItem(
                     friendId = 3,
@@ -42,6 +46,8 @@ class MainDashboardPreviewProvider : ViewModelPreviewProvider<MainDashboardVM, M
                     createdAt = LocalDateTime.of(2024, 6, 3, 9, 15),
                     status = FriendshipStatus.ACCEPTED,
                     friendStatus = FriendshipStatus.ACCEPTED,
+                    joinedAt = LocalDateTime.of(2024, 6, 3, 9, 15),
+                    attendedEventsCount = 0,
                   ),
                 ),
               ),

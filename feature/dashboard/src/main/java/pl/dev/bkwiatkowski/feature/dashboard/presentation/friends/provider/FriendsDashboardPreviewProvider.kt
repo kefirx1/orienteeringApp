@@ -12,7 +12,9 @@ import pl.dev.bkwiatkowski.feature.dashboard.presentation.friends.FriendsDashboa
 import java.time.LocalDateTime
 
 class FriendsDashboardPreviewProvider : ViewModelPreviewProvider<FriendsDashboardVM, FriendsDashboardVM.ScreenData, FriendsDashboardMapper.Params>() {
-  override val mapper: FriendsDashboardMapper = FriendsDashboardMapperImpl()
+  override val mapper: FriendsDashboardMapper = FriendsDashboardMapperImpl(
+    dateFormatter = mock.dateFormatter,
+  )
 
   override val values: Sequence<FriendsDashboardVM> = sequenceOf(
     object : FriendsDashboardVM {
@@ -29,6 +31,8 @@ class FriendsDashboardPreviewProvider : ViewModelPreviewProvider<FriendsDashboar
                   createdAt = LocalDateTime.of(2024, 6, 1, 12, 0),
                   status = FriendshipStatus.ACCEPTED,
                   friendStatus = FriendshipStatus.NOT_ACCEPTED,
+                  joinedAt = LocalDateTime.of(2024, 6, 1, 12, 0),
+                  attendedEventsCount = 5,
                 ),
                 FriendItem(
                   friendId = 2,
@@ -36,6 +40,8 @@ class FriendsDashboardPreviewProvider : ViewModelPreviewProvider<FriendsDashboar
                   createdAt = LocalDateTime.of(2024, 6, 2, 14, 30),
                   status = FriendshipStatus.NOT_ACCEPTED,
                   friendStatus = FriendshipStatus.ACCEPTED,
+                  joinedAt = LocalDateTime.of(2024, 6, 2, 14, 30),
+                  attendedEventsCount = 3,
                 ),
                 FriendItem(
                   friendId = 3,
@@ -43,6 +49,8 @@ class FriendsDashboardPreviewProvider : ViewModelPreviewProvider<FriendsDashboar
                   createdAt = LocalDateTime.of(2024, 6, 3, 9, 15),
                   status = FriendshipStatus.ACCEPTED,
                   friendStatus = FriendshipStatus.ACCEPTED,
+                  joinedAt = LocalDateTime.of(2024, 6, 3, 9, 15),
+                  attendedEventsCount = 2,
                 ),
               ),
             )

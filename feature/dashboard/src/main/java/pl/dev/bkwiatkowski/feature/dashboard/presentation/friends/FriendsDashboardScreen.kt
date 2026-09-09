@@ -126,7 +126,7 @@ fun FriendsDashboardScreenContent(
                 ) {
                   CustomText(
                     text = friend.username,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyLarge,
                   )
 
                   Row {
@@ -138,6 +138,26 @@ fun FriendsDashboardScreenContent(
                       SmallButton(buttonData = buttonData)
                     }
                   }
+                }
+                friend.friendStats?.let { stats ->
+                  Spacer(modifier = Modifier.height(12.dp))
+
+                  CustomText(
+                    text = stats.eventCounter,
+                    style = MaterialTheme.typography.bodySmall,
+                  )
+                  Spacer(modifier = Modifier.height(4.dp))
+
+                  CustomText(
+                    text = stats.joinedAt,
+                    style = MaterialTheme.typography.bodySmall,
+                  )
+                  Spacer(modifier = Modifier.height(4.dp))
+
+                  CustomText(
+                    text = stats.friendsDate,
+                    style = MaterialTheme.typography.bodySmall,
+                  )
                 }
               }
             }

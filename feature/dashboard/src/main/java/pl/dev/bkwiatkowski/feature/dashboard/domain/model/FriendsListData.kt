@@ -18,6 +18,8 @@ data class FriendItem(
   val createdAt: LocalDateTime,
   val status: FriendshipStatus,
   val friendStatus: FriendshipStatus,
+  val joinedAt: LocalDateTime,
+  val attendedEventsCount: Int,
 )
 
 enum class FriendshipStatus {

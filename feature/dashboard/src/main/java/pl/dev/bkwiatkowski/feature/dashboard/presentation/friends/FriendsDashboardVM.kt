@@ -82,6 +82,13 @@ interface FriendsDashboardVM {
         val username: String,
         val acceptFriendRequestButtonData: SmallButtonData?,
         val removeFriendButtonData: SmallButtonData,
+        val friendStats: FriendStats?,
+      )
+
+      data class FriendStats(
+        val eventCounter: String,
+        val joinedAt: String,
+        val friendsDate: String,
       )
     }
 

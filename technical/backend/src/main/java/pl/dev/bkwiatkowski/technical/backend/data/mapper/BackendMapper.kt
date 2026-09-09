@@ -27,9 +27,9 @@ import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BECheckUserResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEFinishSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEFriend
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEFriendshipStatus
-import pl.dev.bkwiatkowski.technical.backend.domain.model.BEFinishSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEGetFriendsListResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMapWaypoint
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEMobileMap
@@ -228,6 +228,8 @@ object BackendMapper {
       createdAt = createdAt,
       status = status.toDomain(),
       friendStatus = friendStatus.toDomain(),
+      joinedAt = joinedAt,
+      attendedEventsCount = attendedEventsCount,
     )
 
   fun GetFriendsListResponseDto.toDomain(): BEGetFriendsListResponse =

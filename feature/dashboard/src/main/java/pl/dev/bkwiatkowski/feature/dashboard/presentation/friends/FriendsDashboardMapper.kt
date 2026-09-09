@@ -1,13 +1,12 @@
 package pl.dev.bkwiatkowski.feature.dashboard.presentation.friends
 
+import pl.dev.bkwiatkowski.common.core.time.DateFormatter
 import pl.dev.bkwiatkowski.common.core.usecase.Mapper
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.button.SmallButtonData
 import pl.dev.bkwiatkowski.common.ui.component.input.TextFieldData
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
-import pl.dev.bkwiatkowski.feature.dashboard.domain.model.FriendsListData
 import pl.dev.bkwiatkowski.feature.dashboard.domain.model.FriendshipStatus
-import javax.inject.Inject
 
 interface FriendsDashboardMapper : Mapper<FriendsDashboardMapper.Params, FriendsDashboardVM.ScreenData> {
   data class Params(
@@ -20,7 +19,9 @@ interface FriendsDashboardMapper : Mapper<FriendsDashboardMapper.Params, Friends
   )
 }
 
-class FriendsDashboardMapperImpl @Inject constructor() : FriendsDashboardMapper {
+class FriendsDashboardMapperImpl(
+  private val dateFormatter: DateFormatter,
+) : FriendsDashboardMapper {
   override fun invoke(params: FriendsDashboardMapper.Params): FriendsDashboardVM.ScreenData =
     when (params.state) {
       is FriendsDashboardVM.State.Initial.Loading -> FriendsDashboardVM.ScreenData.Empty(
@@ -66,6 +67,25 @@ class FriendsDashboardMapperImpl @Inject constructor() : FriendsDashboardMapper 
                 text = "Usuń",
                 onClick = { params.onRemoveFriendClick(friend.friendId) },
               ),
+              friendStats = FriendsDashboardVM.ScreenData.Main.FriendStats(
+                eventCounter = when (friend.attendedEventsCount) {
+                  0 -> "Nie uczestniczył/a w żadnych wydarzeniach"
+                  1 -> "Uczestniczył/a w 1 wydarzeniu"
+                  else -> "Uczestniczył/a w ${friend.attendedEventsCount} wydarzeniach"
+                },
+                joinedAt = dateFormatter.format(
+                  dateTime = friend.joinedAt,
+                  format = DateFormatter.Format.DATE_TIME,
+                ).let { date ->
+                  "Dołączył/a: $date"
+                },
+                friendsDate = dateFormatter.format(
+                  dateTime = friend.createdAt,
+                  format = DateFormatter.Format.DATE_TIME,
+                ).let { date ->
+                  "Znajomi od: $date"
+                },
+              ).takeIf { friend.status == FriendshipStatus.ACCEPTED && friend.friendStatus == FriendshipStatus.ACCEPTED },
             )
           },
           emptyLabel = "Nie dodano jeszcze znajomych, wyszukaj ich w polu powyżej",

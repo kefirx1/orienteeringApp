@@ -118,6 +118,8 @@ object DashboardSetupModule {
                 createdAt = friend.createdAt,
                 status = friend.status.toFeatureModel(),
                 friendStatus = friend.friendStatus.toFeatureModel(),
+                joinedAt = friend.joinedAt,
+                attendedEventsCount = friend.attendedEventsCount,
               )
             },
           )

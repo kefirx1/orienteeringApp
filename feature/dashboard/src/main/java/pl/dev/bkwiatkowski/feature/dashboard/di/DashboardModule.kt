@@ -43,7 +43,11 @@ object DashboardModule {
   )
 
   @Provides
-  fun provideFriendsDashboardMapper(): FriendsDashboardMapper = FriendsDashboardMapperImpl()
+  fun provideFriendsDashboardMapper(
+    dateFormatter: DateFormatter,
+  ): FriendsDashboardMapper = FriendsDashboardMapperImpl(
+    dateFormatter = dateFormatter,
+  )
 
   @Provides
   fun provideChangePasswordMapper(): ChangePasswordMapper = ChangePasswordMapperImpl()
