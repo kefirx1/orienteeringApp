@@ -7,6 +7,7 @@ import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReader
 import pl.dev.bkwiatkowski.feature.maps.domain.model.EventStatus
+import pl.dev.bkwiatkowski.feature.maps.domain.model.EventType
 
 interface EventDetailsMapper : Mapper<EventDetailsMapper.Params, EventDetailsVM.ScreenData> {
   data class Params(
@@ -52,6 +53,7 @@ class EventDetailsMapperImpl(
           EventStatus.COMPLETED -> null
         }.takeIf { params.state.event.session?.userCanJoin == true },
         snackbarHostState = params.snackbarHostState,
+        eventTypeDescriptionLabel = params.state.event.eventType.getEventTypeDescriptionLabel(),
       )
       is EventDetailsVM.State.Initialized.NotJoined.Error -> EventDetailsVM.ScreenData.ErrorScreen(
         onBackClick = params.onBackClick,
@@ -84,6 +86,7 @@ class EventDetailsMapperImpl(
           else -> null
         }.takeIf { params.state.event.session?.userCanJoin == true },
         snackbarHostState = params.snackbarHostState,
+        eventTypeDescriptionLabel = params.state.event.eventType.getEventTypeDescriptionLabel(),
       )
       is EventDetailsVM.State.Initialized.InitializedNoSession -> EventDetailsVM.ScreenData.MainNoSession(
         onBackClick = params.onBackClick,
@@ -96,6 +99,7 @@ class EventDetailsMapperImpl(
           "Rozpoczyna się: $time"
         },
         map = bitmapReader.decode(encoded = params.state.event.map.imageData),
+        eventTypeDescriptionLabel = params.state.event.eventType.getEventTypeDescriptionLabel(),
       )
       is EventDetailsVM.State.Initialized.InitializedFinished -> EventDetailsVM.ScreenData.MainFinished(
         onBackClick = params.onBackClick,
@@ -129,6 +133,12 @@ class EventDetailsMapperImpl(
             },
           )
         },
+        eventTypeDescriptionLabel = params.state.event.eventType.getEventTypeDescriptionLabel(),
       )
     }
+
+  private fun EventType.getEventTypeDescriptionLabel(): String = when (this) {
+    EventType.ONLINE -> "Wydarzenie można rozegrać tylko raz, jedynie w konkretnym momencie."
+    EventType.OFFLINE -> "Wydarzenie można rozegrać wielokrotnie, w dowolnym momencie."
+  }
 }

@@ -97,7 +97,12 @@ fun EventDetailsNoSessionScreenContent(
           text = data.startDateTime,
           style = MaterialTheme.typography.bodySmall,
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        CustomText(
+          text = data.eventTypeDescriptionLabel,
+          style = MaterialTheme.typography.bodySmall,
+        )
       }
     },
   )
@@ -144,7 +149,12 @@ fun EventDetailsWithSessionScreenContent(
           text = data.startDateTime,
           style = MaterialTheme.typography.bodySmall,
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        CustomText(
+          text = data.eventTypeDescriptionLabel,
+          style = MaterialTheme.typography.bodySmall,
+        )
       }
     },
     bottomBar = {
@@ -201,6 +211,12 @@ fun EventDetailsFinishedScreenContent(
 
         CustomText(
           text = data.startDateTime,
+          style = MaterialTheme.typography.bodySmall,
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        CustomText(
+          text = data.eventTypeDescriptionLabel,
           style = MaterialTheme.typography.bodySmall,
         )
 

@@ -98,6 +98,7 @@ interface EventDetailsVM {
       override val onBackClick: () -> Unit,
       val snackbarHostState: SnackbarHostState,
       val event: MobileEventDetails,
+      val eventTypeDescriptionLabel: String,
       val topAppBarData: TopAppBarData,
       val startDateTime: String,
       val map: Bitmap?,
@@ -107,6 +108,7 @@ interface EventDetailsVM {
     data class MainNoSession(
       override val onBackClick: () -> Unit,
       val event: MobileEventDetails,
+      val eventTypeDescriptionLabel: String,
       val topAppBarData: TopAppBarData,
       val startDateTime: String,
       val map: Bitmap?,
@@ -115,6 +117,7 @@ interface EventDetailsVM {
     data class MainFinished(
       override val onBackClick: () -> Unit,
       val event: MobileEventDetails,
+      val eventTypeDescriptionLabel: String,
       val topAppBarData: TopAppBarData,
       val startDateTime: String,
       val map: Bitmap?,
