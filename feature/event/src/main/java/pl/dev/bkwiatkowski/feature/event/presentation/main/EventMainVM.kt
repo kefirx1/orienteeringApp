@@ -2,8 +2,6 @@ package pl.dev.bkwiatkowski.feature.event.presentation.main
 
 import android.location.Location
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -148,7 +146,6 @@ interface EventMainVM {
 
   val nestedNavAction: SharedFlow<Action.NestedNavigation>
   val screenData: StateFlow<ScreenData>
-  var lifecycleOwner: LifecycleOwner
 }
 
 @HiltViewModel(assistedFactory = EventMainVMImpl.Factory::class)
@@ -161,7 +158,6 @@ class EventMainVMImpl @AssistedInject constructor(
   private val gpsManager: GpsManager,
   private val permissionsManager: PermissionsManager,
   private val openAppSettingsIntentUC: OpenAppSettingsIntentUC,
-  private val lifecycleMonitor: LifecycleMonitor,
   private val networkMonitor: NetworkMonitor,
   private val findWaypointFromUserLocationUC: FindWaypointFromUserLocationUC,
   private val getEventDetailsUC: GetEventDetailsUC,
@@ -170,9 +166,7 @@ class EventMainVMImpl @AssistedInject constructor(
   lifecycleMonitorImpl: LifecycleMonitorImpl,
   ) : CustomViewModel<EventMainVM.State, EventMainVM.ScreenData, EventMainVM.Action.Navigation>(
   initialStateValue = EventMainVM.State.Initial.Content,
-), EventMainVM, LifecycleEventObserver by lifecycleMonitorImpl {
-
-  override lateinit var lifecycleOwner: LifecycleOwner
+), EventMainVM, LifecycleMonitor by lifecycleMonitorImpl {
 
   override val screenData: StateFlow<EventMainVM.ScreenData> = _screenData
 
@@ -187,6 +181,24 @@ class EventMainVMImpl @AssistedInject constructor(
 
   init {
     initState()
+    setupLifecycleMonitoring()
+  }
+
+  private fun setupLifecycleMonitoring() {
+    viewModelScope.launch {
+      screenMonitor().collect { lifecycleState ->
+        when (lifecycleState) {
+          Lifecycle.Event.ON_START -> {
+            if (state.value is EventMainVM.State.PermissionDenied) {
+              if (ensureLocationPermission()) {
+                EventMainVM.State.Initial.Content.override()
+              }
+            }
+          }
+          else -> {}
+        }
+      }
+    }
   }
 
   fun dispatchAction(action: EventMainVM.Action) {
@@ -335,17 +347,7 @@ class EventMainVMImpl @AssistedInject constructor(
           }
         }
       }
-      is EventMainVM.State.PermissionDenied -> {
-        stateScope.launch {
-          lifecycleMonitor.activityMonitor().collect { lifecycleState ->
-            if (lifecycleState == Lifecycle.Event.ON_RESUME) {
-              if (ensureLocationPermission()) {
-                EventMainVM.State.Initial.Content.override()
-              }
-            }
-          }
-        }
-      }
+      is EventMainVM.State.PermissionDenied -> {}
       is EventMainVM.State.Initial.Error -> {}
 
       is EventMainVM.State.Active.Error -> {}

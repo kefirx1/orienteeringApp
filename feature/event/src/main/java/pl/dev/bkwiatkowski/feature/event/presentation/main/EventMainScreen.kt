@@ -23,8 +23,8 @@ import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
 import pl.dev.bkwiatkowski.common.ui.component.emptyscreen.EmptyScreen
 import pl.dev.bkwiatkowski.common.ui.component.permissions.PermissionRequester
 import pl.dev.bkwiatkowski.common.ui.component.text.CustomText
-import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 import pl.dev.bkwiatkowski.common.ui.error.ErrorScreen
+import pl.dev.bkwiatkowski.common.ui.theme.OrienteeringAppTheme
 import pl.dev.bkwiatkowski.feature.event.presentation.main.provider.EventMainPreviewProvider
 
 @Composable
@@ -37,7 +37,7 @@ fun EventMainScreen(
   val lifecycleOwner = LocalLifecycleOwner.current
 
   LaunchedEffect(Unit) {
-    viewModel.lifecycleOwner = lifecycleOwner
+    (viewModel as? EventMainVMImpl)?.setScreenLifecycleOwner(lifecycleOwner)
   }
 
   when (val screenData = state) {
