@@ -22,9 +22,8 @@ class BackendAuthenticationRepositoryImpl(
   private val clientFactory: HttpClientFactory,
 ) : BackendAuthenticationRepository {
 
-  private val client by lazy {
-    clientFactory.create()
-  }
+  private val client
+    get() = clientFactory.create()
 
   override suspend fun registerUser(
     request: MobileSignUpRequest,

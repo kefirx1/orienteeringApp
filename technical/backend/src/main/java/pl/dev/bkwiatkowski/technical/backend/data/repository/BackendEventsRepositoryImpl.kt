@@ -11,11 +11,12 @@ import pl.dev.bkwiatkowski.common.network.HttpClientFactory
 import pl.dev.bkwiatkowski.technical.backend.api.CheckUserInEventSession
 import pl.dev.bkwiatkowski.technical.backend.api.FinishEventSession
 import pl.dev.bkwiatkowski.technical.backend.api.GetFinishedSessionParticipants
+import pl.dev.bkwiatkowski.technical.backend.api.GetLastMobileEvent
 import pl.dev.bkwiatkowski.technical.backend.api.GetMobileEventById
 import pl.dev.bkwiatkowski.technical.backend.api.GetMobileEvents
-import pl.dev.bkwiatkowski.technical.backend.api.GetLastMobileEvent
 import pl.dev.bkwiatkowski.technical.backend.api.GetSessionWaypointDetails
 import pl.dev.bkwiatkowski.technical.backend.api.JoinEventSession
+import pl.dev.bkwiatkowski.technical.backend.api.PostSessionWaypointVisits
 import pl.dev.bkwiatkowski.technical.backend.api.UploadSessionImage
 import pl.dev.bkwiatkowski.technical.backend.data.FinishSessionResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.IsUserInSessionResponseDto
@@ -23,20 +24,19 @@ import pl.dev.bkwiatkowski.technical.backend.data.JoinSessionRequestDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileEventDetailResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileEventListResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.MobileLastEventResponseDto
-import pl.dev.bkwiatkowski.technical.backend.data.SessionWaypointDetailsResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.SessionParticipantResponseDto
+import pl.dev.bkwiatkowski.technical.backend.data.SessionWaypointDetailsResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.UploadImageRequest
-import pl.dev.bkwiatkowski.technical.backend.api.PostSessionWaypointVisits
-import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitDto
 import pl.dev.bkwiatkowski.technical.backend.data.UploadImageResponse
+import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitDto
 import pl.dev.bkwiatkowski.technical.backend.data.mapper.BackendMapper.toDomain
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEFinishSessionResponse
-import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionWaypointDetailsResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionParticipant
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionWaypointDetailsResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUploadImageResponse
+import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUserSessionStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventListResponse
-import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUserSessionStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisit
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepository
 
@@ -44,9 +44,9 @@ class BackendEventsRepositoryImpl(
   private val callMediator: CallMediator,
   private val clientFactory: HttpClientFactory,
 ) : BackendEventsRepository {
-  private val client by lazy {
-    clientFactory.create()
-  }
+
+  private val client
+    get() = clientFactory.create()
 
   override suspend fun getMobileEventDetails(eventId: Int): Either<DomainError, MobileEventDetailResponse> =
     callMediator<GetMobileEventById> {

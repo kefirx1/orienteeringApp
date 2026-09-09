@@ -32,7 +32,8 @@ class BackendUserRepositoryImpl(
   private val clientFactory: HttpClientFactory,
 ) : BackendUserRepository {
 
-  private val client by lazy { clientFactory.create() }
+  private val client
+    get() = clientFactory.create()
 
   override suspend fun getUserSessions(userId: Int): Either<DomainError, List<BEUserSession>> =
     callMediator<GetUserSessions> {

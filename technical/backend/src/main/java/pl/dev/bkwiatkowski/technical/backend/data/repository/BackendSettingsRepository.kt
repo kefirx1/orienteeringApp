@@ -21,9 +21,8 @@ class BackendSettingsRepositoryImpl(
   private val clientFactory: HttpClientFactory,
 ) : BackendSettingsRepository {
 
-  private val client by lazy {
-    clientFactory.create()
-  }
+  private val client
+    get() = clientFactory.create()
 
   override suspend fun getMobileSettings(): Either<DomainError, MobileSettingsResponse> =
     callMediator<GetMobileSettings> {

@@ -35,9 +35,9 @@ class WebSocketManagerImpl(
   private val httpClientFactory: HttpClientFactory,
 ) : WebSocketManager {
 
-  val client by lazy {
-    httpClientFactory.createWebSocketClient()
-  }
+  private val client
+    get() = httpClientFactory.createWebSocketClient()
+
 
   private val _incoming = MutableSharedFlow<String>(
     replay = 0,
