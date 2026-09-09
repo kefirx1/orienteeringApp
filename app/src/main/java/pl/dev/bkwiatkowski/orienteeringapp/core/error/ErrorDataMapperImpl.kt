@@ -37,6 +37,13 @@ class ErrorDataMapperImpl : ErrorDataMapper {
           onRetryButtonClick = params.onRetryClick,
         )
       }
+      is DomainError.UnavailableServer -> {
+        return ErrorScreenData(
+          customMessage = params.customMessage ?: "Aplikacja nie jest w stanie połączyć się z serwerem. Spróbuj ponownie później",
+          onCloseButtonClick = params.onCloseClick,
+          onRetryButtonClick = params.onRetryClick,
+        )
+      }
     }
   }
 }

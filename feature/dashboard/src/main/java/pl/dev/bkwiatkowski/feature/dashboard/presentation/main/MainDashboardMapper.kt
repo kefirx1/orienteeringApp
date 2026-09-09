@@ -83,7 +83,11 @@ class MainDashboardMapperImpl : MainDashboardMapper {
         onBackClick = params.onBackClick,
         topBarData = TopAppBarData.Empty,
         welcomeLabel = "Witaj ${params.state.stateData.userName}!",
-        welcomeDescription = "Nie masz połączenia z internetem, niektóre funkcje mogą być niedostępne",
+        welcomeDescription = if (params.state.stateData.noNetwork) {
+          "Brak połączenia z internetem. Sprawdź połączenie i spróbuj ponownie"
+        } else {
+          "Nie można pobrać danych z serwera. Spróbuj ponownie później"
+        },
         refreshStateButton = SmallButtonData.Secondary(
           text = "Odśwież",
           onClick = params.onRefreshState,

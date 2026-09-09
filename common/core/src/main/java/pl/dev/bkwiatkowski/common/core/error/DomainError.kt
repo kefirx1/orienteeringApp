@@ -13,6 +13,8 @@ sealed interface DomainError {
 
   data object NoNetwork : DomainError
 
+  data object UnavailableServer : DomainError
+
   data class Network(
     val code: Code,
     val message: String? = null,

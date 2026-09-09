@@ -44,6 +44,7 @@ interface MainDashboardVM {
         val continueEventId: Int? = null,
         val continueSessionUuid: String? = null,
         val userCanJoin: Boolean,
+        val noNetwork: Boolean,
       )
 
       data class Content(
@@ -219,6 +220,21 @@ class MainDashboardVMImpl @Inject constructor(
                           continueEventId = last?.id,
                           continueSessionUuid = last?.session?.id,
                           userCanJoin = userCanJoin,
+                          noNetwork = true,
+                        ),
+                      ).override()
+                    }
+                    is DomainError.UnavailableServer -> {
+                      val last = dashboardInteractor.getLastActiveSavedEvent().getRightOrNull()
+                      val userCanJoin = last?.session?.userCanJoin == true
+
+                      MainDashboardVM.State.Offline.Content(
+                        stateData = MainDashboardVM.State.Offline.StateData(
+                          userName = dashboardInteractor.getUserName().getRightOr(default = ""),
+                          continueEventId = last?.id,
+                          continueSessionUuid = last?.session?.id,
+                          userCanJoin = userCanJoin,
+                          noNetwork = false,
                         ),
                       ).override()
                     }

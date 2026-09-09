@@ -27,11 +27,6 @@ class CallMediatorImpl(
   private val jsonSerializer: JsonSerializer,
 ) : CallMediator {
 
-  private val serverUnavailableError = DomainError.Network(
-    code = DomainError.Network.Code.SERVICE_UNAVAILABLE,
-    message = "Aplikacja nie jest w stanie połączyć się z serwerem. Spróbuj ponownie później",
-  )
-
   override suspend fun <T> invoke(call: suspend () -> HttpResponse): Either<DomainError, HttpResponse> = either {
     try {
       val response = call()
@@ -46,15 +41,15 @@ class CallMediatorImpl(
     } catch (e: ResponseException) {
       raise(error = handleCodeError(e = e))
     } catch (_: UnknownHostException) {
-      raise(error = serverUnavailableError)
+      raise(error = DomainError.UnavailableServer)
     } catch (_: ConnectException) {
       if (networkMonitor.getCurrentStatus() == NetworkStatus.CONNECTED) {
-        raise(error = serverUnavailableError)
+        raise(error = DomainError.UnavailableServer)
       } else {
         raise(error = DomainError.NoNetwork)
       }
     } catch (_: SocketTimeoutException) {
-      raise(error = serverUnavailableError)
+      raise(error = DomainError.UnavailableServer)
     } catch (e: DefaultEitherException) {
       raise(error = e.error)
     } catch (e: Exception) {

@@ -80,6 +80,7 @@ internal class EitherScopeImpl : EitherScope {
       is DomainError.Business -> error.message
       is DomainError.Custom -> error.e?.message ?: "Unknown error"
       is DomainError.NoNetwork -> "No network connection"
+      is DomainError.UnavailableServer -> "Server is unavailable"
       is DomainError.Network -> error.message ?: "Network error with code ${error.code.value}"
     }
 
