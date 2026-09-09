@@ -21,6 +21,7 @@ import pl.dev.bkwiatkowski.common.core.device.SessionIdProvider
 import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
 import pl.dev.bkwiatkowski.common.core.image.ImageCompressor
 import pl.dev.bkwiatkowski.common.core.intents.OpenAppSettingsIntentUC
+import pl.dev.bkwiatkowski.common.core.intents.OpenMapIntentUC
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.localization.GpsManager
 import pl.dev.bkwiatkowski.common.core.network.NetworkMonitor
@@ -42,6 +43,7 @@ import pl.dev.bkwiatkowski.common.intents.IntentsActivityConnector
 import pl.dev.bkwiatkowski.common.intents.IntentsManager
 import pl.dev.bkwiatkowski.common.intents.IntentsManagerImpl
 import pl.dev.bkwiatkowski.common.intents.usecase.OpenAppSettingsIntentUCImpl
+import pl.dev.bkwiatkowski.common.intents.usecase.OpenMapIntentUCImpl
 import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitor
 import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitorActivityConnector
 import pl.dev.bkwiatkowski.common.lifecycle.LifecycleMonitorImpl
@@ -336,6 +338,13 @@ object CommonModule {
   fun provideOpenAppSettingsIntentUC(
     intentsManager: IntentsManager,
   ): OpenAppSettingsIntentUC = OpenAppSettingsIntentUCImpl(
+    intentsManager = intentsManager,
+  )
+
+  @Provides
+  fun provideOpenMapIntentUC(
+    intentsManager: IntentsManager,
+  ): OpenMapIntentUC = OpenMapIntentUCImpl(
     intentsManager = intentsManager,
   )
 

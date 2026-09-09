@@ -27,6 +27,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import pl.dev.bkwiatkowski.common.ui.component.addDefaultPadding
 import pl.dev.bkwiatkowski.common.ui.component.basescaffold.BaseScaffold
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButton
+import pl.dev.bkwiatkowski.common.ui.component.button.SmallButton
 import pl.dev.bkwiatkowski.common.ui.component.divider.Divider
 import pl.dev.bkwiatkowski.common.ui.component.emptyscreen.EmptyScreen
 import pl.dev.bkwiatkowski.common.ui.error.ErrorScreen
@@ -103,6 +104,9 @@ fun EventDetailsNoSessionScreenContent(
           text = data.eventTypeDescriptionLabel,
           style = MaterialTheme.typography.bodySmall,
         )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        SmallButton(buttonData = data.startLocationButtonData)
       }
     },
   )
@@ -155,6 +159,9 @@ fun EventDetailsWithSessionScreenContent(
           text = data.eventTypeDescriptionLabel,
           style = MaterialTheme.typography.bodySmall,
         )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        SmallButton(buttonData = data.startLocationButtonData)
       }
     },
     bottomBar = {

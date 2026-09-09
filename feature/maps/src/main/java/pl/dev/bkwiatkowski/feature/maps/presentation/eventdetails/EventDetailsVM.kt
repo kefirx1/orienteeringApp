@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
 import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
 import pl.dev.bkwiatkowski.common.core.intents.OpenAppSettingsIntentUC
+import pl.dev.bkwiatkowski.common.core.intents.OpenMapIntentUC
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
@@ -24,6 +25,7 @@ import pl.dev.bkwiatkowski.common.permission.AppPermission
 import pl.dev.bkwiatkowski.common.permission.PermissionResult
 import pl.dev.bkwiatkowski.common.permission.PermissionsManager
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
+import pl.dev.bkwiatkowski.common.ui.component.button.SmallButtonData
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.common.ui.snackbar.SnackbarHost
 import pl.dev.bkwiatkowski.common.ui.snackbar.SnackbarHostImpl
@@ -89,6 +91,7 @@ interface EventDetailsVM {
     data object SetDeniedForeverLocationPermission : Action
     data object OpenAppSettings : Action
     data object ToEventSession : Action
+    data object OpenStartLocationMap : Action
   }
 
   sealed interface ScreenData {
@@ -103,6 +106,7 @@ interface EventDetailsVM {
       val startDateTime: String,
       val map: Bitmap?,
       val playButtonData: LargeButtonData?,
+      val startLocationButtonData: SmallButtonData,
     ) : ScreenData
 
     data class MainNoSession(
@@ -112,6 +116,7 @@ interface EventDetailsVM {
       val topAppBarData: TopAppBarData,
       val startDateTime: String,
       val map: Bitmap?,
+      val startLocationButtonData: SmallButtonData,
     ) : ScreenData
 
     data class MainFinished(
@@ -157,6 +162,7 @@ class EventDetailsVMImpl @AssistedInject constructor(
   private val runWithLoaderUC: RunWithLoaderUC,
   private val errorDataMapper: ErrorDataMapper,
   private val openAppSettingsIntentUC: OpenAppSettingsIntentUC,
+  private val openMapIntentUC: OpenMapIntentUC,
   snackbarHost: SnackbarHostImpl,
   lifecycleMonitor: LifecycleMonitorImpl,
   ) : CustomViewModel<EventDetailsVM.State, EventDetailsVM.ScreenData, EventDetailsVM.Action.Navigation>(
@@ -235,6 +241,12 @@ class EventDetailsVMImpl @AssistedInject constructor(
               sessionUuid = currentState.session.id,
             ).emit()
           }
+          is EventDetailsVM.Action.OpenStartLocationMap -> {
+            openMapStartLocation(
+              latitude = currentState.event.startLocationX,
+              longitude = currentState.event.startLocationY,
+            )
+          }
           else -> {}
         }
         is EventDetailsVM.State.Initialized.NotJoined.Content -> when (action) {
@@ -280,6 +292,12 @@ class EventDetailsVMImpl @AssistedInject constructor(
           is EventDetailsVM.Action.OpenAppSettings -> {
             openAppSettingsIntentUC(UseCase.Params.Empty)
           }
+          is EventDetailsVM.Action.OpenStartLocationMap -> {
+            openMapStartLocation(
+              latitude = currentState.event.startLocationX,
+              longitude = currentState.event.startLocationY,
+            )
+          }
           else -> {}
         }
         is EventDetailsVM.State.Initialized.NotJoined.Error -> when (action) {
@@ -295,6 +313,12 @@ class EventDetailsVMImpl @AssistedInject constructor(
             EventDetailsVM.Action.Navigation.BackToDashboard.emit()
           } else {
             EventDetailsVM.Action.Navigation.Back.emit()
+          }
+          is EventDetailsVM.Action.OpenStartLocationMap -> {
+            openMapStartLocation(
+              latitude = currentState.event.startLocationX,
+              longitude = currentState.event.startLocationY,
+            )
           }
           else -> {}
         }
@@ -370,7 +394,8 @@ class EventDetailsVMImpl @AssistedInject constructor(
       snackbarHostState = snackbarHost,
       onBackClick = { dispatchAction(EventDetailsVM.Action.Back) },
       onPlayClick = { dispatchAction(EventDetailsVM.Action.ToEventSession) },
-      onGoToSettingsClick = { dispatchAction(EventDetailsVM.Action.OpenAppSettings) }
+      onGoToSettingsClick = { dispatchAction(EventDetailsVM.Action.OpenAppSettings) },
+      onOpenStartLocationMapClick = { dispatchAction(EventDetailsVM.Action.OpenStartLocationMap) }
     ),
   )
 
@@ -391,5 +416,18 @@ class EventDetailsVMImpl @AssistedInject constructor(
         false
       }
     }
+  }
+
+  private suspend fun openMapStartLocation(
+    latitude: Float,
+    longitude: Float,
+  ) {
+    openMapIntentUC(
+      params = OpenMapIntentUC.Params(
+        latitude = latitude,
+        longitude = longitude,
+        pinLabel = "Lokalizacja startu",
+      )
+    )
   }
 }

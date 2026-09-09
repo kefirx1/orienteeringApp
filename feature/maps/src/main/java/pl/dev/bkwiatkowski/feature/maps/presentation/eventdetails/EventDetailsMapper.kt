@@ -4,6 +4,7 @@ import androidx.compose.material3.SnackbarHostState
 import pl.dev.bkwiatkowski.common.core.time.DateFormatter
 import pl.dev.bkwiatkowski.common.core.usecase.Mapper
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
+import pl.dev.bkwiatkowski.common.ui.component.button.SmallButtonData
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReader
 import pl.dev.bkwiatkowski.feature.maps.domain.model.EventStatus
@@ -16,6 +17,7 @@ interface EventDetailsMapper : Mapper<EventDetailsMapper.Params, EventDetailsVM.
     val onBackClick: () -> Unit,
     val onPlayClick: () -> Unit,
     val onGoToSettingsClick: () -> Unit,
+    val onOpenStartLocationMapClick: () -> Unit,
   )
 }
 
@@ -54,6 +56,10 @@ class EventDetailsMapperImpl(
         }.takeIf { params.state.event.session?.userCanJoin == true },
         snackbarHostState = params.snackbarHostState,
         eventTypeDescriptionLabel = params.state.event.eventType.getEventTypeDescriptionLabel(),
+        startLocationButtonData = SmallButtonData.Primary(
+          text = "Lokalizacja startu",
+          onClick = params.onOpenStartLocationMapClick,
+        ),
       )
       is EventDetailsVM.State.Initialized.NotJoined.Error -> EventDetailsVM.ScreenData.ErrorScreen(
         onBackClick = params.onBackClick,
@@ -87,6 +93,10 @@ class EventDetailsMapperImpl(
         }.takeIf { params.state.event.session?.userCanJoin == true },
         snackbarHostState = params.snackbarHostState,
         eventTypeDescriptionLabel = params.state.event.eventType.getEventTypeDescriptionLabel(),
+        startLocationButtonData = SmallButtonData.Primary(
+          text = "Lokalizacja startu",
+          onClick = params.onOpenStartLocationMapClick,
+        ),
       )
       is EventDetailsVM.State.Initialized.InitializedNoSession -> EventDetailsVM.ScreenData.MainNoSession(
         onBackClick = params.onBackClick,
@@ -100,6 +110,10 @@ class EventDetailsMapperImpl(
         },
         map = bitmapReader.decode(encoded = params.state.event.map.imageData),
         eventTypeDescriptionLabel = params.state.event.eventType.getEventTypeDescriptionLabel(),
+        startLocationButtonData = SmallButtonData.Primary(
+          text = "Lokalizacja startu",
+          onClick = params.onOpenStartLocationMapClick,
+        ),
       )
       is EventDetailsVM.State.Initialized.InitializedFinished -> EventDetailsVM.ScreenData.MainFinished(
         onBackClick = params.onBackClick,

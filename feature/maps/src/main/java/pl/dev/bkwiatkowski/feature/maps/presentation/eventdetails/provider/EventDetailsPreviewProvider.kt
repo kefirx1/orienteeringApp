@@ -178,6 +178,7 @@ class EventDetailsPreviewProvider : ViewModelPreviewProvider<EventDetailsVM, Eve
       onBackClick = {},
       onPlayClick = {},
       onGoToSettingsClick = {},
+      onOpenStartLocationMapClick = {},
       snackbarHostState = mock.snackbarHost,
     )
 }
