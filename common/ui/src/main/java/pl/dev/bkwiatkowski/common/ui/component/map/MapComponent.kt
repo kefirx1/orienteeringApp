@@ -16,8 +16,11 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -100,9 +103,10 @@ fun MapComponent(
   var indexOfVisibleMarkerInfo by remember { mutableIntStateOf(value = -1) }
   var isInfoCardVisible by remember { mutableStateOf(value = false) }
   var clusterItems by remember { mutableStateOf<List<MarkerData>>(emptyList()) }
+  var lastClusterUpdateTime by remember { mutableLongStateOf(value = 0L) }
 
   val clusterManager = remember { mutableStateOf<ClusterManager<MarkerData>?>(null) }
-  val pagerState = rememberPagerState { clusterItems.size }
+  val pagerState = rememberPagerState(pageCount = { clusterItems.size })
   val cameraPositionState = rememberCameraPositionState {
     position = CameraPosition.fromLatLngZoom(
       LatLng(data.initialPosition.latitude, data.initialPosition.longitude),
@@ -130,42 +134,64 @@ fun MapComponent(
         isMapLoaded = true
       }
     ) {
-      MapEffect(data.markers) { map ->
-        val manager = clusterManager.value ?: ClusterManager<MarkerData>(context, map).apply {
-          renderer = ClusterRenderer(
-            context = context,
-            map = map,
-            clusterManager = this,
-          )
 
-          setOnClusterItemClickListener { marker ->
-            clusterItems = emptyList()
-            indexOfVisibleMarkerInfo = data.markers.indexOf(marker)
-            if (indexOfVisibleMarkerInfo != -1) {
-              isInfoCardVisible = true
+      MapEffect(Unit) { map ->
+        if (clusterManager.value == null) {
+          val manager = ClusterManager<MarkerData>(context, map).apply {
+            renderer = ClusterRenderer(
+              context = context,
+              map = map,
+              clusterManager = this,
+            )
+
+            setOnClusterItemClickListener { marker ->
+              clusterItems = emptyList()
+              indexOfVisibleMarkerInfo = data.markers.indexOf(marker)
+              if (indexOfVisibleMarkerInfo != -1) {
+                isInfoCardVisible = true
+              }
+              true
             }
-            true
+
+            setOnClusterClickListener { cluster ->
+              val items = cluster.items.toList()
+              if (items.isNotEmpty()) {
+                clusterItems = items
+                indexOfVisibleMarkerInfo = 0
+                isInfoCardVisible = true
+              }
+              true
+            }
           }
 
-          setOnClusterClickListener { cluster ->
-            val items = cluster.items.toList()
-            if (items.isNotEmpty()) {
-              clusterItems = items
-              indexOfVisibleMarkerInfo = 0
-              isInfoCardVisible = true
+          map.setOnCameraIdleListener {
+            val now = System.currentTimeMillis()
+            if (now - lastClusterUpdateTime > 200) {
+              manager.cluster()
+              lastClusterUpdateTime = now
             }
-            true
           }
 
-          clusterManager.value = this
+          map.setOnMarkerClickListener(manager)
+          clusterManager.value = manager
         }
+      }
 
-        map.setOnCameraIdleListener(manager)
-        map.setOnMarkerClickListener(manager)
+      LaunchedEffect(data.markers, isMapLoaded) {
+        if (isMapLoaded) {
+          clusterManager.value?.apply {
+            clearItems()
+            addItems(data.markers)
+            cluster()
+          }
+        }
+      }
 
-        manager.clearItems()
-        manager.addItems(data.markers)
-        manager.cluster()
+      DisposableEffect(Unit) {
+        onDispose {
+          clusterManager.value?.clearItems()
+          clusterManager.value = null
+        }
       }
     }
 
