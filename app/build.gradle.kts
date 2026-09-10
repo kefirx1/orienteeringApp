@@ -36,7 +36,7 @@ android {
     create("prod") {
       dimension = "environment"
 
-      buildConfigField("String", "API_BASE_URL", "\"https://api.example.com\"")
+      buildConfigField("String", "API_BASE_URL", "\"https://orienteeringapp.pl\"")
     }
   }
 

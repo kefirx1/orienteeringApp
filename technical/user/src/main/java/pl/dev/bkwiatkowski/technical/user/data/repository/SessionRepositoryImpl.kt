@@ -55,6 +55,11 @@ class SessionRepositoryImpl(
   override suspend fun clearAllTokens(): Either<DomainError, Unit> = either {
     sessionManager.clear()
     dataStoreProvider.clearDataStoreData(dataStoreKey = REFRESH_TOKEN_DATA_STORE_NAME).getRight()
+  }.onRight {
+    Log.i(
+      tag = Tag(this),
+      message = "Cleared all tokens successfully",
+    )
   }
 
 }

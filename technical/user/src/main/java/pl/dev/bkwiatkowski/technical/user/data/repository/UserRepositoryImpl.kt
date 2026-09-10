@@ -1,6 +1,8 @@
 package pl.dev.bkwiatkowski.technical.user.data.repository
 
 import pl.dev.bkwiatkowski.common.core.error.DomainError
+import pl.dev.bkwiatkowski.common.core.logger.Log
+import pl.dev.bkwiatkowski.common.core.logger.Tag
 import pl.dev.bkwiatkowski.common.core.storage.provider.DataStoreProvider
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.technical.user.data.mapper.UserMapper.toDomain
@@ -33,5 +35,10 @@ class UserRepositoryImpl(
   override suspend fun clearUserSettings(): Either<DomainError, Unit> =
     dataStoreProvider.clearDataStoreData(
       dataStoreKey = USER_SETTINGS_STORE_NAME,
-    )
+    ).onRight {
+      Log.i(
+        tag = Tag(this@UserRepositoryImpl),
+        message = "Cleared user settings successfully",
+      )
+    }
 }

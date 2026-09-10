@@ -19,8 +19,8 @@ class LogoutUCImpl(
   private val userFlagsInteractor: UserFlagsInteractor,
 ) : LogoutUC {
   override suspend fun invoke(params: UseCase.Params.Empty): Either<DomainError, Unit> = either {
-    userEventInteractor.clearData().getRight()
-    userFlagsInteractor.clearData().getRight()
+    userEventInteractor.clearData()
+    userFlagsInteractor.clearData()
     sessionRepository.clearAllTokens().getRight()
     userRepository.clearUserSettings().getRight()
   }
