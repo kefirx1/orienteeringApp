@@ -24,7 +24,8 @@ class GetSessionWaypointsUCImpl(
     eventBackendInteractor.getSessionWaypoints(sessionUuid = params.sessionUuid).fold(
       onLeft = { error ->
         when (error) {
-          is DomainError.NoNetwork -> {
+          is DomainError.NoNetwork,
+          is DomainError.UnavailableServer -> {
             val visits = eventRepository.getAllVisitsForSession(params.sessionUuid).getRight()
             WaypointsVisitedResponse(
               waypoints = visits.map { eventWaypoint ->

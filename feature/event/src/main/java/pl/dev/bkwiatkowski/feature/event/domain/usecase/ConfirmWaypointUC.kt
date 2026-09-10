@@ -54,7 +54,7 @@ class ConfirmWaypointUCImpl(
       sessionUuid = params.sessionUuid,
       imageBase64 = base64Coder.encode(data = bytes).getRight(),
     ).getRightOrElse { error ->
-      if (error is DomainError.NoNetwork) {
+      if (error is DomainError.NoNetwork || error is DomainError.UnavailableServer) {
         return@either ConfirmWaypointUC.Result(
           visitedAt = visitedAt,
         )

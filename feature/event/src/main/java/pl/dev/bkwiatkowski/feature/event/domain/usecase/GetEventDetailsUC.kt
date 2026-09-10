@@ -23,7 +23,8 @@ class GetEventDetailsUCImpl(
     eventBackendInteractor.getMobileEventDetails(eventId = params.eventId).fold(
       onLeft = { error ->
         when (error) {
-          is DomainError.NoNetwork -> eventRepository.getEventDetails(params.eventId).getRight()
+          is DomainError.NoNetwork,
+          is DomainError.UnavailableServer -> eventRepository.getEventDetails(params.eventId).getRight()
           else -> raise(error = error)
         }
       },

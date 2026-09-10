@@ -203,12 +203,12 @@ class EventMainVMImpl @AssistedInject constructor(
       when (val currentState = state.value) {
         is EventMainVM.State.Initial.Content -> when (action) {
           is EventMainVM.Action.Back -> EventMainVM.Action.Navigation.Back.emit()
-          is EventMainVM.Action.RetryLoad -> EventMainVM.State.Initial.Content.override()
           else -> {}
         }
 
         is EventMainVM.State.Initial.Error -> when (action) {
           is EventMainVM.Action.Back -> EventMainVM.Action.Navigation.Back.emit()
+          is EventMainVM.Action.RetryLoad -> EventMainVM.State.Initial.Content.override()
           else -> {}
         }
 

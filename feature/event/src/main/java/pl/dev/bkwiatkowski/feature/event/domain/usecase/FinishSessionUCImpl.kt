@@ -68,7 +68,8 @@ class FinishSessionUCImpl @Inject constructor(
     response
   }.mapLeft { error ->
     when (error) {
-      is DomainError.NoNetwork -> {
+      is DomainError.NoNetwork,
+      is DomainError.UnavailableServer -> {
         DomainError.Business(
           message = "Aktualnie nie posiadasz połączenia z siecią - spróbuj ponownie później aby potwierdzić ukończenie wydarzenia",
           primaryButtonLabel = "Spróbuj ponownie",
