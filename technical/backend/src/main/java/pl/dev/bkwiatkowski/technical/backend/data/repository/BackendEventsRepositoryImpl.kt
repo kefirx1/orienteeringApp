@@ -16,6 +16,7 @@ import pl.dev.bkwiatkowski.technical.backend.api.GetMobileEventById
 import pl.dev.bkwiatkowski.technical.backend.api.GetMobileEvents
 import pl.dev.bkwiatkowski.technical.backend.api.GetSessionWaypointDetails
 import pl.dev.bkwiatkowski.technical.backend.api.JoinEventSession
+import pl.dev.bkwiatkowski.technical.backend.api.PostSessionWaypointVisit
 import pl.dev.bkwiatkowski.technical.backend.api.PostSessionWaypointVisits
 import pl.dev.bkwiatkowski.technical.backend.api.UploadSessionImage
 import pl.dev.bkwiatkowski.technical.backend.data.FinishSessionResponseDto
@@ -29,6 +30,7 @@ import pl.dev.bkwiatkowski.technical.backend.data.SessionWaypointDetailsResponse
 import pl.dev.bkwiatkowski.technical.backend.data.UploadImageRequest
 import pl.dev.bkwiatkowski.technical.backend.data.UploadImageResponse
 import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitDto
+import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.mapper.BackendMapper.toDomain
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEFinishSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionParticipant
@@ -38,6 +40,7 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.BEUserSessionStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventListResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisit
+import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisitResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepository
 
 class BackendEventsRepositoryImpl(
@@ -109,6 +112,23 @@ class BackendEventsRepositoryImpl(
       client.post(resource = FinishEventSession(sessionUuid = sessionUuid)).body()
     }.mapRight { response ->
       response.body<FinishSessionResponseDto>().toDomain()
+    }
+
+  override suspend fun postSessionWaypointVisit(
+    sessionUuid: String,
+    visit: WebsocketWaypointVisit,
+  ): Either<DomainError, WebsocketWaypointVisitResponse> =
+    callMediator<PostSessionWaypointVisit> {
+      client.post(resource = PostSessionWaypointVisit(sessionUuid = sessionUuid)) {
+        val dto = WebsocketWaypointVisitDto(
+          waypointId = visit.waypointId,
+          imagePath = visit.imagePath,
+          visitedAt = visit.visitedAt,
+        )
+        setBody(dto)
+      }
+    }.mapRight { response ->
+      response.body<WebsocketWaypointVisitResponseDto>().toDomain()
     }
 
   override suspend fun postSessionWaypointVisits(sessionUuid: String, visits: List<WebsocketWaypointVisit>): Either<DomainError, Unit> =

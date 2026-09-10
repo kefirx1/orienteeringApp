@@ -78,6 +78,11 @@ class WebSocketManagerImpl(
         }
       }
 
+      Log.i(
+        tag = Tag(this@WebSocketManagerImpl),
+        message = "ws: connected to $targetUrl",
+      )
+
       scope.launch {
         try {
           for (frame in currentSession!!.incoming) {
@@ -114,6 +119,10 @@ class WebSocketManagerImpl(
   }
 
   override suspend fun send(text: String): Either<DomainError, Unit> = either {
+    Log.i(
+      tag = Tag(this@WebSocketManagerImpl),
+      message = "ws: sending message: $text",
+    )
     currentSession?.send(Frame.Text(text)) ?: raise(
       error = DomainError.Custom(IllegalStateException("WebSocket session is not connected")),
     )
@@ -125,6 +134,10 @@ class WebSocketManagerImpl(
         either {
           currentSession = null
           session.close()
+          Log.i(
+            tag = Tag(this@WebSocketManagerImpl),
+            message = "ws: closed session",
+          )
         }
       }
     }

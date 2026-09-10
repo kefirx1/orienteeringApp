@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
 
   @Composable
   private fun AddDebugButton() {
-    if (environmentConfig.flavor == Flavor.DEVELOP) {
+    if (true) {
       IconButton(
         onClick = {
           val fm = this@MainActivity.supportFragmentManager

@@ -1,6 +1,5 @@
 package pl.dev.bkwiatkowski.feature.event.presentation.main.provider
 
-import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -27,8 +26,6 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
       override fun onMapClick() = Unit
       override fun onCompleted(response: FinishSessionResponse) = Unit
       override fun setupContract(contract: EventMainContract) = Unit
-
-      override var lifecycleOwner: LifecycleOwner = mock.lifecycleOwner
 
       override val nestedNavAction: SharedFlow<EventMainVM.Action.NestedNavigation> =
         MutableSharedFlow()
@@ -78,8 +75,6 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
       override fun onCompleted(response: FinishSessionResponse) = Unit
       override fun setupContract(contract: EventMainContract) = Unit
 
-      override var lifecycleOwner: LifecycleOwner = mock.lifecycleOwner
-
       override val nestedNavAction: SharedFlow<EventMainVM.Action.NestedNavigation> =
         MutableSharedFlow()
       override val screenData = MutableStateFlow(
@@ -98,8 +93,6 @@ class EventMainPreviewProvider : ViewModelPreviewProvider<EventMainVM, EventMain
       override fun onMapClick() = Unit
       override fun onCompleted(response: FinishSessionResponse) = Unit
       override fun setupContract(contract: EventMainContract) = Unit
-
-      override var lifecycleOwner: LifecycleOwner = mock.lifecycleOwner
 
       override val nestedNavAction: SharedFlow<EventMainVM.Action.NestedNavigation> =
         MutableSharedFlow()

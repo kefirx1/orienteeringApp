@@ -119,6 +119,10 @@ class EventRepositoryImpl(
       extension = FileExtension.JPG,
       bytes = imageBytes,
     ).getRight()
+    Log.i(
+      tag = Tag(this@EventRepositoryImpl),
+      message = "Saved image for waypointId: $waypointId at path: ${file.absolutePath}",
+    )
 
     getDatabase().getRight().waypointVisitDao().insert(
       visit = WaypointVisitEntity(
@@ -128,6 +132,10 @@ class EventRepositoryImpl(
         sessionUuid = sessionUuid,
         sendOnBackend = false,
       )
+    )
+    Log.i(
+      tag = Tag(this@EventRepositoryImpl),
+      message = "Saved waypoint visit for waypointId: $waypointId at visitedAt: $visitedAt",
     )
   }
 

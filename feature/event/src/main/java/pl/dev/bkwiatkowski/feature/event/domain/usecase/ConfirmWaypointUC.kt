@@ -1,13 +1,16 @@
 package pl.dev.bkwiatkowski.feature.event.domain.usecase
 
+import pl.dev.bkwiatkowski.common.camera.domain.usecase.TakePictureAndCompressUC
 import pl.dev.bkwiatkowski.common.core.error.DomainError
+import pl.dev.bkwiatkowski.common.core.logger.Log
+import pl.dev.bkwiatkowski.common.core.logger.Tag
 import pl.dev.bkwiatkowski.common.core.storage.Base64Coder
 import pl.dev.bkwiatkowski.common.core.usecase.Either
+import pl.dev.bkwiatkowski.common.core.usecase.EitherUseCase
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
-import pl.dev.bkwiatkowski.common.camera.domain.usecase.TakePictureAndCompressUC
-import pl.dev.bkwiatkowski.common.core.usecase.EitherUseCase
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
+import pl.dev.bkwiatkowski.feature.event.domain.model.WebsocketWaypointVisit
 import pl.dev.bkwiatkowski.feature.event.domain.repository.EventRepository
 import java.time.LocalDateTime
 
@@ -19,12 +22,9 @@ interface ConfirmWaypointUC : EitherUseCase<ConfirmWaypointUC.Params, ConfirmWay
     val compressedImageQualityPercent: Int,
   ) : UseCase.Params
 
-  sealed interface Result {
-    data object Success : Result
-    data class BackendFailed(
-      val visitedAt: LocalDateTime,
-    ) : Result
-  }
+  data class Result(
+    val visitedAt: LocalDateTime,
+  )
 }
 
 class ConfirmWaypointUCImpl(
@@ -55,29 +55,46 @@ class ConfirmWaypointUCImpl(
       imageBase64 = base64Coder.encode(data = bytes).getRight(),
     ).getRightOrElse { error ->
       if (error is DomainError.NoNetwork) {
-        return@either ConfirmWaypointUC.Result.BackendFailed(
+        return@either ConfirmWaypointUC.Result(
           visitedAt = visitedAt,
         )
       } else {
         raise(error = error)
       }
     }
+    Log.i(
+      tag = Tag(this@ConfirmWaypointUCImpl),
+      message = "Uploaded image for waypointId: ${params.waypointId} at path: ${uploadResponse.path}",
+    )
 
-    eventBackendInteractor.confirmWaypoint(
-      waypointId = params.waypointId,
-      visitedAt = visitedAt,
-      imagePath = uploadResponse.path,
+    val response = eventBackendInteractor.postSessionWaypointVisit(
+      sessionUuid = params.sessionUuid,
+      visit = WebsocketWaypointVisit(
+        waypointId = params.waypointId,
+        visitedAt = visitedAt,
+        imagePath = uploadResponse.path,
+      ),
     ).getRightOrElse {
-      return@either ConfirmWaypointUC.Result.BackendFailed(
+      return@either ConfirmWaypointUC.Result(
         visitedAt = visitedAt,
       )
     }
+    Log.i(
+      tag = Tag(this@ConfirmWaypointUCImpl),
+      message = "Confirmed waypointId: ${params.waypointId} at visitedAt: $visitedAt",
+    )
 
     eventRepository.markVisitAsSent(
       waypointId = params.waypointId,
       sessionUuid = params.sessionUuid,
     ).getRight()
+    Log.i(
+      tag = Tag(this@ConfirmWaypointUCImpl),
+      message = "Marked visit as sent for waypointId: ${params.waypointId} at visitedAt: $visitedAt",
+    )
 
-    ConfirmWaypointUC.Result.Success
+    ConfirmWaypointUC.Result(
+      visitedAt = response.lastVisitedWaypoint.visitedAt,
+    )
   }
 }

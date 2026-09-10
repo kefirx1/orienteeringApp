@@ -12,17 +12,17 @@ import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
 import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.usecase.either
-import pl.dev.bkwiatkowski.feature.event.domain.usecase.PublishWaypointVisitUC
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.icon.ZoomImageData
+import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventFlagsInteractor
 import pl.dev.bkwiatkowski.feature.event.domain.model.FinishSessionResponse
 import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.ConfirmWaypointUC
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.FinishSessionUC
-import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventFlagsInteractor
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.PublishWaypointVisitUC
 
 interface EventMapVM {
   sealed interface State {
@@ -332,15 +332,12 @@ class EventMapVMImpl @AssistedInject constructor(
           compressedImageQualityPercent = stateData.eventDetails.compressedImageQualityPercent,
         ),
       ).onRight { result ->
-        when (result) {
-          is ConfirmWaypointUC.Result.Success -> {}
-          is ConfirmWaypointUC.Result.BackendFailed -> publishWaypointVisitUC(
-            params = PublishWaypointVisitUC.Params(
-              waypointId = waypointId,
-              visitedAt = result.visitedAt,
-            ),
-          ).getRight()
-        }
+        publishWaypointVisitUC(
+          params = PublishWaypointVisitUC.Params(
+            waypointId = waypointId,
+            visitedAt = result.visitedAt,
+          ),
+        ).getRight()
       }.getRight()
     }.onLeft { error ->
       EventMapVM.State.Active.Error(

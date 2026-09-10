@@ -19,7 +19,6 @@ import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
 import pl.dev.bkwiatkowski.common.core.localization.GpsManager
 import pl.dev.bkwiatkowski.common.core.location.Position
 import pl.dev.bkwiatkowski.common.core.network.NetworkMonitor
-import pl.dev.bkwiatkowski.common.core.network.NetworkStatus
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
@@ -154,11 +153,9 @@ class EventMainVMImpl @AssistedInject constructor(
   private val mapper: EventMainMapper,
   private val runWithLoaderUC: RunWithLoaderUC,
   private val errorDataMapper: ErrorDataMapper,
-  private val eventBackendInteractor: EventBackendInteractor,
   private val gpsManager: GpsManager,
   private val permissionsManager: PermissionsManager,
   private val openAppSettingsIntentUC: OpenAppSettingsIntentUC,
-  private val networkMonitor: NetworkMonitor,
   private val findWaypointFromUserLocationUC: FindWaypointFromUserLocationUC,
   private val getEventDetailsUC: GetEventDetailsUC,
   private val getSessionWaypointsUC: GetSessionWaypointsUC,
@@ -247,7 +244,6 @@ class EventMainVMImpl @AssistedInject constructor(
 
         is EventMainVM.State.Active.Content -> when (action) {
           is EventMainVM.Action.Back -> {
-            eventBackendInteractor.closeSession()
             EventMainVM.Action.Navigation.Back.emit()
           }
           is EventMainVM.Action.GoToMap -> {
@@ -293,7 +289,6 @@ class EventMainVMImpl @AssistedInject constructor(
             contract.setWaypointVisited(waypoint = action.lastWaypoint)
           }
           is EventMainVM.Action.OnCompleted -> {
-            eventBackendInteractor.closeSession()
             EventMainVM.Action.Navigation.Completed(
               response = action.response,
               eventName = currentState.stateData.details.name,
@@ -327,7 +322,6 @@ class EventMainVMImpl @AssistedInject constructor(
             contract.setEventDetails(eventDetails = details)
             contract.setInitialVisitedWaypoints(waypoints = currentSessionWaypoints.waypoints)
 
-            eventBackendInteractor.openSession(sessionUuid = setupData.sessionUuid)
             EventMainVM.State.Active.Content(
               stateData = EventMainVM.StateData(
                 currentTab = EventMainVM.StateData.CurrentTab.MAP,
@@ -375,14 +369,6 @@ class EventMainVMImpl @AssistedInject constructor(
             )
           }
         }
-        stateScope.launch {
-          networkMonitor.monitor().collect { status ->
-            if (status == NetworkStatus.CONNECTED) {
-              eventBackendInteractor.openSession(sessionUuid = setupData.sessionUuid)
-                .getRightOrNull()
-            }
-          }
-        }
       }
     }
   }
@@ -417,12 +403,6 @@ class EventMainVMImpl @AssistedInject constructor(
       onOpenSettingsClick = { dispatchAction(EventMainVM.Action.OpenAppSettings) }
     ),
   )
-
-  override fun onCleared() {
-    viewModelScope.launch {
-      eventBackendInteractor.closeSession()
-    }
-  }
 
   private suspend fun ensureLocationPermission(): Boolean {
     val result = permissionsManager.requestPermission(

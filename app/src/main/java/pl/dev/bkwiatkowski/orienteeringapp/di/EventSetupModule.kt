@@ -4,8 +4,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.core.usecase.either
@@ -32,12 +30,9 @@ import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionWaypointDetai
 import pl.dev.bkwiatkowski.technical.backend.domain.model.EventSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.MobileEventDetailResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisit
-import pl.dev.bkwiatkowski.technical.backend.domain.model.WebsocketWaypointVisitResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepository
-import pl.dev.bkwiatkowski.technical.backend.domain.repository.SessionWebSocketRepository
-import pl.dev.bkwiatkowski.technical.flags.domain.usecase.GetFeatureFlagUC
 import pl.dev.bkwiatkowski.technical.flags.domain.model.FeatureFlag
-import java.time.LocalDateTime
+import pl.dev.bkwiatkowski.technical.flags.domain.usecase.GetFeatureFlagUC
 import pl.dev.bkwiatkowski.feature.event.domain.model.WebsocketWaypointVisit as FeatureWebsocketWaypointVisit
 
 @Module
@@ -46,31 +41,8 @@ object EventSetupModule {
 
   @Provides
   fun provideEventBackendInteractor(
-    sessionWebSocketRepository: SessionWebSocketRepository,
     backendEventsRepository: BackendEventsRepository,
   ): EventBackendInteractor = object : EventBackendInteractor {
-    override fun observeSession(): Flow<WaypointVisitResponse> =
-      sessionWebSocketRepository.incoming.map { it.toFeature() }
-
-    override suspend fun openSession(sessionUuid: String): Either<DomainError, Unit> =
-      sessionWebSocketRepository.openSession(sessionUuid = sessionUuid)
-
-    override suspend fun closeSession(): Either<DomainError, Unit> =
-      sessionWebSocketRepository.closeSession()
-
-    override suspend fun confirmWaypoint(
-      waypointId: Int,
-      visitedAt: LocalDateTime,
-      imagePath: String,
-    ): Either<DomainError, Unit> =
-      sessionWebSocketRepository.sendMessage(
-        message = WebsocketWaypointVisit(
-          waypointId = waypointId,
-          visitedAt = visitedAt,
-          imagePath = imagePath,
-        ),
-      )
-
     override suspend fun uploadSessionImage(
       sessionUuid: String,
       imageBase64: String
@@ -97,11 +69,16 @@ object EventSetupModule {
       }.getRight()
     }
 
-    override suspend fun finishEventSession(sessionUuid: String): Either<DomainError, FinishSessionResponse> =
-      backendEventsRepository.finishEventSession(sessionUuid = sessionUuid).mapRight { response ->
-        FinishSessionResponse(
-          participant = response.participant.toFeature(),
-          sessionWaypointDetails = response.sessionWaypointDetails.map { it.toFeature() }
+    override suspend fun postSessionWaypointVisit(
+      sessionUuid: String,
+      visit: FeatureWebsocketWaypointVisit,
+    ): Either<DomainError, WaypointVisitResponse> =
+      backendEventsRepository.postSessionWaypointVisit(
+        sessionUuid = sessionUuid,
+        visit = visit.toBackend(),
+      ).mapRight { response ->
+        WaypointVisitResponse(
+          lastVisitedWaypoint = response.lastVisitedWaypoint.toFeature(),
         )
       }
 
@@ -113,6 +90,14 @@ object EventSetupModule {
         sessionUuid = sessionUuid,
         visits = visits.map { it.toBackend() },
       ).mapRight { }
+
+    override suspend fun finishEventSession(sessionUuid: String): Either<DomainError, FinishSessionResponse> =
+      backendEventsRepository.finishEventSession(sessionUuid = sessionUuid).mapRight { response ->
+        FinishSessionResponse(
+          participant = response.participant.toFeature(),
+          sessionWaypointDetails = response.sessionWaypointDetails.map { it.toFeature() }
+        )
+      }
 
     fun MobileEventDetailResponse.toFeature(): Either<DomainError, MobileEventDetails> = either {
       MobileEventDetails(
@@ -165,10 +150,6 @@ object EventSetupModule {
       startedAt = startedAt,
       userCanJoin = userCanJoin,
       finishedAt = finishedAt
-    )
-
-    fun WebsocketWaypointVisitResponse.toFeature(): WaypointVisitResponse = WaypointVisitResponse(
-      lastVisitedWaypoint = this.lastVisitedWaypoint.toFeature(),
     )
 
     fun BESessionWaypointDetail.toFeature(): SessionWaypointDetail = SessionWaypointDetail(

@@ -5,6 +5,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import net.sqlcipher.database.SupportFactory
 import pl.dev.bkwiatkowski.common.core.error.DomainError
+import pl.dev.bkwiatkowski.common.core.logger.Log
+import pl.dev.bkwiatkowski.common.core.logger.Tag
 import pl.dev.bkwiatkowski.common.core.storage.provider.DatabaseProvider
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.core.usecase.either
@@ -23,6 +25,11 @@ class DatabaseProviderImpl(
   ): Either<DomainError, T> = either {
     getCachedDatabase<T>(databaseName = databaseName).onRight { database ->
       return@either database
+    }.onLeft {
+      Log.i(
+        tag = Tag(this@DatabaseProviderImpl),
+        message = "Database $databaseName is not cached, creating a new instance",
+      )
     }
 
     val factory = SupportFactory(masterKey.encoded)
@@ -38,6 +45,10 @@ class DatabaseProviderImpl(
         }
       }
       .build()
+    Log.i(
+      tag = Tag(this@DatabaseProviderImpl),
+      message = "Created new database instance for $databaseName",
+    )
 
     databaseCache[databaseName] = database
     database
@@ -46,6 +57,10 @@ class DatabaseProviderImpl(
   private fun <T> getCachedDatabase(databaseName: String): Either<DomainError, T> = either {
     val cachedDatabase = databaseCache[databaseName]
     if (cachedDatabase != null && cachedDatabase.isOpen) {
+      Log.i(
+        tag = Tag(this@DatabaseProviderImpl),
+        message = "Returning cached database instance for $databaseName",
+      )
       return@either cachedDatabase as T
     }
 
