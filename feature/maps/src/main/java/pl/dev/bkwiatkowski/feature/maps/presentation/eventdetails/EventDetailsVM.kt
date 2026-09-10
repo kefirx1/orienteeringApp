@@ -245,8 +245,8 @@ class EventDetailsVMImpl @AssistedInject constructor(
           }
           is EventDetailsVM.Action.OpenStartLocationMap -> {
             openMapStartLocation(
-              latitude = currentState.event.startLocationX,
-              longitude = currentState.event.startLocationY,
+              latitude = currentState.event.startLocationY,
+              longitude = currentState.event.startLocationX,
             )
           }
           else -> {}
@@ -296,8 +296,8 @@ class EventDetailsVMImpl @AssistedInject constructor(
           }
           is EventDetailsVM.Action.OpenStartLocationMap -> {
             openMapStartLocation(
-              latitude = currentState.event.startLocationX,
-              longitude = currentState.event.startLocationY,
+              latitude = currentState.event.startLocationY,
+              longitude = currentState.event.startLocationX,
             )
           }
           else -> {}
@@ -318,8 +318,8 @@ class EventDetailsVMImpl @AssistedInject constructor(
           }
           is EventDetailsVM.Action.OpenStartLocationMap -> {
             openMapStartLocation(
-              latitude = currentState.event.startLocationX,
-              longitude = currentState.event.startLocationY,
+              latitude = currentState.event.startLocationY,
+              longitude = currentState.event.startLocationX,
             )
           }
           else -> {}
