@@ -32,6 +32,7 @@ data class MobileEventDetailsDto(
   @SerialName("maxImageSizeBytes") val maxImageSizeBytes: Int,
   @SerialName("compressedImageQualityPercent") val compressedImageQualityPercent: Int,
   @SerialName("eventWaypoints") val eventWaypoints: List<MapWaypointDto>,
+  @SerialName("waypointRadiusMeters") val waypointRadiusMeters: Float,
 )
 
 @Keep

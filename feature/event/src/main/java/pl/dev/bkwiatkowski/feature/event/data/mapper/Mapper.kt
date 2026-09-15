@@ -66,7 +66,8 @@ fun MobileEventDetails.toDto(): MobileEventDetailsDto = MobileEventDetailsDto(
         longitude = mw.position.longitude,
       ),
     )
-  }
+  },
+  waypointRadiusMeters = waypointRadiusMeters,
 )
 
 fun MobileEventDetailsDto.toDomain(): MobileEventDetails = MobileEventDetails(
@@ -120,5 +121,6 @@ fun MobileEventDetailsDto.toDomain(): MobileEventDetails = MobileEventDetails(
         longitude = dto.position.longitude,
       ),
     )
-  }
+  },
+  waypointRadiusMeters = waypointRadiusMeters,
 )

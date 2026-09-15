@@ -17,6 +17,7 @@ data class MobileEventDetailResponse(
   val compressedImageQualityPercent: Int,
   val eventWaypoints: List<BEMapWaypoint>,
   val session: EventSessionResponse? = null,
+  val waypointRadiusMeters: Float,
 )
 
 enum class BEEventStatus(val value: String) {

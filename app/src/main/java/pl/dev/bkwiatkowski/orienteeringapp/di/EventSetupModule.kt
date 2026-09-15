@@ -116,6 +116,7 @@ object EventSetupModule {
         maxImageSizeBytes = maxImageSizeBytes,
         compressedImageQualityPercent = compressedImageQualityPercent,
         eventWaypoints = eventWaypoints.map { it.toFeature() },
+        waypointRadiusMeters = waypointRadiusMeters,
       )
     }
 

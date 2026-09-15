@@ -12,14 +12,11 @@ interface FindWaypointFromUserLocationUC : EitherUseCase<FindWaypointFromUserLoc
   data class Params(
     val currentLocation: Location,
     val waypoints: List<MapWaypoint>,
+    val waypointRadiusMeters: Float,
   ) : UseCase.Params
 }
 
 class FindWaypointFromUserLocationUCImpl : FindWaypointFromUserLocationUC {
-  companion object {
-    private const val WAYPOINT_RADIUS_METERS = 15f
-  }
-
   override suspend fun invoke(params: FindWaypointFromUserLocationUC.Params): Either<DomainError, MapWaypoint?> = either {
     params.waypoints.find { waypoint ->
       val waypointLocation = Location("").apply {
@@ -28,7 +25,7 @@ class FindWaypointFromUserLocationUCImpl : FindWaypointFromUserLocationUC {
       }
 
       val distanceInMeters = params.currentLocation.distanceTo(waypointLocation)
-      distanceInMeters <= WAYPOINT_RADIUS_METERS
+      distanceInMeters <= params.waypointRadiusMeters
     }
   }
 }

@@ -18,6 +18,7 @@ data class MobileEventDetails(
   val maxImageSizeBytes: Int,
   val compressedImageQualityPercent: Int,
   val eventWaypoints: List<MapWaypoint>,
+  val waypointRadiusMeters: Float,
 )
 
 data class EventSession(

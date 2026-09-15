@@ -123,6 +123,7 @@ class EventMapPreviewProvider : ViewModelPreviewProvider<EventMapVM, EventMapVM.
     maxImageSizeBytes = 400_000,
     compressedImageQualityPercent = 50,
     eventWaypoints = emptyList(),
+    waypointRadiusMeters = 50f,
   )
 
   private fun getMapperParams(state: EventMapVM.State): EventMapMapper.Params =

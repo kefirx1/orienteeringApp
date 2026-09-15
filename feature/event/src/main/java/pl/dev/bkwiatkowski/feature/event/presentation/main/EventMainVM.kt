@@ -280,6 +280,7 @@ class EventMainVMImpl @AssistedInject constructor(
               params = FindWaypointFromUserLocationUC.Params(
                 currentLocation = action.newLocation,
                 waypoints = currentState.stateData.details.eventWaypoints,
+                waypointRadiusMeters = currentState.stateData.details.waypointRadiusMeters,
               )
             ).getRight()
 

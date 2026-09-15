@@ -130,6 +130,7 @@ object BackendMapper {
       compressedImageQualityPercent = compressedImageQualityPercent,
       eventWaypoints = eventWaypoints?.map { it.toDomain() } ?: emptyList(),
       session = session?.toDomain(),
+      waypointRadiusMeters = waypointRadiusMeters,
     )
 
   fun MapWaypointDto.toDomain(): BEMapWaypoint =
