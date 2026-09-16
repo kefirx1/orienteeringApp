@@ -25,7 +25,7 @@ sealed interface TextValidatorRule: ValidatorRule {
   data object Required: TextValidatorRule {
     override val defaultMessage: String = "To pole jest wymagane"
     override fun check(value: String): Boolean {
-      return value.isNotEmpty()
+      return value.isNotBlank()
     }
   }
 

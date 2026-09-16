@@ -40,9 +40,11 @@ dependencies {
   ksp(libs.dagger.hilt.compiler)
 
   testImplementation(libs.junit)
-  androidTestImplementation(libs.androidx.espresso.core)
+  testImplementation(libs.mockk)
+  testImplementation(libs.kotlinx.coroutines.test)
   androidTestImplementation(libs.androidx.junit)
 
   implementation(project(":common:core"))
   implementation(project(":common:ui"))
+  implementation(project(":common:validators"))
 }

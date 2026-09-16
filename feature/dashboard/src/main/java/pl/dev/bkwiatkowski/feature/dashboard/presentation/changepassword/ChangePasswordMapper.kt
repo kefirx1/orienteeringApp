@@ -32,7 +32,7 @@ class ChangePasswordMapperImpl : ChangePasswordMapper {
           onNavigationIconClick = params.onBackClick,
         ),
         title = "Zmień hasło",
-        subtitle = "Po zmianie hasła nastąpi wylogowanie z aplikacji.\n\nHasło musi mieć co najmniej 8 znaków",
+        subtitle = "Po zmianie hasła nastąpi wylogowanie z aplikacji.\n\nHasło musi mieć co najmniej 8 znaków, jedną cyfrę, jedną wielką literę, jedną małą literę i jeden znak specjalny.",
         oldPasswordFieldData = TextFieldData(
           label = "Aktualne hasło",
           hint = "Wpisz aktualne hasło",

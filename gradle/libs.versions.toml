@@ -12,14 +12,10 @@ composeBom = "2026.05.00"
 jetbrainsKotlinJvm = "2.3.21"
 coil = "3.4.0"
 ksp = "2.3.8"
-hilt = "1.4.0"
 dagger = "2.60.1"
-lifecycleViewModel = "2.10.0"
-lifecycleViewModelCompose = "2.10.0"
 hiltNav = "1.4.0"
 composeNav = "2.9.8"
 coroutines = "1.11.0"
-biometric = "1.1.0"
 datastore = "1.2.1"
 room = "2.8.4"
 appcompatVersion = "1.7.1"
@@ -28,12 +24,13 @@ secretsGradlePlugin = "2.0.1"
 sqlcipher = "4.5.4"
 ktor = "3.5.0"
 openapi-generator = "7.22.0"
-material = "1.10.0"
 googleServices = "4.5.0"
 mapsCompose = "8.4.0"
 playServices = "20.0.0"
 playServicesLocation = "21.4.0"
 zoomimageCompose = "1.6.0"
+mockk = "1.14.11"
+coroutinesTest = "1.11.0"
 
 [libraries]
 android-maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "mapsCompose" }
@@ -42,6 +39,8 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "fir
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -53,10 +52,6 @@ androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycleViewModel"}
-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleViewModelCompose"}
-lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewModelCompose"}
-androidx-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hilt" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "composeNav" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNav" }
 dagger-hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "dagger" }
@@ -66,7 +61,6 @@ androidx-datastore = { module = "androidx.datastore:datastore-preferences", vers
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
-androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompatVersion" }
 kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 database-sqlcipher = { module = "net.zetetic:android-database-sqlcipher", version.ref = "sqlcipher" }
@@ -82,7 +76,6 @@ ktor-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
 openapi-generator-plugin = { module = "org.openapitools:openapi-generator-gradle-plugin", version.ref = "openapi-generator" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-serialization-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServices" }
 secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
@@ -99,5 +92,4 @@ dagger = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
-openapi-generator = { id = "org.openapi.generator", version.ref = "openapi-generator" }
 secrets-gradle-plugin = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin" }
