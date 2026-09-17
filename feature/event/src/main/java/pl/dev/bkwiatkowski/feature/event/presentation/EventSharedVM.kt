@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.error.DomainError
-import pl.dev.bkwiatkowski.common.core.location.Position
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
@@ -22,10 +21,10 @@ import javax.inject.Inject
 interface EventShared {
   data class State(
     val eventDetails: MobileEventDetails?,
-    val currentUserPosition: Position?,
     val nextWaypoint: MapWaypoint?,
     val currentWaypoint: MapWaypoint?,
     val visitedWaypoints: List<SessionWaypointDetail>,
+    val accuracyState: EventMainContract.AccuracyState = EventMainContract.AccuracyState.StrongAccuracy,
   )
 
   sealed interface Action {
@@ -33,10 +32,6 @@ interface EventShared {
 
     data class SetEventDetails(
       val eventDetails: MobileEventDetails,
-    ) : Action
-
-    data class SetCurrentUserPosition(
-      val position: Position,
     ) : Action
 
     data class SetWaypointVisited(
@@ -50,6 +45,10 @@ interface EventShared {
     data class SetCurrentWaypoint(
       val waypoint: MapWaypoint?,
     ) : Action
+
+    data class SetAccuracyState(
+      val state: EventMainContract.AccuracyState,
+    ) : Action
   }
 
   data object ScreenData
@@ -60,10 +59,10 @@ class EventSharedVM @Inject constructor(
 ) : CustomViewModel<EventShared.State, EventShared.ScreenData, EventShared.Action.Navigation>(
   initialStateValue = EventShared.State(
     eventDetails = null,
-    currentUserPosition = null,
     nextWaypoint = null,
     currentWaypoint = null,
     visitedWaypoints = emptyList(),
+    accuracyState = EventMainContract.AccuracyState.StrongAccuracy,
   ),
 ), EventShared, EventMainContract, EventMapContract, EventGameContract {
 
@@ -83,9 +82,6 @@ class EventSharedVM @Inject constructor(
             currentState.copy(
               eventDetails = action.eventDetails,
             ).mutate()
-          }
-          is EventShared.Action.SetCurrentUserPosition -> {
-            currentState.copy(currentUserPosition = action.position).mutate()
           }
           is EventShared.Action.SetWaypointVisited -> {
             val updatedVisitedWaypoints = currentState.visitedWaypoints + action.waypoint
@@ -108,6 +104,9 @@ class EventSharedVM @Inject constructor(
                 waypoint.id !in action.waypoints.map { waypoint -> waypoint.waypointId }
               },
             ).mutate()
+          }
+          is EventShared.Action.SetAccuracyState -> {
+            currentState.copy(accuracyState = action.state).mutate()
           }
           else -> {}
         }
@@ -139,10 +138,6 @@ class EventSharedVM @Inject constructor(
     dispatchAction(EventShared.Action.SetEventDetails(eventDetails))
   }
 
-  override suspend fun setCurrentUserPosition(position: Position) {
-    dispatchAction(EventShared.Action.SetCurrentUserPosition(position = position))
-  }
-
   override suspend fun setWaypointVisited(waypoint: SessionWaypointDetail) {
     dispatchAction(EventShared.Action.SetWaypointVisited(waypoint = waypoint))
   }
@@ -154,4 +149,12 @@ class EventSharedVM @Inject constructor(
   override suspend fun setInitialVisitedWaypoints(waypoints: List<SessionWaypointDetail>) {
     dispatchAction(EventShared.Action.SetInitialVisitedWaypoints(waypoints = waypoints))
   }
+
+  override suspend fun setAccuracyState(state: EventMainContract.AccuracyState) {
+    dispatchAction(EventShared.Action.SetAccuracyState(state = state))
+  }
+
+  override suspend fun accuracyStateMonitor(): Flow<EventMainContract.AccuracyState> = state.map { currentState ->
+    currentState.accuracyState
+  }.distinctUntilChanged()
 }

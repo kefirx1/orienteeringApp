@@ -1,6 +1,7 @@
 package pl.dev.bkwiatkowski.technical.backend.data.mapper
 
 import pl.dev.bkwiatkowski.common.core.location.Position
+import pl.dev.bkwiatkowski.technical.backend.data.AccuracyDto
 import pl.dev.bkwiatkowski.technical.backend.data.CheckUserResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.EventSessionResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.FinishSessionResponseDto
@@ -24,6 +25,7 @@ import pl.dev.bkwiatkowski.technical.backend.data.UploadImageResponse
 import pl.dev.bkwiatkowski.technical.backend.data.UserSessionDto
 import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitDto
 import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitResponseDto
+import pl.dev.bkwiatkowski.technical.backend.domain.model.Accuracy
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BECheckUserResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventStatus
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEEventType
@@ -156,7 +158,14 @@ object BackendMapper {
       waypointId = waypointId,
       visitedAt = visitedAt,
       imagePath = imagePath,
+      accuracy = accuracy.toDto(),
     )
+
+  fun Accuracy.toDto(): AccuracyDto = when (this) {
+    Accuracy.STRONG -> AccuracyDto.STRONG
+    Accuracy.WEAK -> AccuracyDto.WEAK
+    Accuracy.VERY_WEAK -> AccuracyDto.VERY_WEAK
+  }
 
   fun UploadImageResponse.toDomain(): BEUploadImageResponse =
     BEUploadImageResponse(
@@ -172,7 +181,14 @@ object BackendMapper {
     BESessionWaypointDetail(
       waypointId = waypointId,
       visitedAt = visitedAt,
+      accuracy = accuracy.toDomain(),
     )
+
+  fun AccuracyDto.toDomain(): Accuracy = when (this) {
+    AccuracyDto.STRONG -> Accuracy.STRONG
+    AccuracyDto.WEAK -> Accuracy.WEAK
+    AccuracyDto.VERY_WEAK -> Accuracy.VERY_WEAK
+  }
 
   fun SessionWaypointDetailsResponseDto.toDomain() = BESessionWaypointDetailsResponse(
     sessionWaypointDetails = this.sessionWaypointDetails.map { it.toDomain() },

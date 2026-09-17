@@ -10,6 +10,7 @@ import pl.dev.bkwiatkowski.common.core.usecase.EitherUseCase
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
+import pl.dev.bkwiatkowski.feature.event.domain.model.Accuracy
 import pl.dev.bkwiatkowski.feature.event.domain.model.WebsocketWaypointVisit
 import pl.dev.bkwiatkowski.feature.event.domain.repository.EventRepository
 import java.time.LocalDateTime
@@ -20,6 +21,7 @@ interface ConfirmWaypointUC : EitherUseCase<ConfirmWaypointUC.Params, ConfirmWay
     val waypointId: Int,
     val maxImageSizeBytes: Int,
     val compressedImageQualityPercent: Int,
+    val accuracy: Accuracy,
   ) : UseCase.Params
 
   data class Result(
@@ -48,6 +50,7 @@ class ConfirmWaypointUCImpl(
       visitedAt = visitedAt,
       imageBytes = bytes,
       sessionUuid = params.sessionUuid,
+      accuracy = params.accuracy,
     ).getRight()
 
     val uploadResponse = eventBackendInteractor.uploadSessionImage(
@@ -73,6 +76,7 @@ class ConfirmWaypointUCImpl(
         waypointId = params.waypointId,
         visitedAt = visitedAt,
         imagePath = uploadResponse.path,
+        accuracy = params.accuracy,
       ),
     ).getRightOrElse {
       return@either ConfirmWaypointUC.Result(

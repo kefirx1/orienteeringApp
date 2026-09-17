@@ -19,6 +19,7 @@ import pl.dev.bkwiatkowski.feature.event.data.database.WaypointVisitEntity
 import pl.dev.bkwiatkowski.feature.event.data.mapper.toDomain
 import pl.dev.bkwiatkowski.feature.event.data.mapper.toDto
 import pl.dev.bkwiatkowski.feature.event.data.model.MobileEventDetailsDto
+import pl.dev.bkwiatkowski.feature.event.domain.model.Accuracy
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventWaypointVisitRecord
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.SessionWaypointDetail
@@ -81,6 +82,7 @@ class EventRepositoryImpl(
             visitedAt = data.visitedAt,
             imagePath = data.imagePath,
             sendOnBackend = data.sendOnBackend,
+            accuracy = Accuracy.valueOf(data.accuracy),
           )
         }
     }
@@ -95,6 +97,7 @@ class EventRepositoryImpl(
             visitedAt = data.visitedAt,
             imagePath = data.imagePath,
             sendOnBackend = data.sendOnBackend,
+            accuracy = Accuracy.valueOf(data.accuracy),
           )
         }
     }
@@ -110,6 +113,7 @@ class EventRepositoryImpl(
     visitedAt: LocalDateTime,
     imageBytes: ByteArray,
     sessionUuid: String,
+    accuracy: Accuracy,
   ): Either<DomainError, Unit> = either {
     val file = localFileManager.saveFile(
       fileName = getFileNameForWaypointVisit(
@@ -131,6 +135,7 @@ class EventRepositoryImpl(
         imagePath = file.absolutePath,
         sessionUuid = sessionUuid,
         sendOnBackend = false,
+        accuracy = accuracy.name,
       )
     )
     Log.i(

@@ -5,4 +5,5 @@ import java.time.LocalDateTime
 data class BESessionWaypointDetail(
     val waypointId: Int,
     val visitedAt: LocalDateTime,
+    val accuracy: Accuracy,
 )

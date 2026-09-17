@@ -6,4 +6,5 @@ data class WebsocketWaypointVisit(
   val waypointId: Int,
   val visitedAt: LocalDateTime,
   val imagePath: String,
+  val accuracy: Accuracy,
 )

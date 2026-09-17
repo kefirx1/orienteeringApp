@@ -132,6 +132,6 @@ class EventMapPreviewProvider : ViewModelPreviewProvider<EventMapVM, EventMapVM.
       onBackClick = {},
       onCheckWaypointClick = {},
       onCompleteClick = {},
-      onDebugCheckWaypointClick = {},
+      onWeakAccuracyCheckWaypointClick = {},
     )
 }

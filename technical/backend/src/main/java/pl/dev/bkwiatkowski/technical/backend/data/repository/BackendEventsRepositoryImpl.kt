@@ -32,6 +32,8 @@ import pl.dev.bkwiatkowski.technical.backend.data.UploadImageResponse
 import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitDto
 import pl.dev.bkwiatkowski.technical.backend.data.WebsocketWaypointVisitResponseDto
 import pl.dev.bkwiatkowski.technical.backend.data.mapper.BackendMapper.toDomain
+import pl.dev.bkwiatkowski.technical.backend.data.mapper.BackendMapper.toDto
+import pl.dev.bkwiatkowski.technical.backend.domain.model.Accuracy
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BEFinishSessionResponse
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionParticipant
 import pl.dev.bkwiatkowski.technical.backend.domain.model.BESessionWaypointDetailsResponse
@@ -124,6 +126,7 @@ class BackendEventsRepositoryImpl(
           waypointId = visit.waypointId,
           imagePath = visit.imagePath,
           visitedAt = visit.visitedAt,
+          accuracy = visit.accuracy.toDto(),
         )
         setBody(dto)
       }
@@ -139,6 +142,7 @@ class BackendEventsRepositoryImpl(
             waypointId = visit.waypointId,
             imagePath = visit.imagePath,
             visitedAt = visit.visitedAt,
+            accuracy = visit.accuracy.toDto(),
           )
         }
         setBody(dtos)

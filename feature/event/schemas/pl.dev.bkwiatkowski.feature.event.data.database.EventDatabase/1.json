@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "4f9f7c9d8d28f90d1ab4d41acca01bfb",
+    "identityHash": "2e247dfb5769fec51a0f8389a87ffd81",
     "entities": [
       {
         "tableName": "waypoint_visits",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `waypointId` INTEGER NOT NULL, `visitedAt` TEXT NOT NULL, `imagePath` TEXT NOT NULL, `sessionUuid` TEXT NOT NULL, `sendOnBackend` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `waypointId` INTEGER NOT NULL, `visitedAt` TEXT NOT NULL, `imagePath` TEXT NOT NULL, `sessionUuid` TEXT NOT NULL, `sendOnBackend` INTEGER NOT NULL, `accuracy` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -43,6 +43,12 @@
             "columnName": "sendOnBackend",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "accuracy",
+            "columnName": "accuracy",
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -55,7 +61,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4f9f7c9d8d28f90d1ab4d41acca01bfb')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2e247dfb5769fec51a0f8389a87ffd81')"
     ]
   }
 }

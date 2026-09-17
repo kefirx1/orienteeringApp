@@ -119,6 +119,25 @@ fun EventMapScreenContent(
             Spacer(modifier = Modifier.height(32.dp))
           }
 
+          data.accuracyInfoMessage?.let { message ->
+            BaseCard {
+              Column(
+                modifier = Modifier.padding(
+                  horizontal = 20.dp,
+                  vertical = 10.dp
+                ),
+              ) {
+
+                CustomText(
+                  text = message,
+                  style = MaterialTheme.typography.titleLarge,
+                )
+              }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+          }
+
           CustomText(
             text = data.nextWaypointLabel,
             style = MaterialTheme.typography.headlineLarge,
@@ -137,6 +156,19 @@ fun EventMapScreenContent(
         ) {
           LargeButton(
             buttonData = buttonData,
+          )
+        }
+      }
+      data.weakAccuracyCheckWaypointButton?.let { weakAccuracyButtonData ->
+        Column(
+          modifier = Modifier.padding(
+            horizontal = 20.dp,
+            vertical = 10.dp
+          ),
+          horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+          LargeButton(
+            buttonData = weakAccuracyButtonData,
           )
         }
       }

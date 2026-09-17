@@ -9,6 +9,7 @@ import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventFlagsInteractor
+import pl.dev.bkwiatkowski.feature.event.domain.model.Accuracy
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventSession
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventStatus
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventType
@@ -34,6 +35,7 @@ import pl.dev.bkwiatkowski.technical.backend.domain.repository.BackendEventsRepo
 import pl.dev.bkwiatkowski.technical.flags.domain.model.FeatureFlag
 import pl.dev.bkwiatkowski.technical.flags.domain.usecase.GetFeatureFlagUC
 import pl.dev.bkwiatkowski.feature.event.domain.model.WebsocketWaypointVisit as FeatureWebsocketWaypointVisit
+import pl.dev.bkwiatkowski.technical.backend.domain.model.Accuracy as BEAccuracy
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -168,7 +170,14 @@ object EventSetupModule {
       waypointId = waypointId,
       visitedAt = visitedAt,
       imagePath = imagePath,
+      accuracy = accuracy.toBackend(),
     )
+
+    fun Accuracy.toBackend(): BEAccuracy = when (this) {
+      Accuracy.STRONG -> BEAccuracy.STRONG
+      Accuracy.WEAK -> BEAccuracy.WEAK
+      Accuracy.VERY_WEAK -> BEAccuracy.VERY_WEAK
+    }
   }
 
   @Provides

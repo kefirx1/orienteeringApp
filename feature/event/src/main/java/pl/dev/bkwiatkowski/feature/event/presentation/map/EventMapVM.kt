@@ -17,12 +17,14 @@ import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModelFactory
 import pl.dev.bkwiatkowski.common.ui.component.button.LargeButtonData
 import pl.dev.bkwiatkowski.common.ui.component.icon.ZoomImageData
 import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventFlagsInteractor
+import pl.dev.bkwiatkowski.feature.event.domain.model.Accuracy
 import pl.dev.bkwiatkowski.feature.event.domain.model.FinishSessionResponse
 import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.ConfirmWaypointUC
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.FinishSessionUC
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.PublishWaypointVisitUC
+import pl.dev.bkwiatkowski.feature.event.presentation.main.EventMainContract
 
 interface EventMapVM {
   sealed interface State {
@@ -33,6 +35,7 @@ interface EventMapVM {
       val visitedWrongWaypoint: Boolean = false,
       val nextWaypoint: MapWaypoint?,
       val isDebugLocationEnabled: Boolean = false,
+      val accuracyState: EventMainContract.AccuracyState = EventMainContract.AccuracyState.StrongAccuracy,
     )
 
     sealed interface Loading : State {
@@ -81,9 +84,12 @@ interface EventMapVM {
     data class UpdateNextWaypoint(
       val nextWaypoint: MapWaypoint?,
     ) : Action
+    data class UpdateAccuracyState(
+      val accuracyState: EventMainContract.AccuracyState,
+    ) : Action
     data object CompleteEvent : Action
     data object CheckWaypoint : Action
-    data object DebugCheckWaypoint : Action
+    data object WeakAccuracyCheckWaypoint : Action
   }
 
   sealed interface ScreenData {
@@ -99,8 +105,10 @@ interface EventMapVM {
       val mapData: ZoomImageData?,
       val nextWaypointLabel: String,
       val wrongWaypointInfo: String?,
+      val accuracyInfoMessage: String?,
       val checkWaypointButton: LargeButtonData.Primary?,
-      val debugCheckWaypointButton: LargeButtonData.Secondary?,
+      val weakAccuracyCheckWaypointButton: LargeButtonData.Secondary?,
+      val debugCheckWaypointButton: LargeButtonData.Tertiary?,
     ) : ScreenData
 
     data class ErrorScreen(
@@ -178,6 +186,13 @@ class EventMapVMImpl @AssistedInject constructor(
               )
             ).mutate()
           }
+          is EventMapVM.Action.UpdateAccuracyState -> {
+            currentState.copy(
+              stateData = currentState.stateData.copy(
+                accuracyState = action.accuracyState,
+              )
+            ).mutate()
+          }
           is EventMapVM.Action.CheckWaypoint -> {
             currentState.stateData.currentWaypoint ?: return@launch
 
@@ -186,7 +201,7 @@ class EventMapVMImpl @AssistedInject constructor(
               waypointId = currentState.stateData.currentWaypoint.id,
             )
           }
-          is EventMapVM.Action.DebugCheckWaypoint -> {
+          is EventMapVM.Action.WeakAccuracyCheckWaypoint -> {
             currentState.stateData.nextWaypoint ?: return@launch
 
             checkWaypoint(
@@ -295,6 +310,15 @@ class EventMapVMImpl @AssistedInject constructor(
             }
           }
         }
+        stateScope.launch {
+          contract.accuracyStateMonitor().collect { accuracyState ->
+            dispatchAction(
+              EventMapVM.Action.UpdateAccuracyState(
+                accuracyState = accuracyState,
+              ),
+            )
+          }
+        }
       }
       is EventMapVM.State.Completed.Content -> {}
       is EventMapVM.State.Completed.Error -> {}
@@ -313,8 +337,8 @@ class EventMapVMImpl @AssistedInject constructor(
       onCompleteClick = {
         dispatchAction(EventMapVM.Action.CompleteEvent)
       },
-      onDebugCheckWaypointClick = {
-        dispatchAction(EventMapVM.Action.DebugCheckWaypoint)
+      onWeakAccuracyCheckWaypointClick = {
+        dispatchAction(EventMapVM.Action.WeakAccuracyCheckWaypoint)
       },
     ),
   )
@@ -330,6 +354,11 @@ class EventMapVMImpl @AssistedInject constructor(
           waypointId = waypointId,
           maxImageSizeBytes = stateData.eventDetails.maxImageSizeBytes,
           compressedImageQualityPercent = stateData.eventDetails.compressedImageQualityPercent,
+          accuracy = when (stateData.accuracyState) {
+            is EventMainContract.AccuracyState.StrongAccuracy -> Accuracy.STRONG
+            is EventMainContract.AccuracyState.WeakAccuracy -> Accuracy.WEAK
+            is EventMainContract.AccuracyState.VeryWeakAccuracy -> Accuracy.VERY_WEAK
+          },
         ),
       ).onRight { result ->
         publishWaypointVisitUC(

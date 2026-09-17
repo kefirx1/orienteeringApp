@@ -1,6 +1,5 @@
 package pl.dev.bkwiatkowski.feature.event.presentation.main
 
-import android.location.Location
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
@@ -10,15 +9,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import pl.dev.bkwiatkowski.common.core.error.ErrorDataMapper
 import pl.dev.bkwiatkowski.common.core.error.ErrorScreenData
 import pl.dev.bkwiatkowski.common.core.intents.OpenAppSettingsIntentUC
 import pl.dev.bkwiatkowski.common.core.loader.RunWithLoaderUC
-import pl.dev.bkwiatkowski.common.core.localization.GpsManager
-import pl.dev.bkwiatkowski.common.core.location.Position
-import pl.dev.bkwiatkowski.common.core.network.NetworkMonitor
 import pl.dev.bkwiatkowski.common.core.usecase.UseCase
 import pl.dev.bkwiatkowski.common.core.usecase.either
 import pl.dev.bkwiatkowski.common.core.viewmodel.CustomViewModel
@@ -30,13 +25,12 @@ import pl.dev.bkwiatkowski.common.permission.PermissionResult
 import pl.dev.bkwiatkowski.common.permission.PermissionsManager
 import pl.dev.bkwiatkowski.common.ui.component.permissions.PermissionRequesterData
 import pl.dev.bkwiatkowski.common.ui.component.tab.TopAppBarData
-import pl.dev.bkwiatkowski.feature.event.domain.interactor.EventBackendInteractor
 import pl.dev.bkwiatkowski.feature.event.domain.model.FinishSessionResponse
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.SessionWaypointDetail
-import pl.dev.bkwiatkowski.feature.event.domain.usecase.FindWaypointFromUserLocationUC
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.GetEventDetailsUC
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.GetSessionWaypointsUC
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.ObserveWaypointWithAccuracyTimerUC
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.ObserveSessionUC
 
 interface EventMainVM {
@@ -89,9 +83,6 @@ interface EventMainVM {
     data class OnCompleted(val response: FinishSessionResponse) : Action
     data class SetWaypointVisited(
       val lastWaypoint: SessionWaypointDetail,
-    ) : Action
-    data class CheckUserLocation(
-      val newLocation: Location,
     ) : Action
     data object OpenAppSettings : Action
     data object CheckPermission : Action
@@ -153,10 +144,9 @@ class EventMainVMImpl @AssistedInject constructor(
   private val mapper: EventMainMapper,
   private val runWithLoaderUC: RunWithLoaderUC,
   private val errorDataMapper: ErrorDataMapper,
-  private val gpsManager: GpsManager,
   private val permissionsManager: PermissionsManager,
   private val openAppSettingsIntentUC: OpenAppSettingsIntentUC,
-  private val findWaypointFromUserLocationUC: FindWaypointFromUserLocationUC,
+  private val observeWaypointWithAccuracyTimerUC: ObserveWaypointWithAccuracyTimerUC,
   private val getEventDetailsUC: GetEventDetailsUC,
   private val getSessionWaypointsUC: GetSessionWaypointsUC,
   private val observeSessionUC: ObserveSessionUC,
@@ -268,24 +258,6 @@ class EventMainVMImpl @AssistedInject constructor(
               value = EventMainVM.Action.NestedNavigation.GoToGame(details = currentState.stateData.details),
             )
           }
-          is EventMainVM.Action.CheckUserLocation -> either {
-            contract.setCurrentUserPosition(
-              position = Position(
-                latitude = action.newLocation.latitude,
-                longitude = action.newLocation.longitude,
-              ),
-            )
-
-            val result = findWaypointFromUserLocationUC(
-              params = FindWaypointFromUserLocationUC.Params(
-                currentLocation = action.newLocation,
-                waypoints = currentState.stateData.details.eventWaypoints,
-                waypointRadiusMeters = currentState.stateData.details.waypointRadiusMeters,
-              )
-            ).getRight()
-
-            contract.setCurrentWaypoint(waypoint = result)
-          }
           is EventMainVM.Action.SetWaypointVisited -> {
             contract.setWaypointVisited(waypoint = action.lastWaypoint)
           }
@@ -353,10 +325,41 @@ class EventMainVMImpl @AssistedInject constructor(
         }
 
         stateScope.launch {
-          gpsManager.getLocationFlow().distinctUntilChanged().collect { location ->
-            dispatchAction(
-              action = EventMainVM.Action.CheckUserLocation(newLocation = location),
-            )
+          observeWaypointWithAccuracyTimerUC(
+            waypoints = newState.stateData.details.eventWaypoints,
+            waypointRadiusMeters = newState.stateData.details.waypointRadiusMeters,
+          ).collect { result ->
+            println(result)
+            when (result) {
+              is ObserveWaypointWithAccuracyTimerUC.Result.StrongAccuracyWithWaypoint -> {
+                contract.setCurrentWaypoint(waypoint = result.waypoint)
+                contract.setAccuracyState(state = EventMainContract.AccuracyState.StrongAccuracy)
+              }
+
+              is ObserveWaypointWithAccuracyTimerUC.Result.StrongAccuracyNoWaypoint -> {
+                contract.setCurrentWaypoint(waypoint = null)
+                contract.setAccuracyState(state = EventMainContract.AccuracyState.StrongAccuracy)
+              }
+
+              is ObserveWaypointWithAccuracyTimerUC.Result.WeakAccuracyWithWaypoint -> {
+                contract.setCurrentWaypoint(waypoint = null)
+                contract.setAccuracyState(
+                  state = EventMainContract.AccuracyState.WeakAccuracy(timerExpired = result.timerExpired),
+                )
+              }
+
+              is ObserveWaypointWithAccuracyTimerUC.Result.WeakAccuracyNoWaypoint -> {
+                contract.setCurrentWaypoint(waypoint = null)
+                contract.setAccuracyState(
+                  state = EventMainContract.AccuracyState.WeakAccuracy(timerExpired = result.timerExpired),
+                )
+              }
+
+              is ObserveWaypointWithAccuracyTimerUC.Result.VeryWeakAccuracy -> {
+                contract.setCurrentWaypoint(waypoint = null)
+                contract.setAccuracyState(state = EventMainContract.AccuracyState.VeryWeakAccuracy)
+              }
+            }
           }
         }
         stateScope.launch {
@@ -370,7 +373,7 @@ class EventMainVMImpl @AssistedInject constructor(
             )
           }
         }
-      }
+       }
     }
   }
 

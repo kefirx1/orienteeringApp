@@ -41,6 +41,7 @@ class FinishSessionUCImpl @Inject constructor(
         waypointId = visit.waypointId,
         visitedAt = visit.visitedAt,
         imagePath = uploadResponse.path,
+        accuracy = visit.accuracy,
       )
     }
 

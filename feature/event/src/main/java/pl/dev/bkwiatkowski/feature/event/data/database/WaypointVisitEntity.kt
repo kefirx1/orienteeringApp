@@ -12,4 +12,5 @@ data class WaypointVisitEntity(
   val imagePath: String,
   val sessionUuid: String,
   val sendOnBackend: Boolean,
+  val accuracy: String,
 )

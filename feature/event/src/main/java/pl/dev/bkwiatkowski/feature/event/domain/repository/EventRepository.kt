@@ -3,6 +3,7 @@ package pl.dev.bkwiatkowski.feature.event.domain.repository
 import kotlinx.coroutines.flow.Flow
 import pl.dev.bkwiatkowski.common.core.error.DomainError
 import pl.dev.bkwiatkowski.common.core.usecase.Either
+import pl.dev.bkwiatkowski.feature.event.domain.model.Accuracy
 import pl.dev.bkwiatkowski.feature.event.domain.model.EventWaypointVisitRecord
 import pl.dev.bkwiatkowski.feature.event.domain.model.MobileEventDetails
 import pl.dev.bkwiatkowski.feature.event.domain.model.WaypointVisitResponse
@@ -15,6 +16,7 @@ interface EventRepository {
     visitedAt: LocalDateTime,
     imageBytes: ByteArray,
     sessionUuid: String,
+    accuracy: Accuracy,
   ): Either<DomainError, Unit>
 
   suspend fun finishSession(

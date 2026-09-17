@@ -8,4 +8,5 @@ data class EventWaypointVisitRecord(
   val visitedAt: LocalDateTime,
   val imagePath: String,
   val sendOnBackend: Boolean,
+  val accuracy: Accuracy,
 )

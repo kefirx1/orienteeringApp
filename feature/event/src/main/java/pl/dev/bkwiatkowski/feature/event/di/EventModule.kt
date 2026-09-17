@@ -5,6 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import pl.dev.bkwiatkowski.common.camera.domain.usecase.TakePictureAndCompressUC
+import pl.dev.bkwiatkowski.common.core.localization.GpsManager
 import pl.dev.bkwiatkowski.common.core.security.provider.MasterKeyProvider
 import pl.dev.bkwiatkowski.common.core.storage.Base64Coder
 import pl.dev.bkwiatkowski.common.core.storage.file.LocalFileManager
@@ -32,6 +33,8 @@ import pl.dev.bkwiatkowski.feature.event.domain.usecase.GetSessionWaypointsUC
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.GetSessionWaypointsUCImpl
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.ObserveSessionUC
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.ObserveSessionUCImpl
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.ObserveWaypointWithAccuracyTimerUC
+import pl.dev.bkwiatkowski.feature.event.domain.usecase.ObserveWaypointWithAccuracyTimerUCImpl
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.PublishWaypointVisitUC
 import pl.dev.bkwiatkowski.feature.event.domain.usecase.PublishWaypointVisitUCImpl
 import pl.dev.bkwiatkowski.feature.event.presentation.game.EventGameMapper
@@ -65,6 +68,15 @@ object EventModule {
   fun provideCompareUserLocationUC(): FindWaypointFromUserLocationUC = FindWaypointFromUserLocationUCImpl()
 
   @Provides
+  fun provideObserveWaypointWithAccuracyTimerUC(
+    gpsManager: GpsManager,
+    findWaypointFromUserLocationUC: FindWaypointFromUserLocationUC,
+  ): ObserveWaypointWithAccuracyTimerUC = ObserveWaypointWithAccuracyTimerUCImpl(
+    gpsManager = gpsManager,
+    findWaypointFromUserLocationUC = findWaypointFromUserLocationUC,
+  )
+
+   @Provides
   fun provideSuccessEventMapper(
     dateFormatter: DateFormatter,
   ): SuccessEventMapper = SuccessEventMapperImpl(
