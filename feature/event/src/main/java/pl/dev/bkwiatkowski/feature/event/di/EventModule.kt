@@ -12,6 +12,7 @@ import pl.dev.bkwiatkowski.common.core.storage.file.LocalFileManager
 import pl.dev.bkwiatkowski.common.core.storage.provider.DataStoreProvider
 import pl.dev.bkwiatkowski.common.core.storage.provider.DatabaseProvider
 import pl.dev.bkwiatkowski.common.core.time.DateFormatter
+import pl.dev.bkwiatkowski.common.core.time.TimeProvider
 import pl.dev.bkwiatkowski.common.storage.converter.LocalDateTimeConverter
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReader
 import pl.dev.bkwiatkowski.feature.event.data.repository.EventRepositoryImpl
@@ -71,9 +72,11 @@ object EventModule {
   fun provideObserveWaypointWithAccuracyTimerUC(
     gpsManager: GpsManager,
     findWaypointFromUserLocationUC: FindWaypointFromUserLocationUC,
+    timeProvider: TimeProvider,
   ): ObserveWaypointWithAccuracyTimerUC = ObserveWaypointWithAccuracyTimerUCImpl(
     gpsManager = gpsManager,
     findWaypointFromUserLocationUC = findWaypointFromUserLocationUC,
+    timeProvider = timeProvider,
   )
 
    @Provides

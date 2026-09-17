@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.flow
 import pl.dev.bkwiatkowski.common.core.localization.GpsManager
 import pl.dev.bkwiatkowski.common.core.logger.Log
 import pl.dev.bkwiatkowski.common.core.logger.Tag
+import pl.dev.bkwiatkowski.common.core.time.TimeProvider
 import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
 
 interface ObserveWaypointWithAccuracyTimerUC {
@@ -35,6 +36,7 @@ interface ObserveWaypointWithAccuracyTimerUC {
 class ObserveWaypointWithAccuracyTimerUCImpl(
   private val gpsManager: GpsManager,
   private val findWaypointFromUserLocationUC: FindWaypointFromUserLocationUC,
+  private val timeProvider: TimeProvider,
 ) : ObserveWaypointWithAccuracyTimerUC {
 
   companion object {
@@ -51,7 +53,7 @@ class ObserveWaypointWithAccuracyTimerUCImpl(
     var timerExpired = false
 
     gpsManager.getLocationFlow().collect { location ->
-      val currentTime = System.currentTimeMillis()
+      val currentTime = timeProvider.currentTimeMillis()
 
       val result = findWaypointFromUserLocationUC(
         params = FindWaypointFromUserLocationUC.Params(

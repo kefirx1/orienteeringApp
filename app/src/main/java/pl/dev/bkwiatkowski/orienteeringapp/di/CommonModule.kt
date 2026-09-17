@@ -37,6 +37,7 @@ import pl.dev.bkwiatkowski.common.core.storage.file.LocalFileManager
 import pl.dev.bkwiatkowski.common.core.storage.provider.DataStoreProvider
 import pl.dev.bkwiatkowski.common.core.storage.provider.DatabaseProvider
 import pl.dev.bkwiatkowski.common.core.time.DateFormatter
+import pl.dev.bkwiatkowski.common.core.time.TimeProvider
 import pl.dev.bkwiatkowski.common.core.validators.DateValidator
 import pl.dev.bkwiatkowski.common.core.validators.TextValidator
 import pl.dev.bkwiatkowski.common.intents.IntentsActivityConnector
@@ -78,6 +79,7 @@ import pl.dev.bkwiatkowski.common.storage.provider.DataStoreProviderImpl
 import pl.dev.bkwiatkowski.common.storage.provider.DatabaseProviderImpl
 import pl.dev.bkwiatkowski.common.storage.serializer.JsonSerializerImpl
 import pl.dev.bkwiatkowski.common.time.DateFormatterImpl
+import pl.dev.bkwiatkowski.common.time.SystemTimeProvider
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReader
 import pl.dev.bkwiatkowski.common.ui.image.BitmapReaderImpl
 import pl.dev.bkwiatkowski.common.ui.snackbar.SnackbarHostImpl
@@ -214,6 +216,10 @@ object CommonModule {
   @Provides
   @Singleton
   fun provideDateFormatter(): DateFormatter = DateFormatterImpl()
+
+  @Provides
+  @Singleton
+  fun provideTimeProvider(): TimeProvider = SystemTimeProvider()
 
   @Provides
   @Singleton

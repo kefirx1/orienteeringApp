@@ -329,7 +329,6 @@ class EventMainVMImpl @AssistedInject constructor(
             waypoints = newState.stateData.details.eventWaypoints,
             waypointRadiusMeters = newState.stateData.details.waypointRadiusMeters,
           ).collect { result ->
-            println(result)
             when (result) {
               is ObserveWaypointWithAccuracyTimerUC.Result.StrongAccuracyWithWaypoint -> {
                 contract.setCurrentWaypoint(waypoint = result.waypoint)

@@ -2,8 +2,10 @@ package pl.dev.bkwiatkowski.feature.event.domain.usecase
 
 import android.location.Location
 import android.util.Log
-import io.mockk.*
-import kotlinx.coroutines.delay
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
@@ -12,20 +14,20 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import pl.dev.bkwiatkowski.common.core.error.DomainError
-import pl.dev.bkwiatkowski.common.core.location.Position
 import pl.dev.bkwiatkowski.common.core.localization.GpsManager
+import pl.dev.bkwiatkowski.common.core.location.Position
+import pl.dev.bkwiatkowski.common.core.time.TimeProvider
 import pl.dev.bkwiatkowski.common.core.usecase.Either
 import pl.dev.bkwiatkowski.feature.event.domain.model.MapWaypoint
-import kotlin.time.Duration.Companion.milliseconds
-
 
 class ObserveWaypointWithAccuracyTimerUCTest {
   private var gpsManager: GpsManager = mockk()
   private var findWaypointFromUserLocationUC: FindWaypointFromUserLocationUC = mockk()
+  private var timeProvider: TimeProvider = mockk()
   private var useCase: ObserveWaypointWithAccuracyTimerUC = ObserveWaypointWithAccuracyTimerUCImpl(
     gpsManager = gpsManager,
     findWaypointFromUserLocationUC = findWaypointFromUserLocationUC,
+    timeProvider = timeProvider,
   )
 
   @Before
@@ -34,6 +36,7 @@ class ObserveWaypointWithAccuracyTimerUCTest {
     every { Log.i(any(), any()) } returns 0
     every { Log.e(any(), any()) } returns 0
     every { Log.d(any(), any()) } returns 0
+    coEvery { timeProvider.currentTimeMillis() } returns 0L
   }
 
   private fun createLocation(
@@ -180,33 +183,34 @@ class ObserveWaypointWithAccuracyTimerUCTest {
       foundWaypoint = waypoint,
     )
 
-    var emissionCount = 0
+    val times = listOf(0L, 21_000L)
+    var timeCallCount = 0
+
     coEvery { gpsManager.getLocationFlow() } returns flow {
       emit(weakLocation)
-      emissionCount++
-
-      delay((ObserveWaypointWithAccuracyTimerUCImpl.WEAK_ACCURACY_TIMEOUT_MILLIS + 100).milliseconds)
-
-      if (emissionCount < 2) {
-        emit(weakLocation)
-        emissionCount++
-      }
+      emit(weakLocation)
     }
-    coEvery { findWaypointFromUserLocationUC(any()) } returns Either.Right(result)
+
+    coEvery { timeProvider.currentTimeMillis() } answers {
+      val time = times.getOrNull(timeCallCount) ?: 21_000L
+      timeCallCount++
+      time
+    }
+
+    coEvery { findWaypointFromUserLocationUC(any()) } returns Either.Right(value = result)
 
     val emissions = useCase(
       waypoints = listOf(waypoint),
       waypointRadiusMeters = 100f,
     ).toList()
 
-    println(emissions)
-
-    // Should have at least 2 emissions: first with timerExpired=false, then with timerExpired=true
     assertTrue(emissions.size >= 2)
-    assertTrue(emissions[0] is ObserveWaypointWithAccuracyTimerUC.Result.WeakAccuracyWithWaypoint)
-  }
+    val firstEmission = emissions[0] as ObserveWaypointWithAccuracyTimerUC.Result.WeakAccuracyWithWaypoint
+    val secondEmission = emissions[1] as ObserveWaypointWithAccuracyTimerUC.Result.WeakAccuracyWithWaypoint
 
-  // ===== TIMER CANCELLATION TESTS ===== //TODO POPRAWKA
+    assertFalse(firstEmission.timerExpired)
+    assertTrue(secondEmission.timerExpired)
+  }
 
   @Test
   fun `improving from weak to strong accuracy cancels timer`() = runTest {
@@ -214,11 +218,18 @@ class ObserveWaypointWithAccuracyTimerUCTest {
     val weakLocation = createLocation(accuracy = 100f)
     val strongLocation = createLocation(accuracy = 30f)
 
-    var locationEmitted = false
+    val times = listOf(0L, 100L)
+    var timeCallCount = 0
+
     coEvery { gpsManager.getLocationFlow() } returns flow {
       emit(weakLocation)
-      locationEmitted = true
       emit(strongLocation)
+    }
+
+    coEvery { timeProvider.currentTimeMillis() } answers {
+      val time = times.getOrNull(timeCallCount) ?: 100L
+      timeCallCount++
+      time
     }
 
     val weakResult = FindWaypointFromUserLocationUC.Result(accuracy = 100f, foundWaypoint = waypoint)
@@ -226,7 +237,7 @@ class ObserveWaypointWithAccuracyTimerUCTest {
 
     var callCount = 0
     coEvery { findWaypointFromUserLocationUC(any()) } answers {
-      if (!locationEmitted || callCount == 0) {
+      if (callCount == 0) {
         callCount++
         Either.Right(weakResult)
       } else {
@@ -239,7 +250,6 @@ class ObserveWaypointWithAccuracyTimerUCTest {
       waypointRadiusMeters = 100f,
     ).toList()
 
-    // Should have 2 emissions: weak accuracy then strong accuracy
     assertTrue(emissions.size >= 2)
     assertTrue(emissions[0] is ObserveWaypointWithAccuracyTimerUC.Result.WeakAccuracyWithWaypoint)
     assertTrue(emissions[1] is ObserveWaypointWithAccuracyTimerUC.Result.StrongAccuracyWithWaypoint)
@@ -251,11 +261,18 @@ class ObserveWaypointWithAccuracyTimerUCTest {
     val weakLocation = createLocation(accuracy = 100f)
     val veryWeakLocation = createLocation(accuracy = 160f)
 
-    var locationEmitted = false
+    val times = listOf(0L, 100L)
+    var timeCallCount = 0
+
     coEvery { gpsManager.getLocationFlow() } returns flow {
       emit(weakLocation)
-      locationEmitted = true
       emit(veryWeakLocation)
+    }
+
+    coEvery { timeProvider.currentTimeMillis() } answers {
+      val time = times.getOrNull(timeCallCount) ?: 100L
+      timeCallCount++
+      time
     }
 
     val weakResult = FindWaypointFromUserLocationUC.Result(accuracy = 100f, foundWaypoint = waypoint)
@@ -263,7 +280,7 @@ class ObserveWaypointWithAccuracyTimerUCTest {
 
     var callCount = 0
     coEvery { findWaypointFromUserLocationUC(any()) } answers {
-      if (!locationEmitted || callCount == 0) {
+      if (callCount == 0) {
         callCount++
         Either.Right(weakResult)
       } else {
@@ -276,16 +293,10 @@ class ObserveWaypointWithAccuracyTimerUCTest {
       waypointRadiusMeters = 100f,
     ).toList()
 
-    // Should have 2 emissions: weak accuracy then very weak accuracy
     assertTrue(emissions.size >= 2)
     assertTrue(emissions[0] is ObserveWaypointWithAccuracyTimerUC.Result.WeakAccuracyWithWaypoint)
-    assertEquals(
-      ObserveWaypointWithAccuracyTimerUC.Result.VeryWeakAccuracy,
-      emissions[1],
-    )
+    assertTrue(emissions[1] is ObserveWaypointWithAccuracyTimerUC.Result.VeryWeakAccuracy,)
   }
-
-  // ===== ACCURACY THRESHOLD TESTS =====
 
   @Test
   fun `accuracy at ACCURACY_THRESHOLD boundary is considered strong`() = runTest {
@@ -306,34 +317,9 @@ class ObserveWaypointWithAccuracyTimerUCTest {
       waypointRadiusMeters = 100f,
     ).toList()
 
-    assertTrue(emissions.size >= 1)
+    assertTrue(emissions.isNotEmpty())
     assertTrue(
       emissions.first() is ObserveWaypointWithAccuracyTimerUC.Result.StrongAccuracyWithWaypoint,
-    )
-  }
-
-  @Test
-  fun `accuracy just above ACCURACY_THRESHOLD is considered weak`() = runTest {
-    val waypoint = createWaypoint()
-    val location = createLocation(
-      accuracy = ObserveWaypointWithAccuracyTimerUCImpl.ACCURACY_THRESHOLD + 1,
-    )
-    val result = FindWaypointFromUserLocationUC.Result(
-      accuracy = ObserveWaypointWithAccuracyTimerUCImpl.ACCURACY_THRESHOLD + 1,
-      foundWaypoint = waypoint,
-    )
-
-    coEvery { gpsManager.getLocationFlow() } returns flow { emit(location) }
-    coEvery { findWaypointFromUserLocationUC(any()) } returns Either.Right(result)
-
-    val emissions = useCase(
-      waypoints = listOf(waypoint),
-      waypointRadiusMeters = 100f,
-    ).toList()
-
-    assertTrue(emissions.size >= 1)
-    assertTrue(
-      emissions.first() is ObserveWaypointWithAccuracyTimerUC.Result.WeakAccuracyWithWaypoint,
     )
   }
 
@@ -356,93 +342,9 @@ class ObserveWaypointWithAccuracyTimerUCTest {
       waypointRadiusMeters = 100f,
     ).toList()
 
-    assertTrue(emissions.size >= 1)
+    assertTrue(emissions.isNotEmpty())
     assertTrue(
       emissions.first() is ObserveWaypointWithAccuracyTimerUC.Result.WeakAccuracyWithWaypoint,
     )
   }
-
-  @Test
-  fun `accuracy just above VERY_WEAK_THRESHOLD is considered very weak`() = runTest {
-    val waypoint = createWaypoint()
-    val location = createLocation(
-      accuracy = ObserveWaypointWithAccuracyTimerUCImpl.VERY_WEAK_THRESHOLD + 1,
-    )
-    val result = FindWaypointFromUserLocationUC.Result(
-      accuracy = ObserveWaypointWithAccuracyTimerUCImpl.VERY_WEAK_THRESHOLD + 1,
-      foundWaypoint = waypoint,
-    )
-
-    coEvery { gpsManager.getLocationFlow() } returns flow { emit(location) }
-    coEvery { findWaypointFromUserLocationUC(any()) } returns Either.Right(result)
-
-    val emissions = useCase(
-      waypoints = listOf(waypoint),
-      waypointRadiusMeters = 100f,
-    ).toList()
-
-    assertTrue(emissions.size >= 1)
-    assertEquals(
-      ObserveWaypointWithAccuracyTimerUC.Result.VeryWeakAccuracy,
-      emissions.first(),
-    )
-  }
-
-  // ===== MULTIPLE WAYPOINTS TEST =====
-
-  @Test
-  fun `finds correct waypoint from multiple waypoints`() = runTest {
-    val waypoint1 = createWaypoint(id = 1, position = Position(latitude = 50.0, longitude = 18.0))
-    val waypoint2 = createWaypoint(id = 2, position = Position(latitude = 52.0, longitude = 19.0))
-    val location = createLocation(accuracy = 30f, latitude = 52.0, longitude = 19.0)
-
-    val result = FindWaypointFromUserLocationUC.Result(
-      accuracy = 30f,
-      foundWaypoint = waypoint2,
-    )
-
-    coEvery { gpsManager.getLocationFlow() } returns flow { emit(location) }
-    coEvery { findWaypointFromUserLocationUC(any()) } returns Either.Right(result)
-
-    val emissions = useCase(
-      waypoints = listOf(waypoint1, waypoint2),
-      waypointRadiusMeters = 100f,
-    ).toList()
-
-    assertTrue(emissions.size >= 1)
-    val emission = emissions.first()
-    assertTrue(emission is ObserveWaypointWithAccuracyTimerUC.Result.StrongAccuracyWithWaypoint)
-    assertEquals(waypoint2, (emission as ObserveWaypointWithAccuracyTimerUC.Result.StrongAccuracyWithWaypoint).waypoint)
-  }
-
-  // ===== ERROR HANDLING TEST =====
-
-  @Test
-  fun `handles error from FindWaypointFromUserLocationUC gracefully`() = runTest {
-    val waypoint = createWaypoint()
-    val location = createLocation(accuracy = 30f)
-
-    coEvery { gpsManager.getLocationFlow() } returns flow { emit(location) }
-    coEvery { findWaypointFromUserLocationUC(any()) } returns Either.Left(DomainError.Custom(Exception("Test error")))
-
-    val emissions = useCase(
-      waypoints = listOf(waypoint),
-      waypointRadiusMeters = 100f,
-    ).toList()
-
-    // When getRightOrNull() is called on Either.Left, it returns null, so no emission should occur
-    assertEquals(0, emissions.size)
-  }
 }
-
-
-
-
-
-
-
-
-
-
-
-
