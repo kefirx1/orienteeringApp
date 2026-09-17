@@ -21,14 +21,15 @@ class GetSessionWaypointsUCImpl(
   private val eventBackendInteractor: EventBackendInteractor,
 ) : GetSessionWaypointsUC {
   override suspend fun invoke(params: GetSessionWaypointsUC.Params): Either<DomainError, WaypointsVisitedResponse> = either {
+    val localVisits = eventRepository.getAllVisitsForSession(params.sessionUuid).getRight()
+
     eventBackendInteractor.getSessionWaypoints(sessionUuid = params.sessionUuid).fold(
       onLeft = { error ->
         when (error) {
           is DomainError.NoNetwork,
           is DomainError.UnavailableServer -> {
-            val visits = eventRepository.getAllVisitsForSession(params.sessionUuid).getRight()
             WaypointsVisitedResponse(
-              waypoints = visits.map { eventWaypoint ->
+              waypoints = localVisits.map { eventWaypoint ->
                 SessionWaypointDetail(
                   waypointId = eventWaypoint.waypointId,
                   visitedAt = eventWaypoint.visitedAt,
@@ -39,7 +40,28 @@ class GetSessionWaypointsUCImpl(
           else -> raise(error = error)
         }
       },
-      onRight = { waypoints -> waypoints }
+      onRight = { backendWaypoints ->
+        val localVisitIds = localVisits.map { it.waypointId }.toSet()
+
+        val mergedWaypoints = buildList {
+          for (localVisit in localVisits) {
+            add(
+              SessionWaypointDetail(
+                waypointId = localVisit.waypointId,
+                visitedAt = localVisit.visitedAt,
+              )
+            )
+          }
+
+          for (backendWaypoint in backendWaypoints.waypoints) {
+            if (backendWaypoint.waypointId !in localVisitIds) {
+              add(backendWaypoint)
+            }
+          }
+        }
+
+        WaypointsVisitedResponse(waypoints = mergedWaypoints)
+      }
     )
   }
 }
