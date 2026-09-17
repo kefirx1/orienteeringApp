@@ -6,4 +6,5 @@ data class BESessionParticipant (
   val sessionUuid: String,
   val joinedAt: LocalDateTime,
   val finishedAt: LocalDateTime,
+  val hasToBeChecked: Boolean,
 )

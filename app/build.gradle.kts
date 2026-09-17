@@ -31,7 +31,7 @@ android {
       dimension = "environment"
       applicationIdSuffix = ".develop"
 
-      buildConfigField("String", "API_BASE_URL", "\"http://192.168.100.116:8080\"")
+      buildConfigField("String", "API_BASE_URL", "\"http://10.29.157.49:8080\"")
     }
     create("prod") {
       dimension = "environment"

@@ -50,6 +50,9 @@ class UserProfileDashboardMapperImpl(
                     "Zakończono: $date"
                   },
                   visitedWaypoints = "Odwiedzone punkty: ${value.visitedWaypointsCount}",
+                  acceptanceWarning = "Przejście musi zostać zakceptowane przez organizatora z powodu niskiej pewności lokalizacji urządzenia".takeIf {
+                    value.hasToBeChecked
+                  },
                 )
               }
             }

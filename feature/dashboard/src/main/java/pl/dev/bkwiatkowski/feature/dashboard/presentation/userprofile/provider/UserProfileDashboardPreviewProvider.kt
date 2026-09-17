@@ -28,7 +28,17 @@ class UserProfileDashboardPreviewProvider : ViewModelPreviewProvider<UserProfile
                     visitedWaypointsCount = 5,
                     mapName = "Map 1",
                     eventName = "Event 1",
-                    finishedAt = LocalDateTime.of(2024, 6, 1, 12, 0)
+                    finishedAt = LocalDateTime.of(2024, 6, 1, 12, 0),
+                    hasToBeChecked = false,
+                  ),
+                  UserSessionData(
+                    sessionUuid = "session-uuid-2",
+                    startedAt = LocalDateTime.of(2024, 6, 2, 10, 0),
+                    visitedWaypointsCount = 8,
+                    mapName = "Map 2",
+                    eventName = "Event 2",
+                    finishedAt = LocalDateTime.of(2024, 6, 2, 12, 30),
+                    hasToBeChecked = true,
                   ),
                 ),
               ),

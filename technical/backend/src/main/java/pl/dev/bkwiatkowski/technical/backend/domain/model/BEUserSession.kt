@@ -9,4 +9,5 @@ data class BEUserSession(
   val mapName: String,
   val eventName: String,
   val finishedAt: LocalDateTime,
+  val hasToBeChecked: Boolean,
 )

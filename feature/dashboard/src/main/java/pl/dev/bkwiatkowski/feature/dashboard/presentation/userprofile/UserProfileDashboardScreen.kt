@@ -147,6 +147,16 @@ private fun UserSessionCard(
         text = sessionData.visitedWaypoints,
         style = MaterialTheme.typography.bodyMedium,
       )
+
+      sessionData.acceptanceWarning?.let { label ->
+        Spacer(modifier = Modifier.height(8.dp))
+
+        CustomText(
+          text = label,
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.error,
+        )
+      }
     }
   }
 }

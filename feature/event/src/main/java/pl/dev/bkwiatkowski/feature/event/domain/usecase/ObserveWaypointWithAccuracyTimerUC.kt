@@ -38,9 +38,9 @@ class ObserveWaypointWithAccuracyTimerUCImpl(
 ) : ObserveWaypointWithAccuracyTimerUC {
 
   companion object {
-    private const val WEAK_ACCURACY_TIMEOUT_MILLIS = 20_000L
-    private const val ACCURACY_THRESHOLD = 50f
-    private const val VERY_WEAK_THRESHOLD = 150f
+    const val WEAK_ACCURACY_TIMEOUT_MILLIS = 20_000L
+    const val ACCURACY_THRESHOLD = 50f
+    const val VERY_WEAK_THRESHOLD = 150f
   }
 
   override suspend operator fun invoke(

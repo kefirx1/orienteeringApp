@@ -13,4 +13,5 @@ data class UserSessionData(
   val mapName: String,
   val eventName: String,
   val finishedAt: LocalDateTime,
+  val hasToBeChecked: Boolean,
 )

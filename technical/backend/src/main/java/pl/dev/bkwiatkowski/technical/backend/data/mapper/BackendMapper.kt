@@ -203,6 +203,7 @@ object BackendMapper {
     sessionUuid = this.sessionUuid,
     joinedAt = this.joinedAt,
     finishedAt = this.finishedAt,
+    hasToBeChecked = this.hasToBeChecked,
   )
 
   fun List<SessionParticipantResponseDto>.toDomain() = this.map { it.toDomain() }
@@ -211,6 +212,7 @@ object BackendMapper {
     sessionUuid = this.sessionUuid,
     joinedAt = this.joinedAt,
     finishedAt = this.finishedAt,
+    hasToBeChecked = this.hasToBeChecked,
   )
 
   fun UserSessionDto.toDomain() = BEUserSession(
@@ -220,6 +222,7 @@ object BackendMapper {
     mapName = this.mapName,
     eventName = this.eventName,
     finishedAt = this.finishedAt,
+    hasToBeChecked = this.hasToBeChecked,
   )
 
   fun IsUserInSessionResponseDto.Status.toDomain(): BEUserSessionStatus = when (this) {

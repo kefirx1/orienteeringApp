@@ -64,6 +64,7 @@ interface UserProfileDashboardVM {
         val startDate: String,
         val finishDate: String,
         val visitedWaypoints: String,
+        val acceptanceWarning: String?,
       )
     }
   }

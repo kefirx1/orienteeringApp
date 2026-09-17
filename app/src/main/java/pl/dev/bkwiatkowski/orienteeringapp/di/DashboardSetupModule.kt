@@ -82,6 +82,7 @@ object DashboardSetupModule {
               mapName = be.mapName,
               eventName = be.eventName,
               finishedAt = be.finishedAt,
+              hasToBeChecked = be.hasToBeChecked,
             )
           },
         )
